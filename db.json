@@ -452,6 +452,17 @@
       "status": "active",
       "createdAt": "2026-09-17T03:36:51.433Z",
       "id": 41
+    },
+    {
+      "name": "Smith Josh",
+      "email": "smith@gmail.com",
+      "password": "Debu@0919",
+      "role": "employee",
+      "phone": "",
+      "department": "Support",
+      "status": "active",
+      "createdAt": "2026-09-17T10:57:18.513Z",
+      "id": 42
     }
   ],
   "images": [

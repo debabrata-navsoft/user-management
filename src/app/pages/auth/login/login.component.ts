@@ -59,6 +59,8 @@ export class LoginComponent {
     };
   });
 
+  canResetPassword = computed(() => this.selectedRole().toLowerCase() === 'employee');
+
   onRoleChange(): void {
     this.selectedRole.set(this.form.get('role')?.value || '');
     this.errorMessage.set('');
