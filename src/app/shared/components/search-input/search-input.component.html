@@ -1,0 +1,9 @@
+<div class="search-box">
+  <lucide-icon name="search" [size]="16" class="search-icon"></lucide-icon>
+  <input type="text" class="search-input" [formControl]="control" [placeholder]="placeholder()" />
+  @if (control.value) {
+    <button type="button" class="clear-btn" (click)="clear()" aria-label="Clear search">
+      <lucide-icon name="x" [size]="14"></lucide-icon>
+    </button>
+  }
+</div>

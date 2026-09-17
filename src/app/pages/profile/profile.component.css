@@ -1,0 +1,188 @@
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-layout-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: var(--radius);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+/* User Info Card */
+.profile-info-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-header-banner {
+  height: 100px;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  position: relative;
+}
+
+.profile-large-avatar {
+  position: absolute;
+  bottom: -32px;
+  left: 24px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #4f46e5;
+  border: 4px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.profile-card-body {
+  padding: 44px 24px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.user-primary-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-display-name {
+  font-size: 19px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.user-email-text {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.role-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.profile-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 16px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13.5px;
+}
+
+.info-label {
+  color: #64748b;
+}
+
+.info-val {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Password Card */
+.card-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.card-subtitle {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.card-body {
+  padding: 24px;
+}
+
+.pwd-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 480px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.form-control {
+  width: 100%;
+  height: 42px;
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: #0f172a;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.form-control.is-invalid {
+  border-color: #ef4444;
+}
+
+.form-control::placeholder {
+  color: #94a3b8;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.error-msg {
+  font-size: 12.5px;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.form-action {
+  margin-top: 8px;
+}
+
+@media (max-width: 860px) {
+  .profile-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}

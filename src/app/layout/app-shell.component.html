@@ -1,0 +1,166 @@
+<!-- Global Circular Loader with Overlay -->
+@if (loadingService.isLoading()) {
+  <app-loader [fullscreen]="true" size="lg" message="Loading..."></app-loader>
+}
+
+<!-- Global Lightbox Image Viewer Modal -->
+<app-image-modal></app-image-modal>
+
+<div class="app-layout" [class.sidebar-collapsed]="isSidebarCollapsed()">
+  <!-- Mobile Backdrop -->
+  @if (isMobileNavOpen()) {
+    <div class="mobile-overlay" (click)="toggleMobileNav()"></div>
+  }
+
+  <!-- Sidebar -->
+  <aside class="app-sidebar" [class.mobile-open]="isMobileNavOpen()">
+    <div class="sidebar-header">
+      <div class="logo-area" routerLink="/">
+        <div class="logo-icon">
+          <lucide-icon name="users" [size]="22"></lucide-icon>
+        </div>
+        @if (!isSidebarCollapsed()) {
+          <div class="logo-text">
+            <span class="brand-name">UserManage</span>
+            <span class="brand-tag">SaaS Core</span>
+          </div>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="collapse-btn hide-mobile"
+        (click)="toggleSidebar()"
+        aria-label="Toggle sidebar"
+      >
+        @if (isSidebarCollapsed()) {
+          <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
+        } @else {
+          <lucide-icon name="chevron-left" [size]="16"></lucide-icon>
+        }
+      </button>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="sidebar-nav">
+      @if (!isSidebarCollapsed()) {
+        <div class="nav-section-label">MAIN MENU</div>
+      }
+      <ul class="nav-list">
+        @for (item of filteredNavItems(); track item.route) {
+          <li class="nav-item">
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              class="nav-link"
+              [attr.title]="isSidebarCollapsed() ? item.label : null"
+              (click)="closeMobileNav()"
+            >
+              <span class="nav-icon">
+                <lucide-icon [name]="item.iconName" [size]="18"></lucide-icon>
+              </span>
+              @if (!isSidebarCollapsed()) {
+                <span class="nav-label">{{ item.label }}</span>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <!-- Sidebar Footer User Card -->
+    <div class="sidebar-footer">
+      @if (currentUser(); as user) {
+        <div class="user-quick-card" routerLink="/profile" (click)="closeMobileNav()">
+          <div class="user-avatar-sm">
+            {{ userInitials() }}
+          </div>
+          @if (!isSidebarCollapsed()) {
+            <div class="user-meta">
+              <div class="user-meta-name truncate">{{ user.name }}</div>
+              <div class="user-meta-role">
+                <span class="role-chip" [class]="'role-' + user.role">{{ user.role }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="main-wrapper">
+    <!-- Top Navbar -->
+    <header class="app-navbar">
+      <div class="navbar-left">
+        <button
+          type="button"
+          class="mobile-menu-btn"
+          (click)="toggleMobileNav()"
+          aria-label="Open menu"
+        >
+          <lucide-icon name="menu" [size]="20"></lucide-icon>
+        </button>
+
+        <div class="app-greeting hide-mobile">
+          <span
+            >Welcome back, <strong>{{ currentUser()?.name || 'User' }}</strong></span
+          >
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <!-- Role Badge -->
+        @if (currentUser(); as user) {
+          <app-badge [variant]="getRoleBadgeVariant(user.role)" [dot]="true">
+            {{ user.role }}
+          </app-badge>
+        }
+
+        <!-- User Menu Dropdown -->
+        <div class="user-menu-container">
+          <button
+            type="button"
+            class="user-menu-btn"
+            (click)="toggleUserMenu()"
+            aria-label="User profile menu"
+          >
+            <div class="user-avatar">
+              {{ userInitials() }}
+            </div>
+            <div class="user-info-text hide-mobile">
+              <span class="user-name truncate">{{ currentUser()?.name }}</span>
+              <span class="user-dept truncate">{{ currentUser()?.department || 'Member' }}</span>
+            </div>
+            <lucide-icon name="chevron-down" [size]="14" class="dropdown-chevron"></lucide-icon>
+          </button>
+
+          @if (isUserMenuOpen()) {
+            <div class="user-menu-backdrop" (click)="closeUserMenu()"></div>
+            <div class="user-dropdown-menu">
+              <div class="dropdown-header">
+                <p class="dh-name">{{ currentUser()?.name }}</p>
+                <p class="dh-email">{{ currentUser()?.email }}</p>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a routerLink="/profile" class="dropdown-item" (click)="closeUserMenu()">
+                <lucide-icon name="user" [size]="16"></lucide-icon>
+                <span>My Profile & Security</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <button type="button" class="dropdown-item text-danger" (click)="logout()">
+                <lucide-icon name="log-out" [size]="16"></lucide-icon>
+                <span>Sign Out</span>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Body -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

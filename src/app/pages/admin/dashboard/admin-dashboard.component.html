@@ -1,0 +1,300 @@
+<div class="dashboard-page">
+  <app-page-header
+    title="Admin Executive Dashboard"
+    subtitle="System overview, user analytics, security status and platform metrics"
+    badgeText="Administrator Portal"
+  >
+    <div actions>
+      <app-ui-button variant="secondary" size="md" routerLink="/gallery">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        Gallery
+      </app-ui-button>
+      <app-ui-button variant="secondary" size="md" routerLink="/drive">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+          ></path>
+        </svg>
+        Drive Files
+      </app-ui-button>
+      <app-ui-button variant="primary" size="md" routerLink="/admin/users">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <line x1="19" y1="8" x2="19" y2="14"></line>
+          <line x1="22" y1="11" x2="16" y2="11"></line>
+        </svg>
+        Manage Users
+      </app-ui-button>
+    </div>
+  </app-page-header>
+
+  @if (isLoading()) {
+    <app-loader message="Loading dashboard metrics..."></app-loader>
+  } @else {
+    <!-- Metrics Grid -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon indigo">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">Total Users</span>
+          <div class="metric-val">{{ totalUsers() }}</div>
+          <span class="metric-trend positive">{{ activeUsers() }} active accounts</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon success">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">Active Ratio</span>
+          <div class="metric-val">{{ activePercentage() }}%</div>
+          <span class="metric-trend">{{ inactiveUsers() }} inactive users</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon purple">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">Uploaded Images</span>
+          <div class="metric-val">{{ totalImages() }}</div>
+          <span class="metric-trend">Stored in gallery</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon amber">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+            ></path>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">Drive Files & Folders</span>
+          <div class="metric-val">{{ totalDriveNodes() }}</div>
+          <span class="metric-trend">{{ formattedDriveSize() }} total data</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Section: Breakdown Cards -->
+    <div class="analytics-row">
+      <!-- Roles Breakdown -->
+      <div class="card analytics-card">
+        <div class="card-header">
+          <h3 class="card-title">Role Distribution</h3>
+          <span class="card-subtitle">User authorization privileges</span>
+        </div>
+        <div class="card-body">
+          <div class="breakdown-list">
+            <div class="breakdown-item">
+              <div class="breakdown-label">
+                <span class="dot-badge admin"></span>
+                <span>Administrators</span>
+              </div>
+              <div class="breakdown-bar-wrap">
+                <div
+                  class="breakdown-bar admin"
+                  [style.width.%]="(adminCount() / (totalUsers() || 1)) * 100"
+                ></div>
+              </div>
+              <span class="breakdown-val">{{ adminCount() }}</span>
+            </div>
+
+            <div class="breakdown-item">
+              <div class="breakdown-label">
+                <span class="dot-badge manager"></span>
+                <span>Managers</span>
+              </div>
+              <div class="breakdown-bar-wrap">
+                <div
+                  class="breakdown-bar manager"
+                  [style.width.%]="(managerCount() / (totalUsers() || 1)) * 100"
+                ></div>
+              </div>
+              <span class="breakdown-val">{{ managerCount() }}</span>
+            </div>
+
+            <div class="breakdown-item">
+              <div class="breakdown-label">
+                <span class="dot-badge user"></span>
+                <span>Employees</span>
+              </div>
+              <div class="breakdown-bar-wrap">
+                <div
+                  class="breakdown-bar user"
+                  [style.width.%]="(employeeCount() / (totalUsers() || 1)) * 100"
+                ></div>
+              </div>
+              <span class="breakdown-val">{{ employeeCount() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Department Distribution -->
+      <div class="card analytics-card">
+        <div class="card-header">
+          <h3 class="card-title">Department Distribution</h3>
+          <span class="card-subtitle">Headcount across business units</span>
+        </div>
+        <div class="card-body">
+          <div class="dept-pills">
+            @for (dept of departmentStats(); track dept.name) {
+              <div class="dept-pill">
+                <div class="dept-name">{{ dept.name }}</div>
+                <div class="dept-count">{{ dept.count }} users</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Users Table -->
+    <div class="card recent-users-card">
+      <div class="card-header flex-between">
+        <div>
+          <h3 class="card-title">Recent User Registrations</h3>
+          <span class="card-subtitle">Latest accounts added to the system</span>
+        </div>
+        <app-ui-button variant="outline" size="sm" routerLink="/admin/users">
+          View All Users
+        </app-ui-button>
+      </div>
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Status</th>
+              <th>Joined Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of recentUsers(); track user.id) {
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar-initials">{{ getInitials(user.name) }}</div>
+                    <div class="user-cell-meta">
+                      <div class="user-name">{{ user.name }}</div>
+                      <div class="user-email">{{ user.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <app-badge [variant]="getRoleBadge(user.role)">{{ user.role }}</app-badge>
+                </td>
+                <td>{{ user.department || 'General' }}</td>
+                <td>
+                  <app-badge
+                    [variant]="user.status === 'active' ? 'success' : 'danger'"
+                    [dot]="true"
+                  >
+                    {{ user.status }}
+                  </app-badge>
+                </td>
+                <td>{{ formatDate(user.createdAt) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,335 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.data-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+/* Toolbar */
+.data-table-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  box-shadow: var(--shadow-xs);
+  z-index: 30;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.table-total-count {
+  font-family: var(--font-primary);
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.table-total-count strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* Inline Active Filter Chips */
+.toolbar-chips-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chips-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+.chips-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.chips-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xs);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.chip-group {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.chip-value {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.chip-remove-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  color: var(--text-dim);
+  margin-left: 2px;
+  transition: all 0.12s ease;
+}
+
+.chip-remove-btn:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.btn-clear-all-chips {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: var(--radius-xs);
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+
+.btn-clear-all-chips:hover {
+  color: var(--primary-hover);
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.search-container {
+  min-width: 280px;
+  max-width: 380px;
+}
+
+/* Filter Trigger Button with Lucide Icon */
+.btn-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  height: 38px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-primary);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.btn-filter-trigger:hover {
+  background: var(--surface-muted);
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
+.btn-filter-trigger.has-active-filters {
+  background: var(--primary-soft);
+  border-color: var(--primary-border);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--primary);
+  color: #ffffff;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* Card & Table Area */
+.table-content-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+  border-bottom: none;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.table-loading-container,
+.table-empty-container {
+  padding: 48px 24px;
+}
+
+.table-scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.table-scroll-area::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.table-scroll-area::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.table-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  font-family: var(--font-primary);
+}
+
+.custom-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.custom-table th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 14px 18px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.custom-table td {
+  padding: 11px 18px;
+  font-size: 13.5px;
+  color: var(--text);
+  border-bottom: 1px solid var(--surface-muted);
+  vertical-align: middle;
+}
+
+.custom-table tr:hover td {
+  background: #fafbfc;
+}
+
+.actions-th {
+  text-align: right;
+  padding-right: 24px;
+}
+
+.actions-cell {
+  text-align: right;
+  padding-right: 24px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Height-based responsive scaling for desktop viewports */
+@media (max-height: 800px) {
+  .data-table-wrapper {
+    gap: 8px;
+  }
+  .data-table-toolbar {
+    padding: 8px 14px;
+    gap: 8px;
+  }
+  .btn-filter-trigger {
+    height: 34px;
+    padding: 6px 12px;
+  }
+  .custom-table th {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+  .custom-table td {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (min-height: 1000px) {
+  .custom-table th {
+    padding: 14px 18px;
+  }
+  .custom-table td {
+    padding: 13px 18px;
+  }
+}

@@ -1,0 +1,54 @@
+.dropzone-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--radius);
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  gap: 12px;
+}
+
+.dropzone-box:hover,
+.dropzone-box.is-dragover {
+  border-color: #4f46e5;
+  background: #eef2ff;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.dropzone-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #4f46e5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.dropzone-main-text {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+.dropzone-main-text .highlight {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+.dropzone-hint {
+  font-size: 12.5px;
+  color: #64748b;
+}

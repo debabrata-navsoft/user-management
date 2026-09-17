@@ -1,0 +1,102 @@
+@if (isOpen()) {
+  <div class="filter-backdrop" (click)="onBackdropClick()"></div>
+  <aside class="filter-drawer" [class.drawer-open]="isOpen()" role="dialog" aria-modal="true">
+    <!-- Header -->
+    <div class="filter-header">
+      <h2 class="filter-title">{{ title() }}</h2>
+      <button
+        type="button"
+        class="filter-close-btn"
+        (click)="close.emit()"
+        aria-label="Close filters"
+      >
+        <lucide-icon name="x" [size]="18"></lucide-icon>
+      </button>
+    </div>
+
+    <!-- Scrollable Filter Groups -->
+    <div class="filter-body">
+      @for (group of groups(); track group.id) {
+        <div class="filter-group" [class.group-expanded]="isGroupExpanded(group.id)">
+          <!-- Group Accordion Header -->
+          <button
+            type="button"
+            class="group-header-btn"
+            (click)="toggleGroup(group.id)"
+            [attr.aria-expanded]="isGroupExpanded(group.id)"
+          >
+            <span class="group-title">{{ group.title }}</span>
+            <lucide-icon
+              [name]="isGroupExpanded(group.id) ? 'chevron-up' : 'chevron-down'"
+              [size]="18"
+              class="group-chevron"
+            ></lucide-icon>
+          </button>
+
+          <!-- Group Content -->
+          @if (isGroupExpanded(group.id)) {
+            <div class="group-content">
+              @if (group.searchable !== false && group.options.length > 3) {
+                <div class="group-search-box">
+                  <lucide-icon name="search" [size]="14" class="group-search-icon"></lucide-icon>
+                  <input
+                    type="text"
+                    [placeholder]="'Search ' + group.title + '...'"
+                    class="group-search-input"
+                    (input)="onGroupSearch(group.id, $any($event.target).value)"
+                  />
+                </div>
+              }
+
+              <div class="options-list">
+                @for (opt of getFilteredOptions(group); track opt.value) {
+                  <label
+                    class="option-item"
+                    [class.option-checked]="isOptionSelected(group.id, opt.value)"
+                  >
+                    <div class="checkbox-wrapper">
+                      <input
+                        type="checkbox"
+                        [checked]="isOptionSelected(group.id, opt.value)"
+                        (change)="toggleOption(group.id, opt.value)"
+                      />
+                      <span class="custom-checkbox"></span>
+                    </div>
+                    <span class="option-label truncate">{{ opt.label }}</span>
+                    @if (opt.count !== undefined) {
+                      <span class="option-count">{{ opt.count }}</span>
+                    }
+                  </label>
+                } @empty {
+                  <div class="no-options-text">No matching options</div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Bottom Actions Footer -->
+    <div class="filter-footer">
+      <div class="results-summary">
+        Total <strong class="results-count">{{ matchingResultsCount() }}</strong>
+        {{ entityLabel() }} found
+      </div>
+      <div class="footer-actions">
+        <app-ui-button
+          variant="secondary"
+          size="md"
+          [fullWidth]="true"
+          (click)="onClear()"
+          [disabled]="totalActiveFiltersCount() === 0"
+        >
+          Clear filter
+        </app-ui-button>
+        <app-ui-button variant="primary" size="md" [fullWidth]="true" (click)="onApply()">
+          Apply
+        </app-ui-button>
+      </div>
+    </div>
+  </aside>
+}

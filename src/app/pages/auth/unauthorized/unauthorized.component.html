@@ -1,0 +1,33 @@
+<div class="status-container">
+  <div class="status-card">
+    <div class="status-icon warning">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="36"
+        height="36"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+    </div>
+
+    <h1 class="status-code">403</h1>
+    <h2 class="status-title">Access Restricted</h2>
+    <p class="status-desc">
+      You do not possess the required permissions or role to view this page. Please contact your
+      system administrator if you believe this is an error.
+    </p>
+
+    <div class="status-actions">
+      <app-ui-button variant="primary" size="lg" (click)="goHome()">
+        Return to My Dashboard
+      </app-ui-button>
+    </div>
+  </div>
+</div>

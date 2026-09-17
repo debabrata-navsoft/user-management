@@ -1,0 +1,29 @@
+.confirm-content {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.confirm-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e0e7ff;
+  color: #4338ca;
+  flex-shrink: 0;
+}
+
+.confirm-icon.danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.confirm-text {
+  font-size: 14.5px;
+  color: #475569;
+  line-height: 1.5;
+  padding-top: 2px;
+}

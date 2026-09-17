@@ -1,0 +1,185 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.custom-snackbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow:
+    0 10px 25px -5px rgba(15, 23, 42, 0.12),
+    0 8px 10px -6px rgba(15, 23, 42, 0.06),
+    0 0 0 1px rgba(15, 23, 42, 0.06);
+  border: 1px solid transparent;
+  min-width: 320px;
+  max-width: 440px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Accent side strip */
+.snackbar-accent-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 5px;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+/* Icon */
+.snackbar-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Text */
+.snackbar-text-content {
+  flex: 1;
+  min-width: 0;
+  padding-right: 4px;
+}
+
+.snackbar-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+
+.snackbar-message {
+  font-size: 0.84rem;
+  color: #475569;
+  line-height: 1.45;
+  word-break: break-word;
+  font-weight: 450;
+}
+
+/* Close button */
+.snackbar-close-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin: -2px -4px 0 0;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.snackbar-close-btn:hover {
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+}
+
+/* ================================================================
+   TYPE VARIATIONS (Distinct colors & backgrounds)
+================================================================ */
+
+/* Success - Emerald */
+.snackbar-success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  box-shadow:
+    0 10px 25px -5px rgba(22, 163, 74, 0.15),
+    0 4px 6px -2px rgba(22, 163, 74, 0.05),
+    0 0 0 1px #bbf7d0;
+}
+.snackbar-success .snackbar-accent-bar {
+  background: #16a34a;
+}
+.snackbar-success .snackbar-icon-wrapper {
+  background: #dcfce7;
+  color: #15803d;
+}
+.snackbar-success .snackbar-title {
+  color: #14532d;
+}
+.snackbar-success .snackbar-message {
+  color: #166534;
+}
+
+/* Error - Crimson/Rose */
+.snackbar-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  box-shadow:
+    0 10px 25px -5px rgba(220, 38, 38, 0.15),
+    0 4px 6px -2px rgba(220, 38, 38, 0.05),
+    0 0 0 1px #fecaca;
+}
+.snackbar-error .snackbar-accent-bar {
+  background: #dc2626;
+}
+.snackbar-error .snackbar-icon-wrapper {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.snackbar-error .snackbar-title {
+  color: #7f1d1d;
+}
+.snackbar-error .snackbar-message {
+  color: #991b1b;
+}
+
+/* Warning - Warm Amber/Gold */
+.snackbar-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  box-shadow:
+    0 10px 25px -5px rgba(217, 119, 6, 0.15),
+    0 4px 6px -2px rgba(217, 119, 6, 0.05),
+    0 0 0 1px #fde68a;
+}
+.snackbar-warning .snackbar-accent-bar {
+  background: #d97706;
+}
+.snackbar-warning .snackbar-icon-wrapper {
+  background: #fef3c7;
+  color: #b45309;
+}
+.snackbar-warning .snackbar-title {
+  color: #78350f;
+}
+.snackbar-warning .snackbar-message {
+  color: #92400e;
+}
+
+/* Info - Indigo/Blue */
+.snackbar-info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  box-shadow:
+    0 10px 25px -5px rgba(37, 99, 235, 0.15),
+    0 4px 6px -2px rgba(37, 99, 235, 0.05),
+    0 0 0 1px #bfdbfe;
+}
+.snackbar-info .snackbar-accent-bar {
+  background: #2563eb;
+}
+.snackbar-info .snackbar-icon-wrapper {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.snackbar-info .snackbar-title {
+  color: #1e3a8a;
+}
+.snackbar-info .snackbar-message {
+  color: #1e40af;
+}

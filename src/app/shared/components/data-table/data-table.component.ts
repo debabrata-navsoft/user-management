@@ -1,0 +1,121 @@
+import { CommonModule } from '@angular/common';
+import {
+  Component,
+  ContentChild,
+  TemplateRef,
+  computed,
+  input,
+  output,
+  signal,
+} from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
+import { ActiveFilterState, FilterGroup } from '../../../core/models/filter.model';
+import { TableColumn } from '../../../core/models/table.model';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
+import { FilterDrawerComponent } from '../filter-drawer/filter-drawer.component';
+import { LoaderComponent } from '../loader/loader.component';
+import { PaginationComponent } from '../pagination/pagination.component';
+import { SearchInputComponent } from '../search-input/search-input.component';
+
+export interface ActiveChip {
+  groupId: string;
+  groupTitle: string;
+  value: string;
+  label: string;
+}
+
+@Component({
+  selector: 'app-data-table',
+  standalone: true,
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    SearchInputComponent,
+    FilterDrawerComponent,
+    PaginationComponent,
+    EmptyStateComponent,
+    LoaderComponent,
+  ],
+  templateUrl: './data-table.component.html',
+  styleUrl: './data-table.component.css',
+})
+export class DataTableComponent {
+  data = input<any[]>([]);
+  columns = input<TableColumn[]>([]);
+
+  title = input<string>('');
+  subtitle = input<string>('');
+  searchPlaceholder = input<string>('Search records...');
+  isLoading = input<boolean>(false);
+  total = input<number>(0);
+  page = input<number>(1);
+  limit = input<number>(10);
+  pageSizeOptions = input<number[]>([5, 10, 20, 50]);
+
+  @ContentChild('cellTemplate') customCellTemplate?: TemplateRef<any>;
+
+  // Filter drawer config
+  filterGroups = input<FilterGroup[]>([]);
+  activeFilters = input<ActiveFilterState>({});
+  entityLabel = input<string>('users');
+  showTotalCount = input<boolean>(true);
+  matchingCountCalculator = input<((filters: ActiveFilterState) => number) | undefined>(undefined);
+
+  searchChange = output<string>();
+  pageChange = output<number>();
+  limitChange = output<number>();
+  filterChange = output<ActiveFilterState>();
+
+  isFilterDrawerOpen = signal<boolean>(false);
+
+  openFilterDrawer(): void {
+    this.isFilterDrawerOpen.set(true);
+  }
+
+  closeFilterDrawer(): void {
+    this.isFilterDrawerOpen.set(false);
+  }
+
+  onApplyFilters(filters: ActiveFilterState): void {
+    this.filterChange.emit(filters);
+  }
+
+  onClearAllFilters(): void {
+    this.filterChange.emit({});
+  }
+
+  activeFilterChips = computed<ActiveChip[]>(() => {
+    const chips: ActiveChip[] = [];
+    const state = this.activeFilters();
+    const groups = this.filterGroups();
+
+    for (const groupId of Object.keys(state)) {
+      const values = state[groupId] || [];
+      const group = groups.find((g) => g.id === groupId);
+      const groupTitle = group ? group.title : groupId;
+
+      for (const val of values) {
+        const opt = group?.options.find((o) => o.value === val);
+        const label = opt ? opt.label : val;
+        chips.push({ groupId, groupTitle, value: val, label });
+      }
+    }
+    return chips;
+  });
+
+  removeChip(chip: ActiveChip): void {
+    const state = { ...this.activeFilters() };
+    const current = state[chip.groupId] || [];
+    const updated = current.filter((v) => v !== chip.value);
+    if (updated.length === 0) {
+      delete state[chip.groupId];
+    } else {
+      state[chip.groupId] = updated;
+    }
+    this.filterChange.emit(state);
+  }
+
+  totalActiveFiltersCount = computed(() => {
+    return this.activeFilterChips().length;
+  });
+}

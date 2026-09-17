@@ -1,0 +1,159 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-brand">
+        <div class="brand-badge">
+          <lucide-icon name="users" [size]="28"></lucide-icon>
+        </div>
+        <h2>UserManage</h2>
+      </div>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Sign up to get access to your User Dashboard</p>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert alert-error">
+        <lucide-icon name="alert-circle" [size]="18"></lucide-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          placeholder="John Doe"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('name')"
+        />
+        @if (isFieldInvalid('name')) {
+          <div class="error-msg">Full name is required (min 2 characters).</div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="john.doe@example.com"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('email')"
+        />
+        @if (isFieldInvalid('email')) {
+          <div class="error-msg">
+            @if (form.get('email')?.hasError('required')) {
+              Email is required.
+            } @else if (form.get('email')?.hasError('email')) {
+              Please enter a valid email address.
+            }
+          </div>
+        }
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="department">Department</label>
+          <select id="department" formControlName="department" class="form-control">
+            <option value="Engineering">Engineering</option>
+            <option value="Sales">Sales</option>
+            <option value="Design">Design</option>
+            <option value="Support">Support</option>
+            <option value="Finance">Finance</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone (Optional)</label>
+          <input
+            id="phone"
+            type="tel"
+            formControlName="phone"
+            placeholder="+1 555-0199"
+            class="form-control"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('password')"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-pwd-btn"
+            (click)="toggleShowPassword()"
+            aria-label="Toggle password visibility"
+          >
+            <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
+          </button>
+        </div>
+        @if (isFieldInvalid('password')) {
+          <div class="error-msg">
+            Password must be at least 6 characters with uppercase, lowercase, and numbers.
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <div class="input-wrapper">
+          <input
+            id="confirmPassword"
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            placeholder="••••••••"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('confirmPassword') || form.hasError('mismatch')"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-pwd-btn"
+            (click)="toggleShowConfirmPassword()"
+            aria-label="Toggle confirm password visibility"
+          >
+            <lucide-icon
+              [name]="showConfirmPassword() ? 'eye-off' : 'eye'"
+              [size]="16"
+            ></lucide-icon>
+          </button>
+        </div>
+        @if (
+          isFieldInvalid('confirmPassword') ||
+          (form.get('confirmPassword')?.touched && form.hasError('mismatch'))
+        ) {
+          <div class="error-msg">Passwords do not match.</div>
+        }
+      </div>
+
+      <div class="form-action">
+        <app-ui-button
+          type="submit"
+          variant="primary"
+          size="lg"
+          [fullWidth]="true"
+          [loading]="isLoading()"
+        >
+          Create Account
+        </app-ui-button>
+      </div>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/login">Sign in</a></p>
+    </div>
+  </div>
+</div>

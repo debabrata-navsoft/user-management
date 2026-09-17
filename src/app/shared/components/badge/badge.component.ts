@@ -1,0 +1,90 @@
+import { CommonModule } from '@angular/common';
+import { Component, input } from '@angular/core';
+
+@Component({
+  selector: 'app-badge',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <span class="badge-pill" [class]="'badge-' + variant()" [class.has-dot]="dot()">
+      @if (dot()) {
+        <span class="dot-indicator"></span>
+      }
+      <ng-content></ng-content>
+    </span>
+  `,
+  styles: [
+    `
+      .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        line-height: 1.4;
+        text-transform: capitalize;
+        border: 1px solid transparent;
+      }
+
+      .dot-indicator {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: currentColor;
+      }
+
+      .badge-primary {
+        background: #eef2ff;
+        color: #4338ca;
+        border-color: #c7d2fe;
+      }
+
+      .badge-success {
+        background: #f0fdf4;
+        color: #15803d;
+        border-color: #bbf7d0;
+      }
+
+      .badge-warning {
+        background: #fffbeb;
+        color: #b45309;
+        border-color: #fde68a;
+      }
+
+      .badge-danger {
+        background: #fef2f2;
+        color: #b91c1c;
+        border-color: #fecaca;
+      }
+
+      .badge-neutral {
+        background: #f1f5f9;
+        color: #475569;
+        border-color: #e2e8f0;
+      }
+
+      .badge-purple {
+        background: #faf5ff;
+        color: #7e22ce;
+        border-color: #e9d5ff;
+      }
+
+      .badge-indigo {
+        background: #e0e7ff;
+        color: #3730a3;
+        border-color: #c7d2fe;
+      }
+    `,
+  ],
+  templateUrl: './badge.component.html',
+  styleUrl: './badge.component.css',
+})
+export class BadgeComponent {
+  variant = input<'primary' | 'success' | 'warning' | 'danger' | 'neutral' | 'purple' | 'indigo'>(
+    'neutral',
+  );
+  dot = input<boolean>(false);
+}

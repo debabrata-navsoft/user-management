@@ -1,0 +1,65 @@
+@if (modalService.isOpen() && modalService.currentImage(); as current) {
+  <div class="image-modal-backdrop" (click)="onBackdropClick($event)">
+    <!-- Top Bar with Title on Left, Counter in Center, Close Button on Right -->
+    <div class="image-modal-topbar">
+      <div class="topbar-left">
+        @if (current.title) {
+          <span class="image-title-text">{{ current.title }}</span>
+        }
+      </div>
+
+      <div class="modal-counter">
+        <span class="counter-text">
+          {{ modalService.currentIndex() + 1 }} / {{ modalService.images().length }}
+        </span>
+      </div>
+
+      <div class="topbar-right">
+        <button
+          type="button"
+          class="modal-close-btn"
+          (click)="modalService.close()"
+          aria-label="Close image modal"
+        >
+          <lucide-icon name="x" [size]="22"></lucide-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Image Stage -->
+    <div class="image-modal-stage" (click)="onBackdropClick($event)">
+      <!-- Left Navigation Arrow -->
+      @if (modalService.hasMultiple()) {
+        <button
+          type="button"
+          class="nav-arrow-btn nav-prev"
+          (click)="modalService.prev(); $event.stopPropagation()"
+          aria-label="Previous image"
+        >
+          <lucide-icon name="chevron-left" [size]="32"></lucide-icon>
+        </button>
+      }
+
+      <!-- Center Image Preview -->
+      <div class="image-viewer-container" (click)="$event.stopPropagation()">
+        <img
+          [src]="current.url"
+          [alt]="current.title || 'Image Preview'"
+          class="modal-main-image"
+        />
+      </div>
+
+      <!-- Right Navigation Arrow -->
+      @if (modalService.hasMultiple()) {
+        <button
+          type="button"
+          class="nav-arrow-btn nav-next"
+          (click)="modalService.next(); $event.stopPropagation()"
+          aria-label="Next image"
+        >
+          <lucide-icon name="chevron-right" [size]="32"></lucide-icon>
+        </button>
+      }
+    </div>
+  </div>
+}

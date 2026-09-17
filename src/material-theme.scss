@@ -1,0 +1,21 @@
+// Angular Material theme. Only a few Material components are used (paginator,
+// snackbar), so a single light theme built from the Material 3 API is enough.
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: (
+        plain-family: ('Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif),
+        brand-family: ('Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif),
+      ),
+      density: 0,
+    )
+  );
+}

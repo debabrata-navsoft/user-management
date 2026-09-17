@@ -1,0 +1,35 @@
+<div class="page-header-container">
+  <div class="header-main">
+    @if (breadcrumbs() && breadcrumbs()!.length > 0) {
+      <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+        <ol class="breadcrumb-list">
+          @for (crumb of breadcrumbs()!; track crumb.id; let last = $last) {
+            <li class="breadcrumb-item" [class.active]="last">
+              @if (!last) {
+                <span class="crumb-link">{{ crumb.name }}</span>
+                <span class="crumb-separator">/</span>
+              } @else {
+                <span class="crumb-current">{{ crumb.name }}</span>
+              }
+            </li>
+          }
+        </ol>
+      </nav>
+    }
+
+    <div class="title-row">
+      <h1 class="page-title">{{ title() }}</h1>
+      @if (badgeText()) {
+        <span class="header-badge">{{ badgeText() }}</span>
+      }
+    </div>
+
+    @if (subtitle()) {
+      <p class="page-subtitle">{{ subtitle() }}</p>
+    }
+  </div>
+
+  <div class="header-actions">
+    <ng-content select="[actions]"></ng-content>
+  </div>
+</div>

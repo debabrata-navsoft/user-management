@@ -1,0 +1,157 @@
+<div class="data-table-wrapper">
+  <!-- Table Header & Toolbar (All in single row / toolbar card) -->
+  <div class="data-table-toolbar">
+    <div class="toolbar-left">
+      @if (showTotalCount()) {
+        <div class="table-total-count">
+          Total <strong>{{ total() }}</strong> {{ entityLabel() }} found
+        </div>
+      }
+
+      <!-- Active Filter Chips in the SAME toolbar row -->
+      @if (activeFilterChips().length > 0) {
+        <div class="toolbar-chips-inline">
+          <div class="chips-divider"></div>
+          <span class="chips-label">Active:</span>
+          <div class="chips-list">
+            @for (chip of activeFilterChips(); track chip.groupId + chip.value) {
+              <div class="filter-chip">
+                <span class="chip-group">{{ chip.groupTitle }}:</span>
+                <span class="chip-value">{{ chip.label }}</span>
+                <button
+                  type="button"
+                  class="chip-remove-btn"
+                  (click)="removeChip(chip)"
+                  aria-label="Remove filter"
+                >
+                  <lucide-icon name="x" [size]="12"></lucide-icon>
+                </button>
+              </div>
+            }
+            <button type="button" class="btn-clear-all-chips" (click)="onClearAllFilters()">
+              Clear all
+            </button>
+          </div>
+        </div>
+      }
+
+      <ng-content select="[toolbarLeft], [toolbar-left]"></ng-content>
+    </div>
+
+    <!-- Right Side Toolbar: Search, Filter Trigger, and Custom Actions -->
+    <div class="toolbar-right">
+      <!-- Global Search -->
+      <div class="search-container">
+        <app-search-input
+          [placeholder]="searchPlaceholder()"
+          (searchChange)="searchChange.emit($event)"
+        ></app-search-input>
+      </div>
+
+      <!-- Filter Drawer Trigger Button with Lucide Icon -->
+      @if (filterGroups().length > 0) {
+        <button
+          type="button"
+          class="btn-filter-trigger"
+          [class.has-active-filters]="totalActiveFiltersCount() > 0"
+          (click)="openFilterDrawer()"
+          aria-label="Open filter drawer"
+        >
+          <lucide-icon name="list-filter" [size]="16"></lucide-icon>
+          <span class="filter-btn-text">Filters</span>
+          @if (totalActiveFiltersCount() > 0) {
+            <span class="filter-badge">{{ totalActiveFiltersCount() }}</span>
+          }
+        </button>
+      }
+
+      <ng-content select="[toolbarActions], [toolbar-actions]"></ng-content>
+    </div>
+  </div>
+
+  <!-- Main Table Container -->
+  <div class="table-content-card">
+    @if (isLoading()) {
+      <div class="table-loading-container">
+        <app-loader message="Loading records..."></app-loader>
+      </div>
+    } @else if (total() === 0) {
+      <div class="table-empty-container">
+        <app-empty-state
+          title="No records found"
+          message="Try adjusting your search criteria or clearing active filters."
+          actionText="Clear All Filters"
+          (action)="onClearAllFilters()"
+        ></app-empty-state>
+      </div>
+    } @else {
+      <div class="table-scroll-area">
+        @if (columns().length > 0) {
+          <table class="custom-table">
+            <thead>
+              <tr>
+                @for (col of columns(); track col.key) {
+                  <th
+                    [style.width]="col.width"
+                    [class.actions-th]="col.key === 'actions' || col.align === 'right'"
+                    [class.text-center]="col.align === 'center'"
+                  >
+                    {{ col.header }}
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of data(); track row.id || $index) {
+                <tr>
+                  @for (col of columns(); track col.key) {
+                    <td
+                      [class.actions-cell]="col.key === 'actions' || col.align === 'right'"
+                      [class.text-center]="col.align === 'center'"
+                    >
+                      @if (customCellTemplate) {
+                        <ng-container
+                          *ngTemplateOutlet="
+                            customCellTemplate;
+                            context: { $implicit: row, row: row, column: col, key: col.key }
+                          "
+                        ></ng-container>
+                      } @else {
+                        {{ row[col.key] ?? '-' }}
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <ng-content select="table"></ng-content>
+        }
+      </div>
+
+      <!-- Built-in Material Pagination -->
+      <app-pagination
+        [total]="total()"
+        [page]="page()"
+        [limit]="limit()"
+        [pageSizeOptions]="pageSizeOptions()"
+        (pageChange)="pageChange.emit($event)"
+        (limitChange)="limitChange.emit($event)"
+      ></app-pagination>
+    }
+  </div>
+
+  <!-- Reusable Filter Drawer Slide-Over -->
+  <app-filter-drawer
+    [isOpen]="isFilterDrawerOpen()"
+    [groups]="filterGroups()"
+    [totalResults]="total()"
+    [entityLabel]="entityLabel()"
+    [matchingCountCalculator]="matchingCountCalculator()"
+    [initialSelected]="activeFilters()"
+    (close)="closeFilterDrawer()"
+    (apply)="onApplyFilters($event)"
+    (clear)="onClearAllFilters()"
+  ></app-filter-drawer>
+</div>

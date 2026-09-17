@@ -1,0 +1,40 @@
+.empty-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  background: #ffffff;
+  border-radius: var(--radius);
+}
+
+.icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #94a3b8;
+  margin-bottom: 16px;
+}
+
+.empty-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.empty-desc {
+  font-size: 14px;
+  color: #64748b;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.empty-action {
+  margin-top: 20px;
+}

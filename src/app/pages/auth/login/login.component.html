@@ -1,0 +1,110 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-brand">
+        <div class="brand-badge">
+          <lucide-icon name="users" [size]="26"></lucide-icon>
+        </div>
+        <h2>UserManage</h2>
+      </div>
+      <h1 class="auth-title">Welcome Back</h1>
+      <p class="auth-subtitle">Select your role and enter credentials to access your portal</p>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert alert-error">
+        <lucide-icon name="alert-circle" [size]="18"></lucide-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
+      <!-- Role / Type Selector Dropdown -->
+      <div class="form-group">
+        <label for="role">Select Role</label>
+        <div class="input-wrapper select-wrapper">
+          <select
+            id="role"
+            formControlName="role"
+            class="form-control form-select"
+            (change)="onRoleChange()"
+          >
+            <option value="">Please Select</option>
+            @for (opt of roleOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+          <lucide-icon name="chevron-down" [size]="16" class="select-chevron"></lucide-icon>
+        </div>
+      </div>
+
+      <!-- Dynamic Username / Email Field -->
+      @let cfg = roleConfig();
+      <div class="form-group">
+        <label for="identifier">{{ cfg.label }}</label>
+        <div class="input-wrapper">
+          <lucide-icon [name]="cfg.icon" [size]="16" class="input-icon"></lucide-icon>
+          <input
+            id="identifier"
+            type="text"
+            formControlName="identifier"
+            [placeholder]="cfg.placeholder"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('identifier')"
+            autocomplete="username"
+          />
+        </div>
+        @if (isFieldInvalid('identifier')) {
+          <div class="error-msg">{{ cfg.label }} is required.</div>
+        }
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <lucide-icon name="lock" [size]="16" class="input-icon"></lucide-icon>
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('password')"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="toggle-pwd-btn"
+            (click)="toggleShowPassword()"
+            aria-label="Toggle password visibility"
+          >
+            <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
+          </button>
+        </div>
+        @if (isFieldInvalid('password')) {
+          <div class="error-msg">Password is required.</div>
+        }
+        <div class="forgot-password-row">
+          <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
+        </div>
+      </div>
+
+      <div class="form-action">
+        <app-ui-button
+          type="submit"
+          variant="primary"
+          size="lg"
+          [fullWidth]="true"
+          [loading]="isLoading()"
+        >
+          Sign In
+        </app-ui-button>
+      </div>
+    </form>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/signup">Sign up</a></p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+<span class="badge-pill" [class]="'badge-' + variant()" [class.has-dot]="dot()">
+  @if (dot()) {
+    <span class="dot-indicator"></span>
+  }
+  <ng-content></ng-content>
+</span>

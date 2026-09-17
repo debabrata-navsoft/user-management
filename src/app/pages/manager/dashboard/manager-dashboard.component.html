@@ -1,0 +1,195 @@
+<div class="dashboard-page">
+  <app-page-header
+    title="Manager Portal Dashboard"
+    subtitle="Operational metrics, team directory overview and asset management"
+    badgeText="Manager Workspace"
+  >
+    <div actions>
+      <app-ui-button variant="secondary" size="md" routerLink="/gallery">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        Gallery
+      </app-ui-button>
+      <app-ui-button variant="primary" size="md" routerLink="/drive">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+          ></path>
+        </svg>
+        Drive Files
+      </app-ui-button>
+    </div>
+  </app-page-header>
+
+  @if (isLoading()) {
+    <app-loader message="Loading manager analytics..."></app-loader>
+  } @else {
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon purple">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">Managed Team Members</span>
+          <div class="metric-val">{{ totalUsers() }}</div>
+          <span class="metric-trend positive">{{ activeUsers() }} active</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon indigo">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+            ></path>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">Drive Assets</span>
+          <div class="metric-val">{{ totalDriveNodes() }}</div>
+          <span class="metric-trend">{{ formattedDriveSize() }} storage</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon success">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>
+        <div class="metric-body">
+          <span class="metric-label">Gallery Images</span>
+          <div class="metric-val">{{ totalImages() }}</div>
+          <span class="metric-trend">Available for zoom view</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Directory Overview -->
+    <div class="card">
+      <div class="card-header flex-between">
+        <div>
+          <h3 class="card-title">Team Directory</h3>
+          <span class="card-subtitle">Organization staff directory (Read-only view)</span>
+        </div>
+        <div class="search-wrap">
+          <app-search-input
+            placeholder="Filter by name, email, department..."
+            (searchChange)="onSearch($event)"
+          ></app-search-input>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Contact Phone</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of filteredUsers(); track user.id) {
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar-initials">{{ getInitials(user.name) }}</div>
+                    <div class="user-cell-meta">
+                      <div class="user-name">{{ user.name }}</div>
+                      <div class="user-email">{{ user.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <app-badge [variant]="getRoleBadge(user.role)">{{ user.role }}</app-badge>
+                </td>
+                <td>{{ user.department || 'General' }}</td>
+                <td>{{ user.phone || '-' }}</td>
+                <td>
+                  <app-badge
+                    [variant]="user.status === 'active' ? 'success' : 'danger'"
+                    [dot]="true"
+                  >
+                    {{ user.status }}
+                  </app-badge>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5">
+                  <app-empty-state
+                    title="No team members found"
+                    description="Try adjusting your search criteria."
+                  ></app-empty-state>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

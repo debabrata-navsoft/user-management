@@ -1,0 +1,1121 @@
+<div class="drive-page">
+  <!-- Sticky Header & Navigation Toolbar (Google Drive Style) -->
+  <div class="drive-header-sticky">
+    <app-page-header
+      title="Drive File & Folder Manager"
+      subtitle="Google Drive-inspired workplace asset management with folders, nested navigation and file previews"
+      [badgeText]="stats().totalFolders + ' Folders, ' + stats().totalFiles + ' Files'"
+    >
+      <div actions>
+        <!-- Upload File Button -->
+        <label class="btn-file-upload">
+          <input
+            type="file"
+            multiple
+            class="hidden-file-input"
+            (change)="onUploadFileInput($event)"
+          />
+          <span class="btn-span">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload Files
+          </span>
+        </label>
+
+        <!-- New Folder Button -->
+        <app-ui-button variant="primary" size="md" (click)="openCreateFolderModal()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+            ></path>
+            <line x1="12" y1="11" x2="12" y2="17"></line>
+            <line x1="9" y1="14" x2="15" y2="14"></line>
+          </svg>
+          New Folder
+        </app-ui-button>
+      </div>
+    </app-page-header>
+
+    <!-- Navigation Toolbar: Breadcrumbs & View Modes -->
+    <div class="card drive-toolbar-card">
+      <div class="toolbar-left">
+        <!-- Breadcrumbs Path -->
+        <nav class="drive-breadcrumbs">
+          @for (crumb of breadcrumbs(); track crumb.id; let last = $last) {
+            <div class="crumb-wrapper" [class.is-current]="last">
+              @if (!last) {
+                <button type="button" class="crumb-btn" (click)="navigateToFolder(crumb.id)">
+                  @if (crumb.id === 'root') {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                  }
+                  <span>{{ crumb.name }}</span>
+                </button>
+                <span class="crumb-sep">/</span>
+              } @else {
+                <span class="crumb-active">
+                  @if (crumb.id === 'root') {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                  }
+                  <span>{{ crumb.name }}</span>
+                </span>
+              }
+            </div>
+          }
+        </nav>
+      </div>
+
+      <div class="toolbar-right">
+        <div class="drive-search">
+          <app-search-input
+            placeholder="Search folder contents..."
+            (searchChange)="onSearch($event)"
+          ></app-search-input>
+        </div>
+
+        <!-- View Switcher -->
+        <div class="view-toggle-group">
+          <button
+            type="button"
+            class="toggle-btn"
+            [class.active]="viewMode() === 'grid'"
+            (click)="setViewMode('grid')"
+            title="Grid View"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="toggle-btn"
+            [class.active]="viewMode() === 'list'"
+            (click)="setViewMode('list')"
+            title="List View"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scrollable Data Area (Only items scroll, header and toolbar stay fixed) -->
+  <div class="drive-scrollable-content">
+    @if (isLoading()) {
+      <app-loader message="Loading drive contents..."></app-loader>
+    } @else {
+      <!-- If folder is completely empty -->
+      @if (currentFolders().length === 0 && currentFiles().length === 0) {
+        <div class="card empty-card">
+          <app-empty-state
+            title="This folder is empty"
+            description="Create a subfolder or upload files to organize content in this directory."
+            actionText="Create Folder"
+            (action)="openCreateFolderModal()"
+          ></app-empty-state>
+        </div>
+      } @else {
+        <!-- GRID VIEW -->
+        @if (viewMode() === 'grid') {
+          <!-- FOLDERS SECTION -->
+          @if (currentFolders().length > 0) {
+            <div class="drive-section">
+              <h3 class="section-title">Folders ({{ currentFolders().length }})</h3>
+              <div class="folders-grid">
+                @for (folder of currentFolders(); track folder.id) {
+                  <div
+                    class="folder-card"
+                    [class.menu-open]="activeMenuNode()?.id === folder.id"
+                    (dblclick)="navigateToFolder(folder.id)"
+                  >
+                    <div class="folder-main">
+                      <div class="folder-icon">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="22"
+                          height="22"
+                          viewBox="0 0 24 24"
+                          fill="#fbbf24"
+                          stroke="#d97706"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path
+                            d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <span class="folder-name truncate" [title]="folder.name">{{
+                        folder.name
+                      }}</span>
+                    </div>
+
+                    <!-- Folder Card Actions (Three-dot button & Context Menu) -->
+                    <div
+                      class="card-action-wrap"
+                      [class.is-menu-open]="activeMenuNode()?.id === folder.id"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <button
+                        type="button"
+                        class="action-icon-btn more-dots-btn"
+                        [class.active]="activeMenuNode()?.id === folder.id"
+                        (click)="toggleMenu(folder, $event)"
+                        title="More actions"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <circle cx="12" cy="5" r="2"></circle>
+                          <circle cx="12" cy="12" r="2"></circle>
+                          <circle cx="12" cy="19" r="2"></circle>
+                        </svg>
+                      </button>
+
+                      <!-- Context Dropdown Menu -->
+                      @if (activeMenuNode()?.id === folder.id) {
+                        <div class="menu-backdrop" (click)="closeMenu()"></div>
+                        <div class="drive-context-menu" (click)="$event.stopPropagation()">
+                          <button
+                            type="button"
+                            class="menu-item"
+                            (click)="openRenameModal(folder); closeMenu()"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path
+                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                              ></path>
+                              <path
+                                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                              ></path>
+                            </svg>
+                            <span>Rename</span>
+                          </button>
+                          <div class="menu-divider"></div>
+                          <button
+                            type="button"
+                            class="menu-item text-danger"
+                            (click)="confirmDelete(folder); closeMenu()"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path
+                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                              ></path>
+                            </svg>
+                            <span>Move to bin</span>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- FILES SECTION -->
+          @if (currentFiles().length > 0) {
+            <div class="drive-section">
+              <h3 class="section-title">Files ({{ currentFiles().length }})</h3>
+              <div class="files-grid">
+                @for (file of currentFiles(); track file.id) {
+                  <div
+                    class="file-card"
+                    [class.menu-open]="activeMenuNode()?.id === file.id"
+                    (click)="openPreview(file)"
+                  >
+                    <div class="file-preview-area">
+                      @if (isImageFile(file) && file.dataUrl) {
+                        <img [src]="file.dataUrl" [alt]="file.name" class="file-img-thumb" />
+                      } @else {
+                        <div class="file-generic-icon">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="36"
+                            height="36"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#6366f1"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path
+                              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                            ></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                          </svg>
+                        </div>
+                      }
+                    </div>
+
+                    <div class="file-card-info">
+                      <div class="file-info-left">
+                        <span class="file-name truncate" [title]="file.name">{{ file.name }}</span>
+                        <span class="file-size">{{ formatBytes(file.size) }}</span>
+                      </div>
+
+                      <!-- File Card Actions (Three-dot button & Context Menu) -->
+                      <div
+                        class="card-action-wrap"
+                        [class.is-menu-open]="activeMenuNode()?.id === file.id"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <button
+                          type="button"
+                          class="action-icon-btn more-dots-btn"
+                          [class.active]="activeMenuNode()?.id === file.id"
+                          (click)="toggleMenu(file, $event)"
+                          title="More actions"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <circle cx="12" cy="5" r="2"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <circle cx="12" cy="19" r="2"></circle>
+                          </svg>
+                        </button>
+
+                        <!-- Context Dropdown Menu -->
+                        @if (activeMenuNode()?.id === file.id) {
+                          <div class="menu-backdrop" (click)="closeMenu()"></div>
+                          <div class="drive-context-menu" (click)="$event.stopPropagation()">
+                            <button
+                              type="button"
+                              class="menu-item"
+                              (click)="openPreview(file); closeMenu()"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                              </svg>
+                              <span>Preview</span>
+                            </button>
+                            <button
+                              type="button"
+                              class="menu-item"
+                              (click)="downloadFile(file); closeMenu()"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                              </svg>
+                              <span>Download</span>
+                            </button>
+                            <button
+                              type="button"
+                              class="menu-item"
+                              (click)="openRenameModal(file); closeMenu()"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path
+                                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                                ></path>
+                                <path
+                                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                                ></path>
+                              </svg>
+                              <span>Rename</span>
+                            </button>
+                            <div class="menu-divider"></div>
+                            <button
+                              type="button"
+                              class="menu-item text-danger"
+                              (click)="confirmDelete(file); closeMenu()"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path
+                                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                                ></path>
+                              </svg>
+                              <span>Move to bin</span>
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        } @else {
+          <!-- UNIFIED GOOGLE DRIVE-STYLE LIST VIEW TABLE -->
+          <div class="card drive-list-card">
+            <table class="drive-table">
+              <thead>
+                <tr>
+                  <th class="th-name">
+                    <div class="th-sort-wrapper">
+                      <span>Name</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#4f46e5"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="sort-arrow"
+                      >
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="5 12 12 5 19 12"></polyline>
+                      </svg>
+                    </div>
+                  </th>
+                  <th class="th-owner">Owner</th>
+                  <th class="th-date">Date modified</th>
+                  <th class="th-size">File size</th>
+                  <th class="actions-th">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Folders First in List -->
+                @for (folder of currentFolders(); track folder.id) {
+                  <tr
+                    class="drive-row folder-row"
+                    [class.menu-open]="activeMenuNode()?.id === folder.id"
+                    (dblclick)="navigateToFolder(folder.id)"
+                  >
+                    <td class="td-name">
+                      <div class="item-name-cell">
+                        <div class="folder-table-icon">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="#fbbf24"
+                            stroke="#d97706"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path
+                              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                            ></path>
+                          </svg>
+                        </div>
+                        <span class="row-name-text">{{ folder.name }}</span>
+                      </div>
+                    </td>
+                    <td class="td-owner">
+                      <div class="owner-cell">
+                        <div class="owner-avatar">{{ getInitials(folder.uploadedBy || 'me') }}</div>
+                        <span class="owner-text">{{ folder.uploadedBy || 'me' }}</span>
+                      </div>
+                    </td>
+                    <td class="td-date">{{ formatDate(folder.createdAt) }}</td>
+                    <td class="td-size">—</td>
+                    <td class="actions-cell" (click)="$event.stopPropagation()">
+                      <div
+                        class="row-actions-wrapper"
+                        [class.menu-open]="activeMenuNode()?.id === folder.id"
+                      >
+                        <!-- Hover Quick Actions (visible on row hover) -->
+                        <div class="hover-quick-actions">
+                          <button
+                            type="button"
+                            class="action-icon-btn"
+                            (click)="openRenameModal(folder)"
+                            title="Rename"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path
+                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                              ></path>
+                              <path
+                                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                              ></path>
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            class="action-icon-btn danger"
+                            (click)="confirmDelete(folder)"
+                            title="Delete"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path
+                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                              ></path>
+                            </svg>
+                          </button>
+                        </div>
+
+                        <!-- Three Dots Button (Always visible) -->
+                        <button
+                          type="button"
+                          class="action-icon-btn more-dots-btn"
+                          [class.active]="activeMenuNode()?.id === folder.id"
+                          (click)="toggleMenu(folder, $event)"
+                          title="More actions"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <circle cx="12" cy="5" r="2"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <circle cx="12" cy="19" r="2"></circle>
+                          </svg>
+                        </button>
+
+                        <!-- Context Dropdown Menu -->
+                        @if (activeMenuNode()?.id === folder.id) {
+                          <div class="menu-backdrop" (click)="closeMenu()"></div>
+                          <div class="drive-context-menu" (click)="$event.stopPropagation()">
+                            <button
+                              type="button"
+                              class="menu-item"
+                              (click)="openRenameModal(folder); closeMenu()"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path
+                                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                                ></path>
+                                <path
+                                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                                ></path>
+                              </svg>
+                              <span>Rename</span>
+                            </button>
+                            <div class="menu-divider"></div>
+                            <button
+                              type="button"
+                              class="menu-item text-danger"
+                              (click)="confirmDelete(folder); closeMenu()"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path
+                                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                                ></path>
+                              </svg>
+                              <span>Move to bin</span>
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+
+                <!-- Files in List -->
+                @for (file of currentFiles(); track file.id) {
+                  <tr
+                    class="drive-row file-row"
+                    [class.menu-open]="activeMenuNode()?.id === file.id"
+                    (click)="openPreview(file)"
+                  >
+                    <td class="td-name">
+                      <div class="item-name-cell">
+                        <div class="file-table-icon" [class.is-img]="isImageFile(file)">
+                          @if (isImageFile(file)) {
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="#6366f1"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                              <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                          } @else {
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="#3b82f6"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path
+                                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                              ></path>
+                              <polyline points="14 2 14 8 20 8"></polyline>
+                              <line x1="16" y1="13" x2="8" y2="13"></line>
+                              <line x1="16" y1="17" x2="8" y2="17"></line>
+                            </svg>
+                          }
+                        </div>
+                        <span class="row-name-text">{{ file.name }}</span>
+                      </div>
+                    </td>
+                    <td class="td-owner">
+                      <div class="owner-cell">
+                        <div class="owner-avatar">{{ getInitials(file.uploadedBy || 'me') }}</div>
+                        <span class="owner-text">{{ file.uploadedBy || 'me' }}</span>
+                      </div>
+                    </td>
+                    <td class="td-date">{{ formatDate(file.createdAt) }}</td>
+                    <td class="td-size">{{ formatBytes(file.size) }}</td>
+                    <td class="actions-cell" (click)="$event.stopPropagation()">
+                      <div
+                        class="row-actions-wrapper"
+                        [class.menu-open]="activeMenuNode()?.id === file.id"
+                      >
+                        <!-- Hover Quick Actions (visible on row hover) -->
+                        <div class="hover-quick-actions">
+                          <button
+                            type="button"
+                            class="action-icon-btn"
+                            (click)="downloadFile(file)"
+                            title="Download"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="7 10 12 15 17 10"></polyline>
+                              <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            class="action-icon-btn"
+                            (click)="openRenameModal(file)"
+                            title="Rename"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path
+                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                              ></path>
+                              <path
+                                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                              ></path>
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            class="action-icon-btn danger"
+                            (click)="confirmDelete(file)"
+                            title="Delete"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path
+                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                              ></path>
+                            </svg>
+                          </button>
+                        </div>
+
+                        <!-- Three Dots Button (Always visible) -->
+                        <button
+                          type="button"
+                          class="action-icon-btn more-dots-btn"
+                          [class.active]="activeMenuNode()?.id === file.id"
+                          (click)="toggleMenu(file, $event)"
+                          title="More actions"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <circle cx="12" cy="5" r="2"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <circle cx="12" cy="19" r="2"></circle>
+                          </svg>
+                        </button>
+
+                        <!-- Context Dropdown Menu -->
+                        @if (activeMenuNode()?.id === file.id) {
+                          <div class="menu-backdrop" (click)="closeMenu()"></div>
+                          <div class="drive-context-menu" (click)="$event.stopPropagation()">
+                            <button
+                              type="button"
+                              class="menu-item"
+                              (click)="openPreview(file); closeMenu()"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                              </svg>
+                              <span>Preview</span>
+                            </button>
+                            <button
+                              type="button"
+                              class="menu-item"
+                              (click)="downloadFile(file); closeMenu()"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                              </svg>
+                              <span>Download</span>
+                            </button>
+                            <button
+                              type="button"
+                              class="menu-item"
+                              (click)="openRenameModal(file); closeMenu()"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path
+                                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                                ></path>
+                                <path
+                                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                                ></path>
+                              </svg>
+                              <span>Rename</span>
+                            </button>
+                            <div class="menu-divider"></div>
+                            <button
+                              type="button"
+                              class="menu-item text-danger"
+                              (click)="confirmDelete(file); closeMenu()"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path
+                                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                                ></path>
+                              </svg>
+                              <span>Move to bin</span>
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    }
+  </div>
+
+  <!-- Create Folder Modal -->
+  <app-modal
+    [isOpen]="isCreateFolderOpen()"
+    title="Create New Folder"
+    size="sm"
+    (close)="closeCreateFolderModal()"
+  >
+    <div class="modal-form-body">
+      <div class="form-group">
+        <label for="newFolderName">Folder Name</label>
+        <input
+          id="newFolderName"
+          type="text"
+          class="form-control"
+          placeholder="e.g. Invoices 2026"
+          [value]="newFolderName()"
+          (input)="onNewFolderNameInput($event)"
+          (keydown.enter)="submitCreateFolder()"
+        />
+      </div>
+    </div>
+
+    <div footer>
+      <app-ui-button variant="secondary" size="md" (click)="closeCreateFolderModal()"
+        >Cancel</app-ui-button
+      >
+      <app-ui-button
+        variant="primary"
+        size="md"
+        [loading]="isActionSubmitting()"
+        (click)="submitCreateFolder()"
+      >
+        Create Folder
+      </app-ui-button>
+    </div>
+  </app-modal>
+
+  <!-- Rename Node Modal -->
+  <app-modal [isOpen]="isRenameOpen()" title="Rename Item" size="sm" (close)="closeRenameModal()">
+    <div class="modal-form-body">
+      <div class="form-group">
+        <label for="renameInput">New Name</label>
+        <input
+          id="renameInput"
+          type="text"
+          class="form-control"
+          [value]="renameValue()"
+          (input)="onRenameInput($event)"
+          (keydown.enter)="submitRename()"
+        />
+      </div>
+    </div>
+
+    <div footer>
+      <app-ui-button variant="secondary" size="md" (click)="closeRenameModal()"
+        >Cancel</app-ui-button
+      >
+      <app-ui-button
+        variant="primary"
+        size="md"
+        [loading]="isActionSubmitting()"
+        (click)="submitRename()"
+      >
+        Save Name
+      </app-ui-button>
+    </div>
+  </app-modal>
+
+  <!-- File Preview Modal -->
+  <app-modal
+    [isOpen]="isPreviewOpen()"
+    [title]="previewNode()?.name || 'File Preview'"
+    size="lg"
+    (close)="closePreview()"
+  >
+    @if (previewNode(); as node) {
+      <div class="preview-content-box">
+        @if (isImageFile(node) && node.dataUrl) {
+          <div class="img-preview-wrap">
+            <img [src]="node.dataUrl" [alt]="node.name" class="img-full-preview" />
+          </div>
+        } @else {
+          <div class="doc-preview-placeholder">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#4f46e5"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span class="doc-name">{{ node.name }}</span>
+            <span class="doc-size"
+              >{{ formatBytes(node.size) }} ({{ node.mimeType || 'Document' }})</span
+            >
+          </div>
+        }
+      </div>
+    }
+
+    <div footer>
+      <app-ui-button variant="secondary" size="md" (click)="closePreview()">Close</app-ui-button>
+      @if (previewNode()?.dataUrl) {
+        <app-ui-button variant="primary" size="md" (click)="downloadFile(previewNode()!)">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download File
+        </app-ui-button>
+      }
+    </div>
+  </app-modal>
+
+  <!-- Delete Confirmation Dialog -->
+  <app-confirm-dialog
+    [isOpen]="isDeleteOpen()"
+    title="Delete Item"
+    [message]="
+      'Are you sure you want to delete ' +
+      (nodeToDelete()?.name || '') +
+      (nodeToDelete()?.type === 'folder' ? ' and all its subfolders/files?' : '?')
+    "
+    confirmText="Delete"
+    [danger]="true"
+    [loading]="isActionSubmitting()"
+    (confirmed)="submitDelete()"
+    (cancelled)="closeDeleteModal()"
+  ></app-confirm-dialog>
+</div>

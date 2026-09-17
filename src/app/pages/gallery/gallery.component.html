@@ -1,0 +1,433 @@
+<div class="gallery-page">
+  <app-page-header
+    title="Image Gallery & Product Magnifier"
+    subtitle="Upload multiple images, organize media assets, and inspect with product-style zoom magnifier"
+    [badgeText]="images().length + ' Images Stored'"
+  >
+    <div actions>
+      <app-ui-button
+        [variant]="showUploader() ? 'secondary' : 'primary'"
+        size="md"
+        (click)="toggleUploader()"
+      >
+        @if (showUploader()) {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          Close Uploader
+        } @else {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Upload Images
+        }
+      </app-ui-button>
+    </div>
+  </app-page-header>
+
+  <!-- Upload Section (Accordion or Toggle) -->
+  @if (showUploader()) {
+    <div class="card upload-card">
+      <div class="card-header">
+        <h3 class="card-title">Multiple Image Upload</h3>
+        <span class="card-subtitle">Select multiple images to preview and batch upload</span>
+      </div>
+
+      <div class="card-body">
+        <app-file-drop-zone
+          accept="image/png, image/jpeg, image/webp, image/gif, image/svg+xml"
+          [multiple]="true"
+          [maxSizeMb]="2"
+          hint="Supports PNG, JPG, WEBP, GIF, SVG up to 2MB each"
+          (filesSelected)="onFilesSelected($event)"
+        ></app-file-drop-zone>
+
+        <!-- Preview Queue -->
+        @if (selectedPreviews().length > 0) {
+          <div class="preview-queue-section">
+            <div class="queue-header">
+              <h4>Ready to Upload ({{ validPreviewsCount() }} valid images)</h4>
+              <div class="queue-actions">
+                <app-ui-button variant="ghost" size="sm" (click)="clearPreviews()"
+                  >Clear All</app-ui-button
+                >
+                <app-ui-button
+                  variant="primary"
+                  size="md"
+                  [disabled]="validPreviewsCount() === 0"
+                  [loading]="isUploading()"
+                  (click)="uploadAll()"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  Upload {{ validPreviewsCount() }} Images
+                </app-ui-button>
+              </div>
+            </div>
+
+            <div class="preview-grid">
+              @for (item of selectedPreviews(); track item.name + $index) {
+                <div class="preview-card" [class.has-error]="item.error">
+                  <div class="preview-thumb-wrap">
+                    @if (item.dataUrl) {
+                      <img [src]="item.dataUrl" [alt]="item.name" class="preview-thumb" />
+                    } @else {
+                      <div class="error-thumb">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="8" x2="12" y2="12"></line>
+                          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                      </div>
+                    }
+                    <button
+                      type="button"
+                      class="remove-preview-btn"
+                      (click)="removePreview($index)"
+                      aria-label="Remove preview"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div class="preview-meta">
+                    <span class="preview-name truncate" [title]="item.name">{{ item.name }}</span>
+                    <span class="preview-size">{{ formatBytes(item.size) }}</span>
+                    @if (item.dimensions) {
+                      <span class="preview-dims"
+                        >{{ item.dimensions.width }}x{{ item.dimensions.height }}px</span
+                      >
+                    }
+                    @if (item.error) {
+                      <span class="preview-err-text">{{ item.error }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Active Magnifier Inspector Section -->
+  @if (activeImage(); as active) {
+    <div class="card inspector-card">
+      <div class="card-header flex-between">
+        <div>
+          <h3 class="card-title">Product Magnifier Studio</h3>
+          <span class="card-subtitle"
+            >Hover your cursor over the image to trigger the 2.5x high-definition zoom lens</span
+          >
+        </div>
+        <div class="inspector-controls">
+          <app-ui-button variant="outline" size="sm" (click)="downloadImage(active)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Download
+          </app-ui-button>
+          <app-ui-button variant="danger" size="sm" (click)="confirmDeleteImage(active)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              ></path>
+            </svg>
+            Delete
+          </app-ui-button>
+        </div>
+      </div>
+
+      <div class="card-body inspector-body">
+        <div class="magnifier-stage">
+          <app-image-magnifier
+            [imageUrl]="active.url"
+            [alt]="active.name"
+            [zoomLevel]="2.8"
+            [galleryImages]="galleryModalItems()"
+            [currentIndex]="activeImageIndex()"
+          ></app-image-magnifier>
+        </div>
+
+        <div class="active-image-details">
+          <div class="details-top-row">
+            <h4 class="details-heading">Asset Information</h4>
+            <app-ui-button variant="outline" size="sm" (click)="openLightbox(activeImageIndex())">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+              View Fullscreen
+            </app-ui-button>
+          </div>
+
+          <div class="detail-badge-group">
+            <span class="prop-chip"><strong>Name:</strong> {{ active.name }}</span>
+            <span class="prop-chip"><strong>Size:</strong> {{ formatBytes(active.size) }}</span>
+            <span class="prop-chip"><strong>Type:</strong> {{ active.type }}</span>
+            <span class="prop-chip"
+              ><strong>Uploaded:</strong> {{ formatDate(active.createdAt) }}</span
+            >
+          </div>
+
+          <!-- Compact Thumbnail Grid Selector (No Horizontal Scrollbar, +N More Badge) -->
+          <div class="gallery-selector-wrap">
+            <div class="selector-header">
+              <span class="selector-title">Select from Gallery:</span>
+              <span class="selector-count">{{ images().length }} photos</span>
+            </div>
+
+            <div class="thumbnail-cluster">
+              @for (img of visibleThumbnails(); track img.id; let idx = $index) {
+                @if (idx === maxVisibleThumbnails - 1 && overflowThumbnailsCount() > 0) {
+                  <div
+                    class="thumb-cluster-item overflow-item"
+                    [class.active]="img.id === active.id"
+                    (click)="openLightbox(idx)"
+                    title="View all {{ images().length }} images"
+                  >
+                    <img [src]="img.url" [alt]="img.name" />
+                    <div class="overflow-badge">+{{ overflowThumbnailsCount() }}</div>
+                  </div>
+                } @else {
+                  <div
+                    class="thumb-cluster-item"
+                    [class.active]="img.id === active.id"
+                    (click)="setActiveImage(img)"
+                    [title]="img.name"
+                  >
+                    <img [src]="img.url" [alt]="img.name" />
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Image Gallery Grid -->
+  <div class="card gallery-card">
+    <div class="card-header flex-between">
+      <div>
+        <h3 class="card-title">Gallery Collection</h3>
+        <span class="card-subtitle">Click any image to inspect it with the magnifier above</span>
+      </div>
+      <div class="gallery-search">
+        <app-search-input
+          placeholder="Filter images..."
+          (searchChange)="onSearchChange($event)"
+        ></app-search-input>
+      </div>
+    </div>
+
+    <div class="card-body">
+      @if (isLoading()) {
+        <app-loader message="Loading image collection..."></app-loader>
+      } @else if (filteredImages().length === 0) {
+        <app-empty-state
+          title="No images in gallery"
+          description="Upload your first photo to get started with the gallery and magnifier."
+          actionText="Upload Images"
+          (action)="openUploader()"
+        ></app-empty-state>
+      } @else {
+        <div class="gallery-grid">
+          @for (img of filteredImages(); track img.id) {
+            <div
+              class="gallery-item"
+              [class.is-selected]="activeImage()?.id === img.id"
+              (click)="setActiveImage(img)"
+            >
+              <div class="gallery-img-wrap">
+                <img [src]="img.url" [alt]="img.name" class="gallery-img" />
+                <div class="gallery-hover-overlay">
+                  <span class="zoom-pill" (click)="setActiveImage(img)">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    Magnify
+                  </span>
+                  <button
+                    type="button"
+                    class="lightbox-pill"
+                    (click)="openLightbox($index); $event.stopPropagation()"
+                    title="Fullscreen Lightbox"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <polyline points="9 21 3 21 3 15"></polyline>
+                      <line x1="21" y1="3" x2="14" y2="10"></line>
+                      <line x1="3" y1="21" x2="10" y2="14"></line>
+                    </svg>
+                    View
+                  </button>
+                </div>
+              </div>
+
+              <div class="gallery-item-footer">
+                <span class="img-name truncate" [title]="img.name">{{ img.name }}</span>
+                <div class="img-info-row">
+                  <span class="img-size">{{ formatBytes(img.size) }}</span>
+                  <button
+                    type="button"
+                    class="trash-btn"
+                    (click)="confirmDeleteImage(img); $event.stopPropagation()"
+                    title="Delete image"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path
+                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Delete Confirm Dialog -->
+  <app-confirm-dialog
+    [isOpen]="isDeleteModalOpen()"
+    title="Delete Image"
+    [message]="
+      'Are you sure you want to permanently delete image ' + (imageToDelete()?.name || '') + '?'
+    "
+    confirmText="Delete"
+    [danger]="true"
+    [loading]="isDeleting()"
+    (confirmed)="submitDeleteImage()"
+    (cancelled)="closeDeleteModal()"
+  ></app-confirm-dialog>
+</div>
