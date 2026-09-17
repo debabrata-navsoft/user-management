@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { concatMap, from } from 'rxjs';
 import { ImageItem, ImageUploadPreview } from '../../core/models/image.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ImageModalService } from '../../core/services/image-modal.service';
@@ -139,35 +139,47 @@ export class GalleryComponent implements OnInit {
     if (valid.length === 0) return;
 
     this.isUploading.set(true);
-    const uploaderName = this.authService.currentUser()?.name || 'User';
+    const uploadedBy = this.authService.currentUser()?.name || 'User';
+    const created: ImageItem[] = [];
 
-    const calls = valid.map((item) =>
-      this.imageService.uploadImage({
-        name: item.name,
-        url: item.dataUrl,
-        size: item.size,
-        type: item.type,
-        dimensions: item.dimensions,
-        uploadedBy: uploaderName,
-      }),
-    );
+    // Strictly one at a time: json-server reloads db.json after every write, and
+    // any POST still in flight during that reload is aborted and kills the API.
+    from(valid)
+      .pipe(
+        concatMap(({ name, dataUrl, size, type, dimensions }) =>
+          this.imageService.uploadImage({ name, url: dataUrl, size, type, dimensions, uploadedBy }),
+        ),
+      )
+      .subscribe({
+        next: (image) => created.push(image),
+        complete: () => {
+          this.clearPreviews();
+          this.showUploader.set(false);
+          this.snackbar.success(`Successfully uploaded ${created.length} image(s)!`);
+          this.finishUpload(created);
+        },
+        error: () => {
+          // concatMap keeps order, so the first `created.length` previews landed.
+          const done = valid.slice(0, created.length);
+          this.selectedPreviews.update((curr) => curr.filter((p) => !done.includes(p)));
 
-    forkJoin(calls).subscribe({
-      next: (created) => {
-        this.isUploading.set(false);
-        this.clearPreviews();
-        this.showUploader.set(false);
-        this.snackbar.success(`Successfully uploaded ${created.length} image(s)!`);
-        if (created.length > 0) {
-          this.activeImage.set(created[0]);
-        }
-        this.fetchImages();
-      },
-      error: () => {
-        this.isUploading.set(false);
-        this.snackbar.error('Failed to upload some images. Please try again.');
-      },
-    });
+          if (created.length > 0) {
+            this.snackbar.warning(
+              `Uploaded ${created.length} of ${valid.length} image(s). Please retry the rest.`,
+            );
+          } else {
+            this.snackbar.error('Failed to upload images. Please try again.');
+          }
+          this.finishUpload(created);
+        },
+      });
+  }
+
+  private finishUpload(created: ImageItem[]): void {
+    this.isUploading.set(false);
+    if (created.length === 0) return;
+    this.activeImage.set(created[0]);
+    this.fetchImages();
   }
 
   setActiveImage(image: ImageItem): void {
