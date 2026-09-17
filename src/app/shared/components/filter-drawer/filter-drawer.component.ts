@@ -25,7 +25,6 @@ export class FilterDrawerComponent {
   apply = output<ActiveFilterState>();
   clear = output<void>();
 
-  // Internal state
   selectedFilters = signal<ActiveFilterState>({});
   expandedGroups = signal<Record<string, boolean>>({});
   groupSearchQueries = signal<Record<string, string>>({});
@@ -40,7 +39,6 @@ export class FilterDrawerComponent {
 
   ngOnChanges(): void {
     if (this.initialSelected()) {
-      // Clone initial selections
       const cloned: ActiveFilterState = {};
       for (const key of Object.keys(this.initialSelected())) {
         cloned[key] = [...this.initialSelected()[key]];
@@ -48,7 +46,6 @@ export class FilterDrawerComponent {
       this.selectedFilters.set(cloned);
     }
 
-    // Default first 2 groups to expanded if not set
     const exp = { ...this.expandedGroups() };
     this.groups().forEach((g, idx) => {
       if (exp[g.id] === undefined) {

@@ -3,18 +3,6 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl } from '@angular/forms';
 import { EMPTY, switchMap } from 'rxjs';
 
-/**
- * Label + control + validation message, shared by every reactive form.
- *
- * The control itself is projected, so inputs, selects and textareas all work:
- *
- *   <app-form-field label="Email" [control]="form.controls.email" [required]="true">
- *     <input formControlName="email" class="form-control" />
- *   </app-form-field>
- *
- * The `is-invalid` host class styles the projected control from global CSS,
- * which is what lets one component cover controls it does not render itself.
- */
 @Component({
   selector: 'app-form-field',
   standalone: true,
@@ -26,22 +14,13 @@ export class FormFieldComponent {
   label = input<string>('');
   control = input<AbstractControl | null>(null);
   required = input<boolean>(false);
-  /** Static helper text shown while the field is valid. */
   hint = input<string>('');
-  /** Overrides the derived message when a form needs specific wording. */
   errorText = input<string>('');
 
-  /**
-   * `touched`, `dirty` and `status` are mutated on the same control instance, so
-   * the `control` input signal never changes when they do. Following the
-   * control's own event stream is what makes validity genuinely reactive —
-   * without it the computed below would cache the initial state forever.
-   */
   private controlEvent = toSignal(
     toObservable(this.control).pipe(switchMap((c) => c?.events ?? EMPTY)),
   );
 
-  /** Errors appear once the field is left, or after a submit touches everything. */
   invalid = computed(() => {
     this.controlEvent();
     const c = this.control();
@@ -66,7 +45,6 @@ export class FormFieldComponent {
     }
     if (errors['pattern']) return `${label} is not in the expected format.`;
 
-    // The phone error carries the country and its expected digit count.
     const phone = errors['phone'];
     if (phone) {
       const where = phone.country ? ` for ${phone.country}` : '';

@@ -17,13 +17,11 @@
   cursor: not-allowed;
 }
 
-/* Projected icons must not squash when a label is long or space is tight. */
 .btn > svg,
 .btn > img {
   flex-shrink: 0;
 }
 
-/* One press effect for every variant, instead of per-variant transforms. */
 .btn:active:not(:disabled) {
   transform: translateY(1px);
 }

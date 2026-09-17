@@ -2,21 +2,11 @@
   display: block;
 }
 
-/* Narrow "Code" dropdown beside a wide number field.
-
-   The custom properties retheme Angular Material: it paints this field from its
-   own tokens (azure), and setting those tokens is the supported way to change
-   it — far more reliable than overriding border-color, which Material re-applies
-   at its own specificity. Values mirror .form-control so the field is
-   indistinguishable from the inputs around it. */
 .phone-row {
   display: grid;
   grid-template-columns: 104px minmax(0, 1fr);
   gap: 8px;
   align-items: start;
-
-  /* Outline: grey at rest and on hover, indigo on focus. Material's own default
-     focus colour is --mat-sys-primary, and its hover is --mat-sys-on-surface. */
   --mat-form-field-outlined-outline-color: var(--border-strong);
   --mat-form-field-outlined-hover-outline-color: var(--border-strong);
   --mat-form-field-outlined-focus-outline-color: var(--primary);
@@ -37,8 +27,6 @@
   --mat-select-focused-arrow-color: var(--primary);
 }
 
-/* Material form fields carry a default min-width; without overriding it the
-   number field refuses to shrink and overflows its grid cell. */
 .code-field,
 .number-field {
   width: 100%;
@@ -58,7 +46,6 @@
   font-weight: 500;
 }
 
-/* The app's inputs show a soft ring on focus; Material does not. Match it. */
 .phone-row ::ng-deep .mat-focused .mdc-notched-outline {
   border-radius: var(--radius-sm);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
@@ -68,7 +55,6 @@
   color: var(--text-dim);
 }
 
-/* Material's own metrics are taller than the .form-control inputs beside it. */
 .phone-row ::ng-deep .mat-mdc-form-field-infix {
   min-height: 42px;
   padding-top: 8px;
@@ -83,9 +69,6 @@
   background: var(--surface);
 }
 
-/* Search box pinned above the option list. */
-/* Pinned above the option list. z-index has to clear the options, which Material
-   gives their own stacking, or rows scroll over the search box. */
 .country-search {
   position: sticky;
   top: 0;
@@ -136,8 +119,6 @@
   color: var(--text);
 }
 
-/* Invalid: same tokens, repointed at the danger colour so the outline, label
-   and focus ring all turn red together. */
 .phone-row.is-invalid {
   --mat-form-field-outlined-outline-color: var(--danger);
   --mat-form-field-outlined-hover-outline-color: var(--danger);

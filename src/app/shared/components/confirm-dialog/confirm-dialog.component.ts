@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 import { ModalComponent } from '../modal/modal.component';
 import { UiButtonComponent } from '../ui-button/ui-button.component';
 
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [CommonModule, ModalComponent, UiButtonComponent],
+  imports: [CommonModule, LucideAngularModule, ModalComponent, UiButtonComponent],
   templateUrl: './confirm-dialog.component.html',
   styleUrl: './confirm-dialog.component.css',
 })

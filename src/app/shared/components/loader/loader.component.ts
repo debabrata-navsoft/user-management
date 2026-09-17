@@ -16,7 +16,6 @@ export class LoaderComponent {
   size = input<'sm' | 'md' | 'lg'>('md');
   fullscreen = input<boolean>(false);
 
-  // Prevent duplicate loaders: If global fullscreen loader is active, hide inline loaders
   shouldDisplay = computed(() => {
     if (this.fullscreen()) {
       return true;

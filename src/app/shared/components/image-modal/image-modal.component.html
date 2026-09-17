@@ -1,6 +1,5 @@
 @if (modalService.isOpen() && modalService.currentImage(); as current) {
   <div class="image-modal-backdrop" (click)="onBackdropClick($event)">
-    <!-- Top Bar with Title on Left, Counter in Center, Close Button on Right -->
     <div class="image-modal-topbar">
       <div class="topbar-left">
         @if (current.title) {
@@ -40,7 +39,6 @@
         </button>
       }
 
-      <!-- Center Preview: video entries get a player, everything else an image -->
       <div class="image-viewer-container" (click)="$event.stopPropagation()">
         @if (isVideo(current)) {
           <video [src]="current.url" class="modal-main-video" controls autoplay playsinline></video>

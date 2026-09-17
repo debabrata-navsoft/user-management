@@ -7,6 +7,7 @@ import { provideRouter } from '@angular/router';
 import {
   AlertCircle,
   CheckCircle2,
+  CircleMinus,
   File as FileIcon,
   FileArchive,
   FileCode,
@@ -61,6 +62,7 @@ describe('DriveComponent multi-file upload', () => {
             CheckCircle2,
             AlertCircle,
             TriangleAlert,
+            CircleMinus,
             File: FileIcon,
             FileArchive,
             FileCode,

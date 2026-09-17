@@ -13,6 +13,7 @@ import {
   Plus,
   Search,
   Trash2,
+  TriangleAlert,
   Upload,
   X,
 } from 'lucide-angular';
@@ -62,6 +63,7 @@ describe('GalleryComponent selection', () => {
             Plus,
             Search,
             Trash2,
+            TriangleAlert,
             Upload,
             X,
           }),

@@ -13,12 +13,10 @@ export class FileTypeIconComponent {
   fileName = input<string>('');
   mimeType = input<string>('');
   size = input<number>(20);
-  /** Render the folder artwork instead of deriving a type from the name. */
   folder = input<boolean>(false);
 
   info = computed(() => describeFileType(this.fileName(), this.mimeType()));
 
-  /** Artwork from `public/`, or null when only a glyph is available. */
   asset = computed(() => (this.folder() ? FOLDER_ASSET : (this.info().asset ?? null)));
 
   label = computed(() => (this.folder() ? 'Folder' : this.info().label));

@@ -61,7 +61,6 @@ export class DataTableComponent {
   showTotalCount = input<boolean>(true);
   matchingCountCalculator = input<((filters: ActiveFilterState) => number) | undefined>(undefined);
 
-  /** Column key currently sorted, and its direction. */
   sort = input<string>('');
   order = input<'asc' | 'desc'>('asc');
 
@@ -73,13 +72,11 @@ export class DataTableComponent {
 
   isFilterDrawerOpen = signal<boolean>(false);
 
-  /** Click a column to sort ascending; click it again to flip to descending. */
   toggleSort(key: string): void {
     const next: 'asc' | 'desc' = this.sort() === key && this.order() === 'asc' ? 'desc' : 'asc';
     this.sortChange.emit({ sort: key, order: next });
   }
 
-  /** Direction of the sorted column; unsorted columns render no arrow at all. */
   sortIcon(key: string): string {
     if (this.sort() !== key) return 'arrow-up';
     return this.order() === 'asc' ? 'arrow-up' : 'arrow-down';
