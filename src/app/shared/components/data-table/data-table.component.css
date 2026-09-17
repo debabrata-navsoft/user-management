@@ -228,6 +228,8 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: auto;
+  /* Reserve the gutter so columns don't shift when rows finish loading. */
+  scrollbar-gutter: stable;
   width: 100%;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;

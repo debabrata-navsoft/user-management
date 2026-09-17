@@ -50,6 +50,13 @@ body {
   height: 100%;
 }
 
+/* Always reserve room for the scrollbar. Pages start short (loader) and grow
+   tall once data arrives; without a stable gutter the scrollbar appears on load
+   and shifts the whole layout sideways by its own width. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   background: var(--bg);
