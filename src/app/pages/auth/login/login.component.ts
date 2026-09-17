@@ -28,7 +28,7 @@ export class LoginComponent {
   ];
 
   form = this.fb.group({
-    role: [''],
+    role: ['', Validators.required],
     identifier: ['', Validators.required],
     password: ['', Validators.required],
   });

@@ -56,6 +56,10 @@ export class AuthService {
       .toLowerCase();
     const role = (credentials.role || '').trim().toLowerCase();
 
+    if (!role) {
+      return throwError(() => new Error('Please select a role to continue.'));
+    }
+
     return this.http.get<User[]>(`${environment.apiUrl}/users`).pipe(
       map((users) => {
         const user = users.find((u) => {
@@ -66,7 +70,7 @@ export class AuthService {
             (input === 'manager' && u.role === 'manager');
 
           if (!matchId) return false;
-          if (role && u.role?.toLowerCase() !== role) return false;
+          if (u.role?.toLowerCase() !== role) return false;
           return true;
         });
 

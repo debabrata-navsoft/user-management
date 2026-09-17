@@ -27,6 +27,7 @@
             id="role"
             formControlName="role"
             class="form-control form-select"
+            [class.is-invalid]="isFieldInvalid('role')"
             (change)="onRoleChange()"
           >
             <option value="">Please Select</option>
@@ -36,6 +37,9 @@
           </select>
           <lucide-icon name="chevron-down" [size]="16" class="select-chevron"></lucide-icon>
         </div>
+        @if (isFieldInvalid('role')) {
+          <div class="error-msg">Please select a role to continue.</div>
+        }
       </div>
 
       <!-- Dynamic Username / Email Field -->

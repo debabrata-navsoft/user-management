@@ -27,7 +27,7 @@ Nothing works without `npm run api` — every service targets `environment.apiUr
 - **Angular 21, zoneless** (`provideZonelessChangeDetection()` in [app.config.ts](src/app/app.config.ts)). State that drives templates must be a `signal`/`computed`, or the view will not update. Never reach for zone-based patterns.
 - **Standalone components only.** No NgModules. Inputs/outputs use the signal APIs (`input()`, `output()`), not decorators — see [ui-button.component.ts](src/app/shared/components/ui-button/ui-button.component.ts) and [data-table.component.ts](src/app/shared/components/data-table/data-table.component.ts). `@ContentChild` is still used for template projection.
 - **TypeScript is fully strict**, including `noPropertyAccessFromIndexSignature` and `strictTemplates`. Route data is read as `route.data['roles']`, not `route.data.roles`.
-- Components keep template and styles in sibling `.html`/`.css` files (badge is the lone inline-template exception).
+- Components keep template and styles in sibling `.html`/`.css` files — always `templateUrl`/`styleUrl`, never inline `template`/`styles`.
 
 ## Icons: the most common build/test break
 

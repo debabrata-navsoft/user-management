@@ -62,15 +62,56 @@ describe('AuthService', () => {
       },
     ];
 
-    service.login({ email: 'admin@demo.com', password: 'Password123' }).subscribe((user) => {
-      expect(user.email).toBe('admin@demo.com');
-      expect(service.isAuthenticated()).toBe(true);
-      expect(service.currentRole()).toBe('admin');
-    });
+    service
+      .login({ email: 'admin@demo.com', role: 'admin', password: 'Password123' })
+      .subscribe((user) => {
+        expect(user.email).toBe('admin@demo.com');
+        expect(service.isAuthenticated()).toBe(true);
+        expect(service.currentRole()).toBe('admin');
+      });
 
     const req = httpMock.expectOne(`${environment.apiUrl}/users`);
     expect(req.request.method).toBe('GET');
     req.flush(mockUsers);
+  });
+
+  it('should reject login when no role is selected', () => {
+    let error: Error | undefined;
+
+    service.login({ email: 'admin@demo.com', password: 'Password123' }).subscribe({
+      next: () => expect.unreachable('login should not succeed without a role'),
+      error: (err: Error) => (error = err),
+    });
+
+    expect(error?.message).toBe('Please select a role to continue.');
+    expect(service.isAuthenticated()).toBe(false);
+    httpMock.expectNone(`${environment.apiUrl}/users`);
+  });
+
+  it('should reject login when the role does not match the account', () => {
+    const mockUsers = [
+      {
+        id: 1,
+        name: 'Admin User',
+        email: 'admin@demo.com',
+        password: 'Password123',
+        role: 'admin',
+        status: 'active',
+      },
+    ];
+    let error: Error | undefined;
+
+    service
+      .login({ email: 'admin@demo.com', role: 'employee', password: 'Password123' })
+      .subscribe({
+        next: () => expect.unreachable('login should not succeed with a mismatched role'),
+        error: (err: Error) => (error = err),
+      });
+
+    httpMock.expectOne(`${environment.apiUrl}/users`).flush(mockUsers);
+
+    expect(error?.message).toBe('No account found matching the provided credentials.');
+    expect(service.isAuthenticated()).toBe(false);
   });
 
   it('should clear session on logout', () => {
