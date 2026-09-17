@@ -22,6 +22,8 @@ npm test -- --list-tests                             # discover spec files
 
 Nothing works without `npm run api` — every service targets `environment.apiUrl` (`http://localhost:3000`), and `error.interceptor.ts` surfaces a specific "run `npm run api`" toast on status 0.
 
+**Never add `--watch` back to the `api` script.** The app is the only writer of `db.json`, so `--watch` only ever fires on json-server's *own* writes: it reloads the multi-MB file after every POST/DELETE, aborts any request in flight during that reload, and silently kills the process — the whole batch then fails with `ERR_EMPTY_RESPONSE` / `ERR_CONNECTION_REFUSED`. Writes still persist without it.
+
 ## Stack constraints that shape all code
 
 - **Angular 21, zoneless** (`provideZonelessChangeDetection()` in [app.config.ts](src/app/app.config.ts)). State that drives templates must be a `signal`/`computed`, or the view will not update. Never reach for zone-based patterns.

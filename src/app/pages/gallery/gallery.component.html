@@ -308,11 +308,43 @@
         <h3 class="card-title">Gallery Collection</h3>
         <span class="card-subtitle">Click any image to inspect it with the magnifier above</span>
       </div>
-      <div class="gallery-search">
-        <app-search-input
-          placeholder="Filter images..."
-          (searchChange)="onSearchChange($event)"
-        ></app-search-input>
+      <div class="gallery-header-actions">
+        @if (selectedCount() > 0) {
+          <span class="selection-count">{{ selectedCount() }} selected</span>
+          <app-ui-button variant="ghost" size="sm" (click)="clearSelection()"
+            >Clear Selection</app-ui-button
+          >
+          <app-ui-button
+            variant="danger"
+            size="sm"
+            [loading]="isDeleting()"
+            (click)="confirmDeleteSelected()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              ></path>
+            </svg>
+            {{ selectedCount() === 1 ? 'Delete' : 'Delete Selected' }}
+          </app-ui-button>
+        }
+        <div class="gallery-search">
+          <app-search-input
+            placeholder="Filter images..."
+            (searchChange)="onSearchChange($event)"
+          ></app-search-input>
+        </div>
       </div>
     </div>
 
@@ -327,14 +359,34 @@
           (action)="openUploader()"
         ></app-empty-state>
       } @else {
-        <div class="gallery-grid">
+        <label class="select-all-row">
+          <input
+            type="checkbox"
+            class="select-box"
+            [checked]="allFilteredSelected()"
+            (change)="toggleSelectAll()"
+          />
+          <span>Select all {{ filteredImages().length }} image(s)</span>
+        </label>
+
+        <div class="gallery-grid" [class.selection-active]="selectedCount() > 0">
           @for (img of filteredImages(); track img.id) {
             <div
               class="gallery-item"
               [class.is-selected]="activeImage()?.id === img.id"
+              [class.is-checked]="isSelected(img.id)"
               (click)="setActiveImage(img)"
             >
               <div class="gallery-img-wrap">
+                <label class="select-check" (click)="$event.stopPropagation()">
+                  <input
+                    type="checkbox"
+                    class="select-box"
+                    [checked]="isSelected(img.id)"
+                    (change)="toggleSelection(img.id)"
+                    [attr.aria-label]="'Select ' + img.name"
+                  />
+                </label>
                 <img [src]="img.url" [alt]="img.name" class="gallery-img" />
                 <div class="gallery-hover-overlay">
                   <span class="zoom-pill" (click)="setActiveImage(img)">
@@ -417,17 +469,15 @@
     </div>
   </div>
 
-  <!-- Delete Confirm Dialog -->
+  <!-- Delete Confirm Dialog (single card action and bulk selection share this) -->
   <app-confirm-dialog
     [isOpen]="isDeleteModalOpen()"
-    title="Delete Image"
-    [message]="
-      'Are you sure you want to permanently delete image ' + (imageToDelete()?.name || '') + '?'
-    "
-    confirmText="Delete"
+    [title]="deleteDialog().title"
+    [message]="deleteDialog().message"
+    [confirmText]="deleteDialog().confirmText"
     [danger]="true"
     [loading]="isDeleting()"
-    (confirmed)="submitDeleteImage()"
+    (confirmed)="submitDelete()"
     (cancelled)="closeDeleteModal()"
   ></app-confirm-dialog>
 </div>

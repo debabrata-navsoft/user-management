@@ -447,8 +447,83 @@
   background: #fef2f2;
 }
 
+/* Multi-select */
+.gallery-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.selection-count {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4338ca;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.select-all-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+}
+
+.select-box {
+  width: 16px;
+  height: 16px;
+  accent-color: #4f46e5;
+  cursor: pointer;
+  margin: 0;
+}
+
+.select-check {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+  /* Hidden until the gallery is in selection mode — revealed on hover so a
+     single image can still be picked without selecting everything first. */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.gallery-item:hover .select-check,
+.gallery-item.is-checked .select-check,
+.gallery-grid.selection-active .select-check {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gallery-item.is-checked {
+  border-color: #4f46e5;
+  background: #f8faff;
+}
+
 @media (max-width: 900px) {
   .inspector-body {
     grid-template-columns: 1fr;
+  }
+
+  .gallery-header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 }

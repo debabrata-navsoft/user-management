@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { concatMap, from } from 'rxjs';
+import { concatMap, from, map } from 'rxjs';
 import { ImageItem, ImageUploadPreview } from '../../core/models/image.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ImageModalService } from '../../core/services/image-modal.service';
@@ -49,8 +49,10 @@ export class GalleryComponent implements OnInit {
   selectedPreviews = signal<ImageUploadPreview[]>([]);
   activeImage = signal<ImageItem | null>(null);
 
+  selectedIds = signal<Set<string | number>>(new Set());
+
+  pendingDeletes = signal<ImageItem[]>([]);
   isDeleteModalOpen = signal<boolean>(false);
-  imageToDelete = signal<ImageItem | null>(null);
 
   formatBytes = formatBytes;
   formatDate = formatDate;
@@ -87,6 +89,31 @@ export class GalleryComponent implements OnInit {
 
   overflowThumbnailsCount = computed(() => {
     return Math.max(0, this.images().length - this.maxVisibleThumbnails);
+  });
+
+  selectedImages = computed(() => {
+    const ids = this.selectedIds();
+    return this.images().filter((img) => ids.has(img.id));
+  });
+
+  selectedCount = computed(() => this.selectedIds().size);
+
+  deleteDialog = computed(() => {
+    const pending = this.pendingDeletes();
+    const single = pending.length === 1;
+    return {
+      title: single ? 'Delete Image' : 'Delete Selected Images',
+      confirmText: single ? 'Delete' : 'Delete All',
+      message: single
+        ? `Are you sure you want to permanently delete image ${pending[0].name}?`
+        : `Are you sure you want to permanently delete ${pending.length} selected images?`,
+    };
+  });
+
+  allFilteredSelected = computed(() => {
+    const list = this.filteredImages();
+    const ids = this.selectedIds();
+    return list.length > 0 && list.every((img) => ids.has(img.id));
   });
 
   ngOnInit(): void {
@@ -142,8 +169,6 @@ export class GalleryComponent implements OnInit {
     const uploadedBy = this.authService.currentUser()?.name || 'User';
     const created: ImageItem[] = [];
 
-    // Strictly one at a time: json-server reloads db.json after every write, and
-    // any POST still in flight during that reload is aborted and kills the API.
     from(valid)
       .pipe(
         concatMap(({ name, dataUrl, size, type, dimensions }) =>
@@ -206,35 +231,100 @@ export class GalleryComponent implements OnInit {
   }
 
   confirmDeleteImage(image: ImageItem): void {
-    this.imageToDelete.set(image);
-    this.isDeleteModalOpen.set(true);
+    this.openDeleteModal([image]);
+  }
+
+  confirmDeleteSelected(): void {
+    this.openDeleteModal(this.selectedImages());
   }
 
   closeDeleteModal(): void {
     this.isDeleteModalOpen.set(false);
-    this.imageToDelete.set(null);
+    this.pendingDeletes.set([]);
   }
 
-  submitDeleteImage(): void {
-    const img = this.imageToDelete();
-    if (!img) return;
+  submitDelete(): void {
+    const targets = this.pendingDeletes();
+    if (targets.length === 0) return;
 
     this.isDeleting.set(true);
-    this.imageService.deleteImage(img.id).subscribe({
-      next: () => {
-        this.isDeleting.set(false);
-        this.closeDeleteModal();
-        this.snackbar.success(`Image "${img.name}" deleted.`);
+    const removed: ImageItem[] = [];
 
-        if (this.activeImage()?.id === img.id) {
-          this.activeImage.set(null);
-        }
-        this.fetchImages();
-      },
-      error: () => {
-        this.isDeleting.set(false);
-        this.snackbar.error('Failed to delete image.');
-      },
+    // Serialised like uploadAll(), so a failure part-way leaves a known state.
+    from(targets)
+      .pipe(concatMap((img) => this.imageService.deleteImage(img.id).pipe(map(() => img))))
+      .subscribe({
+        next: (img) => removed.push(img),
+        complete: () => this.finishDelete(removed, targets.length),
+        error: () => this.finishDelete(removed, targets.length),
+      });
+  }
+
+  private openDeleteModal(targets: ImageItem[]): void {
+    if (targets.length === 0) return;
+    this.pendingDeletes.set(targets);
+    this.isDeleteModalOpen.set(true);
+  }
+
+  private finishDelete(removed: ImageItem[], total: number): void {
+    this.isDeleting.set(false);
+    this.closeDeleteModal();
+
+    if (removed.length === total) {
+      this.snackbar.success(
+        total === 1 ? `Image "${removed[0].name}" deleted.` : `Deleted ${total} images.`,
+      );
+    } else if (removed.length > 0) {
+      this.snackbar.warning(`Deleted ${removed.length} of ${total} images. Please retry the rest.`);
+    } else {
+      this.snackbar.error('Failed to delete images. Please try again.');
+    }
+
+    if (removed.length === 0) return;
+    this.forgetImages(removed.map((img) => img.id));
+    this.fetchImages();
+  }
+
+  isSelected(id: string | number): boolean {
+    return this.selectedIds().has(id);
+  }
+
+  toggleSelection(id: string | number): void {
+    this.editSelection((ids) => {
+      if (!ids.delete(id)) ids.add(id);
     });
+  }
+
+  /** Select every filtered image, or deselect them when they are all selected. */
+  toggleSelectAll(): void {
+    const selectAll = !this.allFilteredSelected();
+    this.editSelection((ids) => {
+      for (const img of this.filteredImages()) {
+        if (selectAll) ids.add(img.id);
+        else ids.delete(img.id);
+      }
+    });
+  }
+
+  clearSelection(): void {
+    this.selectedIds.set(new Set());
+  }
+
+  private editSelection(mutate: (ids: Set<string | number>) => void): void {
+    this.selectedIds.update((curr) => {
+      const next = new Set(curr);
+      mutate(next);
+      return next;
+    });
+  }
+
+  /** Drop deleted ids from the selection and clear the inspector if it showed one. */
+  private forgetImages(ids: (string | number)[]): void {
+    this.editSelection((set) => ids.forEach((id) => set.delete(id)));
+
+    const active = this.activeImage();
+    if (active && ids.includes(active.id)) {
+      this.activeImage.set(null);
+    }
   }
 }
