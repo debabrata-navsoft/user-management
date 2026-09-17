@@ -9,6 +9,7 @@ import { DRIVE_ROOT, DriveService } from '../../core/services/drive.service';
 import { ImageModalService } from '../../core/services/image-modal.service';
 import { MediaUploadService } from '../../core/services/media-upload.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
+import { openDataUrlInNewTab } from '../../core/utils/data-url';
 import { isImageType, isVideoType } from '../../core/utils/file-types';
 import { formatBytes, formatDate, getInitials } from '../../core/utils/formatters';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -317,6 +318,18 @@ export class DriveComponent implements OnInit {
       this.imageModalService.open(playable, Math.max(0, idx));
       return;
     }
+
+    // Documents — PDF, Word, Excel, text — hand off to the browser, which shows
+    // what it can render and downloads the rest. The in-app modal was only ever
+    // a file-type icon and a Download button, so it stays as the fallback for a
+    // blocked pop-up or a node with no stored bytes.
+    if (node.dataUrl && openDataUrlInNewTab(node.dataUrl)) {
+      return;
+    }
+    if (node.dataUrl) {
+      this.snackbar.info(`Allow pop-ups to open "${node.name}" in a new tab.`);
+    }
+
     this.previewNode.set(node);
     this.isPreviewOpen.set(true);
   }

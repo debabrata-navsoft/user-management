@@ -129,6 +129,83 @@ describe('DriveComponent multi-file upload', () => {
     });
   });
 
+  describe('opening a file', () => {
+    const fileNode = (name: string, mimeType: string, dataUrl?: string) => ({
+      id: 'file-' + name,
+      name,
+      type: 'file' as const,
+      parentId: 'root',
+      mimeType,
+      dataUrl,
+      createdAt: '',
+    });
+
+    const originalOpen = window.open;
+    const originalCreate = URL.createObjectURL;
+    const originalRevoke = URL.revokeObjectURL;
+    let opened: string[];
+
+    beforeEach(() => {
+      opened = [];
+      URL.createObjectURL = () => 'blob:mock/1';
+      URL.revokeObjectURL = () => undefined;
+      window.open = ((url: string) => {
+        opened.push(url);
+        return {} as Window;
+      }) as typeof window.open;
+    });
+
+    afterEach(() => {
+      window.open = originalOpen;
+      URL.createObjectURL = originalCreate;
+      URL.revokeObjectURL = originalRevoke;
+    });
+
+    it('sends a document to a browser tab instead of the in-app modal', () => {
+      const pdf = fileNode('report.pdf', 'application/pdf', 'data:application/pdf;base64,QUJD');
+      fixture.componentInstance.openPreview(pdf);
+
+      expect(opened).toEqual(['blob:mock/1']);
+      expect(fixture.componentInstance.isPreviewOpen()).toBe(false);
+    });
+
+    it('does the same for a spreadsheet, which Chrome will download', () => {
+      const xlsx = fileNode(
+        'budget.xlsx',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'data:application/vnd.ms-excel;base64,QUJD',
+      );
+      fixture.componentInstance.openPreview(xlsx);
+
+      expect(opened.length).toBe(1);
+      expect(fixture.componentInstance.isPreviewOpen()).toBe(false);
+    });
+
+    it('keeps images in the in-app lightbox', () => {
+      const png = fileNode('cat.png', 'image/png', 'data:image/png;base64,QUJD');
+      fixture.componentInstance.openPreview(png);
+
+      expect(opened).toEqual([]);
+      expect(fixture.componentInstance.isPreviewOpen()).toBe(false);
+    });
+
+    it('falls back to the modal when a document has no stored bytes', () => {
+      fixture.componentInstance.openPreview(fileNode('empty.docx', 'application/msword'));
+
+      expect(opened).toEqual([]);
+      expect(fixture.componentInstance.isPreviewOpen()).toBe(true);
+    });
+
+    it('falls back to the modal when the pop-up is blocked', () => {
+      window.open = (() => null) as typeof window.open;
+      fixture.componentInstance.openPreview(
+        fileNode('report.pdf', 'application/pdf', 'data:application/pdf;base64,QUJD'),
+      );
+
+      expect(fixture.componentInstance.isPreviewOpen()).toBe(true);
+    });
+  });
+
   it('exposes a multiple file input wired to the upload handler', () => {
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="file"]');
     expect(input).toBeTruthy();
