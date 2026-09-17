@@ -1,0 +1,12 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* The artwork is square, so keep it that way whatever the row height. */
+.type-asset {
+  object-fit: contain;
+  display: block;
+}

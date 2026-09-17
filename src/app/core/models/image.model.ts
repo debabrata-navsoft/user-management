@@ -9,6 +9,8 @@ export interface ImageItem {
   createdAt: string;
   tags?: string[];
   description?: string;
+  /** Id of the mirrored drive node, when this image was shared to both. */
+  driveNodeId?: string;
 }
 
 export interface ImageUploadPreview {

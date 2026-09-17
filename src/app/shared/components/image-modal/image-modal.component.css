@@ -99,7 +99,8 @@
   cursor: default;
 }
 
-.modal-main-image {
+.modal-main-image,
+.modal-main-video {
   max-width: 90vw;
   max-height: 80vh;
   width: auto;

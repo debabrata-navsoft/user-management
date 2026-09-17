@@ -6,15 +6,25 @@ import { BreadcrumbItem, DriveNode, DriveStats } from '../../core/models/drive.m
 import { AuthService } from '../../core/services/auth.service';
 import { DRIVE_ROOT, DriveService } from '../../core/services/drive.service';
 import { ImageModalService } from '../../core/services/image-modal.service';
+import { MediaUploadService } from '../../core/services/media-upload.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
+import { isImageType, isVideoType } from '../../core/utils/file-types';
 import { formatBytes, formatDate, getInitials } from '../../core/utils/formatters';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { FileTypeIconComponent } from '../../shared/components/file-type-icon/file-type-icon.component';
+import { DriveItemMenuComponent } from './drive-item-menu/drive-item-menu.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SearchInputComponent } from '../../shared/components/search-input/search-input.component';
 import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.component';
+
+/**
+ * Worst-case height of the row/card context menu (four items plus padding).
+ * Used to decide whether it opens downwards or flips above the trigger.
+ */
+const CONTEXT_MENU_HEIGHT_PX = 200;
 
 @Component({
   selector: 'app-drive',
@@ -26,7 +36,9 @@ import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.c
     SearchInputComponent,
     ModalComponent,
     ConfirmDialogComponent,
+    DriveItemMenuComponent,
     EmptyStateComponent,
+    FileTypeIconComponent,
     LoaderComponent,
   ],
   templateUrl: './drive.component.html',
@@ -34,6 +46,7 @@ import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.c
 })
 export class DriveComponent implements OnInit {
   private driveService = inject(DriveService);
+  private mediaUpload = inject(MediaUploadService);
   private authService = inject(AuthService);
   private snackbar = inject(SnackbarService);
   private imageModalService = inject(ImageModalService);
@@ -67,6 +80,8 @@ export class DriveComponent implements OnInit {
 
   // Three-dot row context menu
   activeMenuNode = signal<DriveNode | null>(null);
+  /** True when the open context menu has to render above its trigger. */
+  menuDropUp = signal<boolean>(false);
 
   formatBytes = formatBytes;
   formatDate = formatDate;
@@ -173,9 +188,16 @@ export class DriveComponent implements OnInit {
     event.stopPropagation();
     if (this.activeMenuNode()?.id === node.id) {
       this.activeMenuNode.set(null);
-    } else {
-      this.activeMenuNode.set(node);
+      return;
     }
+
+    // Open upwards when the menu would not fit below the trigger, so rows near
+    // the bottom of the viewport stay fully visible.
+    const trigger = (event.currentTarget as HTMLElement | null)?.getBoundingClientRect();
+    const spaceBelow = trigger ? window.innerHeight - trigger.bottom : Number.POSITIVE_INFINITY;
+    this.menuDropUp.set(spaceBelow < CONTEXT_MENU_HEIGHT_PX);
+
+    this.activeMenuNode.set(node);
   }
 
   closeMenu(): void {
@@ -183,8 +205,16 @@ export class DriveComponent implements OnInit {
   }
 
   isImageFile(node: DriveNode): boolean {
-    if (!node.mimeType) return false;
-    return node.mimeType.startsWith('image/');
+    return isImageType(node.name, node.mimeType);
+  }
+
+  isVideoFile(node: DriveNode): boolean {
+    return isVideoType(node.name, node.mimeType);
+  }
+
+  /** Images and videos both play in the lightbox. */
+  isPlayableFile(node: DriveNode): boolean {
+    return this.isImageFile(node) || this.isVideoFile(node);
   }
 
   // Create Folder
@@ -231,26 +261,15 @@ export class DriveComponent implements OnInit {
     const input = e.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
-    const files = Array.from(input.files);
+    // The input is reset on click, not here: clearing `value` detaches the File
+    // objects, and they still have to be readable while the upload runs.
     this.isLoading.set(true);
-    const uploader = this.authService.currentUser()?.name || 'User';
+    const outcome = await this.mediaUpload.readAndUpload(Array.from(input.files), {
+      uploadedBy: this.authService.currentUser()?.name || 'User',
+      driveParentId: this.currentFolderId(),
+    });
+    this.mediaUpload.report(outcome);
 
-    for (const file of files) {
-      try {
-        const obs = await this.driveService.uploadFile(file, this.currentFolderId(), uploader);
-        await new Promise<void>((resolve, reject) => {
-          obs.subscribe({
-            next: () => resolve(),
-            error: (err) => reject(err),
-          });
-        });
-      } catch {
-        this.snackbar.error(`Failed to upload ${file.name}`);
-      }
-    }
-
-    this.snackbar.success(`Uploaded ${files.length} file(s) into current folder!`);
-    input.value = '';
     this.loadFolder(this.currentFolderId());
     this.loadStats();
   }
@@ -297,13 +316,13 @@ export class DriveComponent implements OnInit {
       this.navigateToFolder(node.id);
       return;
     }
-    if (this.isImageFile(node) && node.dataUrl) {
-      const allImageFiles = this.currentFiles()
-        .filter((f) => this.isImageFile(f) && f.dataUrl)
-        .map((f) => ({ url: f.dataUrl!, title: f.name }));
+    if (this.isPlayableFile(node) && node.dataUrl) {
+      const playable = this.currentFiles()
+        .filter((f) => this.isPlayableFile(f) && f.dataUrl)
+        .map((f) => ({ url: f.dataUrl!, title: f.name, mimeType: f.mimeType }));
 
-      const idx = allImageFiles.findIndex((f) => f.title === node.name);
-      this.imageModalService.open(allImageFiles, Math.max(0, idx));
+      const idx = playable.findIndex((f) => f.title === node.name);
+      this.imageModalService.open(playable, Math.max(0, idx));
       return;
     }
     this.previewNode.set(node);

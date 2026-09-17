@@ -40,13 +40,17 @@
         </button>
       }
 
-      <!-- Center Image Preview -->
+      <!-- Center Preview: video entries get a player, everything else an image -->
       <div class="image-viewer-container" (click)="$event.stopPropagation()">
-        <img
-          [src]="current.url"
-          [alt]="current.title || 'Image Preview'"
-          class="modal-main-image"
-        />
+        @if (isVideo(current)) {
+          <video [src]="current.url" class="modal-main-video" controls autoplay playsinline></video>
+        } @else {
+          <img
+            [src]="current.url"
+            [alt]="current.title || 'Image Preview'"
+            class="modal-main-image"
+          />
+        }
       </div>
 
       <!-- Right Navigation Arrow -->

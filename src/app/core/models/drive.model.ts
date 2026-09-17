@@ -11,6 +11,8 @@ export interface DriveNode {
   uploadedBy?: string;
   createdAt: string;
   updatedAt?: string;
+  /** Id of the mirrored gallery image, when this file was shared to both. */
+  galleryId?: string | number;
 }
 
 export interface BreadcrumbItem {

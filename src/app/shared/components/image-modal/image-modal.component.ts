@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
-import { ImageModalService } from '../../../core/services/image-modal.service';
+import { ImageModalService, LightboxImage } from '../../../core/services/image-modal.service';
+import { isVideoType } from '../../../core/utils/file-types';
 
 @Component({
   selector: 'app-image-modal',
@@ -24,6 +25,10 @@ export class ImageModalComponent {
     } else if (event.key === 'ArrowLeft') {
       this.modalService.prev();
     }
+  }
+
+  isVideo(item: LightboxImage): boolean {
+    return isVideoType(item.title, item.mimeType);
   }
 
   onBackdropClick(event: MouseEvent): void {

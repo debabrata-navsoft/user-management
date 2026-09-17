@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { concatMap, from, map } from 'rxjs';
+import { catchError, concatMap, from, map, of } from 'rxjs';
 import { ImageItem, ImageUploadPreview } from '../../core/models/image.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ImageModalService } from '../../core/services/image-modal.service';
 import { ImageService } from '../../core/services/image.service';
+import { MediaUploadService } from '../../core/services/media-upload.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
 import { formatBytes, formatDate } from '../../core/utils/formatters';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -35,6 +36,7 @@ import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.c
 })
 export class GalleryComponent implements OnInit {
   private imageService = inject(ImageService);
+  private mediaUpload = inject(MediaUploadService);
   private authService = inject(AuthService);
   private snackbar = inject(SnackbarService);
   modalService = inject(ImageModalService);
@@ -161,50 +163,30 @@ export class GalleryComponent implements OnInit {
     this.selectedPreviews.set([]);
   }
 
-  uploadAll(): void {
+  /** Runs through MediaUploadService, so an image lands in the Gallery and Drive. */
+  async uploadAll(): Promise<void> {
     const valid = this.selectedPreviews().filter((p) => !p.error && p.dataUrl);
     if (valid.length === 0) return;
 
     this.isUploading.set(true);
-    const uploadedBy = this.authService.currentUser()?.name || 'User';
-    const created: ImageItem[] = [];
-
-    from(valid)
-      .pipe(
-        concatMap(({ name, dataUrl, size, type, dimensions }) =>
-          this.imageService.uploadImage({ name, url: dataUrl, size, type, dimensions, uploadedBy }),
-        ),
-      )
-      .subscribe({
-        next: (image) => created.push(image),
-        complete: () => {
-          this.clearPreviews();
-          this.showUploader.set(false);
-          this.snackbar.success(`Successfully uploaded ${created.length} image(s)!`);
-          this.finishUpload(created);
-        },
-        error: () => {
-          // concatMap keeps order, so the first `created.length` previews landed.
-          const done = valid.slice(0, created.length);
-          this.selectedPreviews.update((curr) => curr.filter((p) => !done.includes(p)));
-
-          if (created.length > 0) {
-            this.snackbar.warning(
-              `Uploaded ${created.length} of ${valid.length} image(s). Please retry the rest.`,
-            );
-          } else {
-            this.snackbar.error('Failed to upload images. Please try again.');
-          }
-          this.finishUpload(created);
-        },
-      });
-  }
-
-  private finishUpload(created: ImageItem[]): void {
+    // The previews already hold the decoded data URL, so nothing is re-read
+    // here — the picked File objects are long detached by this point.
+    const outcome = await this.mediaUpload.uploadShared(
+      valid.map((p) => ({ name: p.name, size: p.size, type: p.type, dataUrl: p.dataUrl })),
+      { uploadedBy: this.authService.currentUser()?.name || 'User' },
+    );
+    this.mediaUpload.report(outcome, 'Gallery and Drive');
     this.isUploading.set(false);
-    if (created.length === 0) return;
-    this.activeImage.set(created[0]);
-    this.fetchImages();
+
+    // Keep only what still needs uploading so a retry cannot duplicate.
+    const landed = new Set(outcome.uploaded);
+    this.selectedPreviews.update((curr) => curr.filter((p) => !landed.has(p.name)));
+
+    if (outcome.uploaded.length > 0) {
+      this.showUploader.set(false);
+      this.activeImage.set(null);
+      this.fetchImages();
+    }
   }
 
   setActiveImage(image: ImageItem): void {

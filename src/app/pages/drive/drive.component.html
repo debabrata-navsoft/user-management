@@ -13,6 +13,7 @@
           type="file"
           multiple
           class="hidden-file-input"
+          (click)="fileInput.value = ''"
           (change)="onUploadFileInput($event)"
         />
         <app-ui-button variant="secondary" size="md" (click)="fileInput.click()">
@@ -208,21 +209,7 @@
                   >
                     <div class="folder-main">
                       <div class="folder-icon">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="22"
-                          height="22"
-                          viewBox="0 0 24 24"
-                          fill="#fbbf24"
-                          stroke="#d97706"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path
-                            d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-                          ></path>
-                        </svg>
+                        <app-file-type-icon [folder]="true" [size]="22"></app-file-type-icon>
                       </div>
                       <span class="folder-name truncate" [title]="folder.name">{{
                         folder.name
@@ -257,58 +244,15 @@
 
                       <!-- Context Dropdown Menu -->
                       @if (activeMenuNode()?.id === folder.id) {
-                        <div class="menu-backdrop" (click)="closeMenu()"></div>
-                        <div class="drive-context-menu" (click)="$event.stopPropagation()">
-                          <button
-                            type="button"
-                            class="menu-item"
-                            (click)="openRenameModal(folder); closeMenu()"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <path
-                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                              ></path>
-                              <path
-                                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                              ></path>
-                            </svg>
-                            <span>Rename</span>
-                          </button>
-                          <div class="menu-divider"></div>
-                          <button
-                            type="button"
-                            class="menu-item text-danger"
-                            (click)="confirmDelete(folder); closeMenu()"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6"></polyline>
-                              <path
-                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                              ></path>
-                            </svg>
-                            <span>Move to bin</span>
-                          </button>
-                        </div>
+                        <app-drive-item-menu
+                          [node]="folder"
+                          [dropUp]="menuDropUp()"
+                          (preview)="openPreview(folder)"
+                          (download)="downloadFile(folder)"
+                          (rename)="openRenameModal(folder)"
+                          (remove)="confirmDelete(folder)"
+                          (closed)="closeMenu()"
+                        ></app-drive-item-menu>
                       }
                     </div>
                   </div>
@@ -331,27 +275,31 @@
                     <div class="file-preview-area">
                       @if (isImageFile(file) && file.dataUrl) {
                         <img [src]="file.dataUrl" [alt]="file.name" class="file-img-thumb" />
-                      } @else {
-                        <div class="file-generic-icon">
+                      } @else if (isVideoFile(file) && file.dataUrl) {
+                        <video
+                          [src]="file.dataUrl"
+                          class="file-img-thumb"
+                          muted
+                          preload="metadata"
+                        ></video>
+                        <span class="video-play-badge" aria-hidden="true">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width="36"
-                            height="36"
+                            width="18"
+                            height="18"
                             viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#6366f1"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
+                            fill="currentColor"
                           >
-                            <path
-                              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                            ></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
+                            <polygon points="6 4 20 12 6 20"></polygon>
                           </svg>
+                        </span>
+                      } @else {
+                        <div class="file-generic-icon">
+                          <app-file-type-icon
+                            [fileName]="file.name"
+                            [mimeType]="file.mimeType || ''"
+                            [size]="36"
+                          ></app-file-type-icon>
                         </div>
                       }
                     </div>
@@ -390,101 +338,15 @@
 
                         <!-- Context Dropdown Menu -->
                         @if (activeMenuNode()?.id === file.id) {
-                          <div class="menu-backdrop" (click)="closeMenu()"></div>
-                          <div class="drive-context-menu" (click)="$event.stopPropagation()">
-                            <button
-                              type="button"
-                              class="menu-item"
-                              (click)="openPreview(file); closeMenu()"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              >
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                              </svg>
-                              <span>Preview</span>
-                            </button>
-                            <button
-                              type="button"
-                              class="menu-item"
-                              (click)="downloadFile(file); closeMenu()"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              >
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                              </svg>
-                              <span>Download</span>
-                            </button>
-                            <button
-                              type="button"
-                              class="menu-item"
-                              (click)="openRenameModal(file); closeMenu()"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              >
-                                <path
-                                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                                ></path>
-                                <path
-                                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                                ></path>
-                              </svg>
-                              <span>Rename</span>
-                            </button>
-                            <div class="menu-divider"></div>
-                            <button
-                              type="button"
-                              class="menu-item text-danger"
-                              (click)="confirmDelete(file); closeMenu()"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              >
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path
-                                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                                ></path>
-                              </svg>
-                              <span>Move to bin</span>
-                            </button>
-                          </div>
+                          <app-drive-item-menu
+                            [node]="file"
+                            [dropUp]="menuDropUp()"
+                            (preview)="openPreview(file)"
+                            (download)="downloadFile(file)"
+                            (rename)="openRenameModal(file)"
+                            (remove)="confirmDelete(file)"
+                            (closed)="closeMenu()"
+                          ></app-drive-item-menu>
                         }
                       </div>
                     </div>
@@ -536,21 +398,7 @@
                     <td class="td-name">
                       <div class="item-name-cell">
                         <div class="folder-table-icon">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="#fbbf24"
-                            stroke="#d97706"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path
-                              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-                            ></path>
-                          </svg>
+                          <app-file-type-icon [folder]="true" [size]="20"></app-file-type-icon>
                         </div>
                         <span class="row-name-text">{{ folder.name }}</span>
                       </div>
@@ -643,58 +491,15 @@
 
                         <!-- Context Dropdown Menu -->
                         @if (activeMenuNode()?.id === folder.id) {
-                          <div class="menu-backdrop" (click)="closeMenu()"></div>
-                          <div class="drive-context-menu" (click)="$event.stopPropagation()">
-                            <button
-                              type="button"
-                              class="menu-item"
-                              (click)="openRenameModal(folder); closeMenu()"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              >
-                                <path
-                                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                                ></path>
-                                <path
-                                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                                ></path>
-                              </svg>
-                              <span>Rename</span>
-                            </button>
-                            <div class="menu-divider"></div>
-                            <button
-                              type="button"
-                              class="menu-item text-danger"
-                              (click)="confirmDelete(folder); closeMenu()"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              >
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path
-                                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                                ></path>
-                              </svg>
-                              <span>Move to bin</span>
-                            </button>
-                          </div>
+                          <app-drive-item-menu
+                            [node]="folder"
+                            [dropUp]="menuDropUp()"
+                            (preview)="openPreview(folder)"
+                            (download)="downloadFile(folder)"
+                            (rename)="openRenameModal(folder)"
+                            (remove)="confirmDelete(folder)"
+                            (closed)="closeMenu()"
+                          ></app-drive-item-menu>
                         }
                       </div>
                     </td>
@@ -711,42 +516,11 @@
                     <td class="td-name">
                       <div class="item-name-cell">
                         <div class="file-table-icon" [class.is-img]="isImageFile(file)">
-                          @if (isImageFile(file)) {
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="#6366f1"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                              <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                              <polyline points="21 15 16 10 5 21"></polyline>
-                            </svg>
-                          } @else {
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="#3b82f6"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <path
-                                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                              ></path>
-                              <polyline points="14 2 14 8 20 8"></polyline>
-                              <line x1="16" y1="13" x2="8" y2="13"></line>
-                              <line x1="16" y1="17" x2="8" y2="17"></line>
-                            </svg>
-                          }
+                          <app-file-type-icon
+                            [fileName]="file.name"
+                            [mimeType]="file.mimeType || ''"
+                            [size]="20"
+                          ></app-file-type-icon>
                         </div>
                         <span class="row-name-text">{{ file.name }}</span>
                       </div>
@@ -861,101 +635,15 @@
 
                         <!-- Context Dropdown Menu -->
                         @if (activeMenuNode()?.id === file.id) {
-                          <div class="menu-backdrop" (click)="closeMenu()"></div>
-                          <div class="drive-context-menu" (click)="$event.stopPropagation()">
-                            <button
-                              type="button"
-                              class="menu-item"
-                              (click)="openPreview(file); closeMenu()"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              >
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                              </svg>
-                              <span>Preview</span>
-                            </button>
-                            <button
-                              type="button"
-                              class="menu-item"
-                              (click)="downloadFile(file); closeMenu()"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              >
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                              </svg>
-                              <span>Download</span>
-                            </button>
-                            <button
-                              type="button"
-                              class="menu-item"
-                              (click)="openRenameModal(file); closeMenu()"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              >
-                                <path
-                                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                                ></path>
-                                <path
-                                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                                ></path>
-                              </svg>
-                              <span>Rename</span>
-                            </button>
-                            <div class="menu-divider"></div>
-                            <button
-                              type="button"
-                              class="menu-item text-danger"
-                              (click)="confirmDelete(file); closeMenu()"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              >
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path
-                                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                                ></path>
-                              </svg>
-                              <span>Move to bin</span>
-                            </button>
-                          </div>
+                          <app-drive-item-menu
+                            [node]="file"
+                            [dropUp]="menuDropUp()"
+                            (preview)="openPreview(file)"
+                            (download)="downloadFile(file)"
+                            (rename)="openRenameModal(file)"
+                            (remove)="confirmDelete(file)"
+                            (closed)="closeMenu()"
+                          ></app-drive-item-menu>
                         }
                       </div>
                     </td>
@@ -1050,24 +738,17 @@
           <div class="img-preview-wrap">
             <img [src]="node.dataUrl" [alt]="node.name" class="img-full-preview" />
           </div>
+        } @else if (isVideoFile(node) && node.dataUrl) {
+          <div class="img-preview-wrap">
+            <video [src]="node.dataUrl" class="img-full-preview" controls playsinline></video>
+          </div>
         } @else {
           <div class="doc-preview-placeholder">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="64"
-              height="64"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#4f46e5"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-            </svg>
+            <app-file-type-icon
+              [fileName]="node.name"
+              [mimeType]="node.mimeType || ''"
+              [size]="64"
+            ></app-file-type-icon>
             <span class="doc-name">{{ node.name }}</span>
             <span class="doc-size"
               >{{ formatBytes(node.size) }} ({{ node.mimeType || 'Document' }})</span

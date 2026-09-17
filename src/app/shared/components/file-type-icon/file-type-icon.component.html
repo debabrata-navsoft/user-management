@@ -1,0 +1,20 @@
+@if (asset(); as src) {
+  <img
+    [src]="src"
+    [width]="size()"
+    [height]="size()"
+    [alt]="label()"
+    [title]="label()"
+    class="type-asset"
+    loading="lazy"
+  />
+} @else {
+  @let type = info();
+  <lucide-icon
+    [name]="type.icon"
+    [size]="size()"
+    [style.color]="type.color"
+    [attr.aria-label]="type.label"
+    [title]="type.label"
+  ></lucide-icon>
+}

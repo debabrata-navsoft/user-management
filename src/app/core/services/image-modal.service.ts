@@ -3,6 +3,8 @@ import { Injectable, computed, signal } from '@angular/core';
 export interface LightboxImage {
   url: string;
   title?: string;
+  /** Set for video entries so the lightbox renders a player instead of an <img>. */
+  mimeType?: string;
 }
 
 @Injectable({
