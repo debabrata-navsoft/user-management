@@ -11,7 +11,6 @@ export interface DriveNode {
   uploadedBy?: string;
   createdAt: string;
   updatedAt?: string;
-  galleryId?: string | number;
 }
 
 export interface BreadcrumbItem {

@@ -156,28 +156,20 @@ describe('DriveComponent multi-file upload', () => {
     expect(posted).toEqual(['one.pdf', 'two.zip', 'three.txt']);
   });
 
-  it('mirrors each selected image into the gallery', async () => {
+  it('keeps selected images in the drive instead of mirroring them into the gallery', async () => {
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="file"]');
     attachFiles(input, [fileOf('a.png', 'image/png'), fileOf('b.png', 'image/png')]);
     input.dispatchEvent(new Event('change'));
 
-    const mirrored: string[] = [];
+    const stored: string[] = [];
     for (let i = 0; i < 2; i++) {
       const nodeReq = await waitForPost(httpMock, `${environment.apiUrl}/nodes`);
+      stored.push(nodeReq.request.body.name);
       nodeReq.flush({ ...nodeReq.request.body });
-
-      const imgReq = await waitForPost(httpMock, `${environment.apiUrl}/images`);
-      mirrored.push(imgReq.request.body.name);
-      imgReq.flush({ id: 100 + i, ...imgReq.request.body });
-
-      const patchReq = await waitForPost(
-        httpMock,
-        `${environment.apiUrl}/nodes/${nodeReq.request.body.id}`,
-      );
-      patchReq.flush({});
     }
 
-    expect(mirrored).toEqual(['a.png', 'b.png']);
+    expect(stored).toEqual(['a.png', 'b.png']);
+    httpMock.expectNone(`${environment.apiUrl}/images`);
   });
 });
 

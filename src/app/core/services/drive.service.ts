@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
+import { Observable, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BreadcrumbItem, DriveNode, DriveStats } from '../models/drive.model';
+import { runPacedWrites } from '../utils/write-pacing';
 
 export const DRIVE_ROOT = 'root';
 
@@ -25,7 +26,11 @@ export class DriveService {
     return this.http.get<DriveNode>(`${this.baseUrl}/${id}`);
   }
 
-  createFolder(name: string, parentId: string = DRIVE_ROOT, uploadedBy: string = 'Admin'): Observable<DriveNode> {
+  createFolder(
+    name: string,
+    parentId: string = DRIVE_ROOT,
+    uploadedBy: string = 'Admin',
+  ): Observable<DriveNode> {
     const id = 'folder-' + Math.random().toString(36).substring(2, 9);
     const newFolder: DriveNode = {
       id,
@@ -38,7 +43,11 @@ export class DriveService {
     return this.http.post<DriveNode>(this.baseUrl, newFolder);
   }
 
-  uploadFile(file: File, parentId: string = DRIVE_ROOT, uploadedBy: string = 'Admin'): Promise<Observable<DriveNode>> {
+  uploadFile(
+    file: File,
+    parentId: string = DRIVE_ROOT,
+    uploadedBy: string = 'Admin',
+  ): Promise<Observable<DriveNode>> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -71,16 +80,16 @@ export class DriveService {
 
   deleteNode(id: string): Observable<void> {
     return this.getAllNodes().pipe(
-      switchMap((allNodes) => {
-        const toDeleteIds = this.getDescendantIds(id, allNodes);
-        toDeleteIds.push(id);
-
-        const deleteCalls = toDeleteIds.map((nodeId) =>
-          this.http.delete<void>(`${this.baseUrl}/${nodeId}`)
+      switchMap(async (allNodes) => {
+        const ids = [...this.getDescendantIds(id, allNodes), id];
+        const { done } = await runPacedWrites(ids, (nodeId) =>
+          this.http.delete<void>(`${this.baseUrl}/${nodeId}`),
         );
 
-        return forkJoin(deleteCalls).pipe(map(() => void 0));
-      })
+        if (done.length < ids.length) {
+          throw new Error(`Deleted ${done.length} of ${ids.length} items. Please try again.`);
+        }
+      }),
     );
   }
 
@@ -108,7 +117,7 @@ export class DriveService {
 
         crumbs.unshift({ id: DRIVE_ROOT, name: 'My Drive' });
         return crumbs;
-      })
+      }),
     );
   }
 
@@ -133,7 +142,7 @@ export class DriveService {
           totalFiles,
           totalSizeBytes,
         };
-      })
+      }),
     );
   }
 

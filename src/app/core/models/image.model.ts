@@ -9,7 +9,6 @@ export interface ImageItem {
   createdAt: string;
   tags?: string[];
   description?: string;
-  driveNodeId?: string;
 }
 
 export interface ImageUploadPreview {

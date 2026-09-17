@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
-import { catchError, concatMap, from, map, of } from 'rxjs';
 import { ImageItem, ImageUploadPreview } from '../../core/models/image.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ImageModalService } from '../../core/services/image-modal.service';
@@ -9,6 +8,7 @@ import { ImageService } from '../../core/services/image.service';
 import { MediaUploadService } from '../../core/services/media-upload.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
 import { formatBytes, formatDate } from '../../core/utils/formatters';
+import { PacedWriteOutcome, runPacedWrites } from '../../core/utils/write-pacing';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { FileDropZoneComponent } from '../../shared/components/file-drop-zone/file-drop-zone.component';
@@ -173,11 +173,11 @@ export class GalleryComponent implements OnInit {
 
     this.isUploading.set(true);
 
-    const outcome = await this.mediaUpload.uploadShared(
+    const outcome = await this.mediaUpload.uploadToGallery(
       valid.map((p) => ({ name: p.name, size: p.size, type: p.type, dataUrl: p.dataUrl })),
       { uploadedBy: this.authService.currentUser()?.name || 'User' },
     );
-    this.mediaUpload.report(outcome, 'Gallery and Drive');
+    this.mediaUpload.report(outcome, 'Gallery');
     this.isUploading.set(false);
 
     const landed = new Set(outcome.uploaded);
@@ -226,20 +226,13 @@ export class GalleryComponent implements OnInit {
     this.pendingDeletes.set([]);
   }
 
-  submitDelete(): void {
+  async submitDelete(): Promise<void> {
     const targets = this.pendingDeletes();
     if (targets.length === 0) return;
 
     this.isDeleting.set(true);
-    const removed: ImageItem[] = [];
-
-    from(targets)
-      .pipe(concatMap((img) => this.imageService.deleteImage(img.id).pipe(map(() => img))))
-      .subscribe({
-        next: (img) => removed.push(img),
-        complete: () => this.finishDelete(removed, targets.length),
-        error: () => this.finishDelete(removed, targets.length),
-      });
+    const outcome = await runPacedWrites(targets, (img) => this.imageService.deleteImage(img.id));
+    this.finishDelete(outcome, targets.length);
   }
 
   private openDeleteModal(targets: ImageItem[]): void {
@@ -248,13 +241,21 @@ export class GalleryComponent implements OnInit {
     this.isDeleteModalOpen.set(true);
   }
 
-  private finishDelete(removed: ImageItem[], total: number): void {
+  private finishDelete(outcome: PacedWriteOutcome<ImageItem>, total: number): void {
     this.isDeleting.set(false);
     this.closeDeleteModal();
+
+    const removed = outcome.done;
 
     if (removed.length === total) {
       this.snackbar.success(
         total === 1 ? `Image "${removed[0].name}" deleted.` : `Deleted ${total} images.`,
+      );
+    } else if (outcome.aborted) {
+      // The connection dropped, so the rest were never attempted.
+      this.snackbar.warning(
+        `Deleted ${removed.length} of ${total} images before the API stopped responding. ` +
+          'Check that `npm run api` is still running, then delete the rest.',
       );
     } else if (removed.length > 0) {
       this.snackbar.warning(`Deleted ${removed.length} of ${total} images. Please retry the rest.`);

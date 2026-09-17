@@ -70,9 +70,9 @@ describe('MediaUploadService', () => {
     });
   });
 
-  describe('uploadShared', () => {
+  describe('uploadToDrive', () => {
     it('uploads every item in a batch, not just the first', async () => {
-      const pending = service.uploadShared(
+      const pending = service.uploadToDrive(
         [item('a.pdf', 'application/pdf'), item('b.pdf', 'application/pdf')],
         {
           uploadedBy: 'Tester',
@@ -92,8 +92,8 @@ describe('MediaUploadService', () => {
       expect(outcome.failed).toEqual([]);
     });
 
-    it('writes an image to the drive and mirrors it into the gallery', async () => {
-      const pending = service.uploadShared([item('cat.png', 'image/png')], {
+    it('keeps an image in the drive instead of mirroring it into the gallery', async () => {
+      const pending = service.uploadToDrive([item('cat.png', 'image/png')], {
         uploadedBy: 'Tester',
         driveParentId: 'folder-abc',
       });
@@ -102,55 +102,51 @@ describe('MediaUploadService', () => {
       expect(nodeReq.request.body.parentId).toBe('folder-abc');
       nodeReq.flush({ ...nodeReq.request.body });
 
-      const imageReq = await waitForRequest(httpMock, `${environment.apiUrl}/images`);
-      expect(imageReq.request.body.driveNodeId).toBe(nodeReq.request.body.id);
-      imageReq.flush({ id: 99, ...imageReq.request.body });
-
-      const patchReq = await waitForRequest(
-        httpMock,
-        `${environment.apiUrl}/nodes/${nodeReq.request.body.id}`,
-      );
-      expect(patchReq.request.body).toEqual({ galleryId: 99 });
-      patchReq.flush({});
-
-      const outcome = await pending;
-      expect(outcome.uploaded).toEqual(['cat.png']);
-      expect(outcome.notShared).toEqual([]);
-    });
-
-    it('stores a non-image in the drive only', async () => {
-      const pending = service.uploadShared([item('notes.pdf', 'application/pdf')], {
-        uploadedBy: 'Tester',
-      });
-
-      const nodeReq = await waitForRequest(httpMock, `${environment.apiUrl}/nodes`);
-      nodeReq.flush({ ...nodeReq.request.body });
-
-      expect((await pending).uploaded).toEqual(['notes.pdf']);
+      expect((await pending).uploaded).toEqual(['cat.png']);
       httpMock.expectNone(`${environment.apiUrl}/images`);
-    });
-
-    it('keeps the drive file when the gallery mirror fails', async () => {
-      const pending = service.uploadShared([item('dog.jpg', 'image/jpeg')], {
-        uploadedBy: 'Tester',
-      });
-
-      const nodeReq = await waitForRequest(httpMock, `${environment.apiUrl}/nodes`);
-      nodeReq.flush({ ...nodeReq.request.body });
-
-      const imageReq = await waitForRequest(httpMock, `${environment.apiUrl}/images`);
-      imageReq.flush('boom', { status: 500, statusText: 'Server Error' });
-
-      const outcome = await pending;
-      expect(outcome.uploaded).toEqual(['dog.jpg']);
-      expect(outcome.notShared).toEqual(['dog.jpg']);
     });
   });
 
-  describe('readAndUpload', () => {
+  describe('uploadToGallery', () => {
+    it('writes images to the gallery without touching the drive', async () => {
+      const pending = service.uploadToGallery([item('cat.png', 'image/png')], {
+        uploadedBy: 'Tester',
+      });
+
+      const imageReq = await waitForRequest(httpMock, `${environment.apiUrl}/images`);
+      expect(imageReq.request.body).toMatchObject({
+        name: 'cat.png',
+        url: 'data:image/png;base64,AAAA',
+        uploadedBy: 'Tester',
+      });
+      imageReq.flush({ id: 99, ...imageReq.request.body });
+
+      expect((await pending).uploaded).toEqual(['cat.png']);
+      httpMock.expectNone(`${environment.apiUrl}/nodes`);
+    });
+
+    it('records a failed image without aborting the batch', async () => {
+      const pending = service.uploadToGallery(
+        [item('dog.jpg', 'image/jpeg'), item('fox.jpg', 'image/jpeg')],
+        { uploadedBy: 'Tester' },
+      );
+
+      const first = await waitForRequest(httpMock, `${environment.apiUrl}/images`);
+      first.flush('boom', { status: 500, statusText: 'Server Error' });
+
+      const second = await waitForRequest(httpMock, `${environment.apiUrl}/images`);
+      second.flush({ id: 100, ...second.request.body });
+
+      const outcome = await pending;
+      expect(outcome.uploaded).toEqual(['fox.jpg']);
+      expect(outcome.failed).toEqual(['dog.jpg']);
+    });
+  });
+
+  describe('readAndUploadToDrive', () => {
     it('folds read failures into the outcome', async () => {
       const tooBig = (environment.maxDriveUploadMb + 1) * 1024 * 1024;
-      const pending = service.readAndUpload(
+      const pending = service.readAndUploadToDrive(
         [fileOf('ok.pdf', 'application/pdf', 8), fileOf('huge.jpg', 'image/jpeg', tooBig)],
         { uploadedBy: 'Tester' },
       );

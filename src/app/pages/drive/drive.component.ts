@@ -254,7 +254,7 @@ export class DriveComponent implements OnInit {
     if (!input.files || input.files.length === 0) return;
 
     this.isLoading.set(true);
-    const outcome = await this.mediaUpload.readAndUpload(Array.from(input.files), {
+    const outcome = await this.mediaUpload.readAndUploadToDrive(Array.from(input.files), {
       uploadedBy: this.authService.currentUser()?.name || 'User',
       driveParentId: this.currentFolderId(),
     });

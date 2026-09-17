@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { DriveNode } from '../models/drive.model';
 import { ImageItem } from '../models/image.model';
-import { isImageType } from '../utils/file-types';
+import { isConnectionLost, pause } from '../utils/write-pacing';
 import { DRIVE_ROOT } from './drive.service';
 import { SnackbarService } from './snackbar.service';
 
@@ -12,7 +12,6 @@ export interface MediaUploadOutcome {
   uploaded: string[];
   tooLarge: string[];
   failed: string[];
-  notShared: string[];
 }
 
 export interface MediaUploadOptions {
@@ -71,54 +70,37 @@ export class MediaUploadService {
     return result;
   }
 
-  async uploadShared(
-    items: MediaUploadItem[],
-    opts: MediaUploadOptions,
-  ): Promise<MediaUploadOutcome> {
+  /** Drive and Gallery are separate stores: this writes `nodes` only. */
+  uploadToDrive(items: MediaUploadItem[], opts: MediaUploadOptions): Promise<MediaUploadOutcome> {
     const parentId = opts.driveParentId || DRIVE_ROOT;
-    const outcome: MediaUploadOutcome = {
-      uploaded: [],
-      tooLarge: [],
-      failed: [],
-      notShared: [],
-    };
-
-    for (const item of items) {
-      try {
-        const node = await this.createNode(item, parentId, opts.uploadedBy);
-        outcome.uploaded.push(item.name);
-
-        if (isImageType(item.name, item.type)) {
-          try {
-            await this.mirrorToGallery(node);
-          } catch {
-            outcome.notShared.push(item.name);
-          }
-        }
-      } catch {
-        outcome.failed.push(item.name);
-      }
-    }
-
-    return outcome;
+    return this.runUploads(items, (item) =>
+      this.http.post<DriveNode>(this.nodesUrl, this.nodeFor(item, parentId, opts.uploadedBy)),
+    );
   }
 
-  async readAndUpload(files: File[], opts: MediaUploadOptions): Promise<MediaUploadOutcome> {
+  /** Counterpart of {@link uploadToDrive}: this writes `images` only. */
+  uploadToGallery(items: MediaUploadItem[], opts: MediaUploadOptions): Promise<MediaUploadOutcome> {
+    return this.runUploads(items, (item) =>
+      this.http.post<ImageItem>(this.imagesUrl, this.imageFor(item, opts.uploadedBy)),
+    );
+  }
+
+  async readAndUploadToDrive(files: File[], opts: MediaUploadOptions): Promise<MediaUploadOutcome> {
     const read = await this.readFiles(files, opts.maxMb ?? this.maxUploadMb);
-    const outcome = await this.uploadShared(read.items, opts);
+    const outcome = await this.uploadToDrive(read.items, opts);
     outcome.tooLarge.push(...read.tooLarge);
     outcome.failed.push(...read.unreadable);
     return outcome;
   }
 
   report(outcome: MediaUploadOutcome, destination = 'current folder'): void {
-    const { uploaded, tooLarge, failed, notShared } = outcome;
+    const { uploaded, tooLarge, failed } = outcome;
 
     if (uploaded.length > 0) {
       this.snackbar.success(
         uploaded.length === 1
-          ? `Uploaded "${uploaded[0]}" to the Gallery and Drive.`
-          : `Uploaded ${uploaded.length} files into the ${destination}.`,
+          ? `Uploaded "${uploaded[0]}" to the ${destination}.`
+          : `Uploaded ${uploaded.length} files to the ${destination}.`,
       );
     }
     if (tooLarge.length > 0) {
@@ -131,19 +113,34 @@ export class MediaUploadService {
     if (failed.length > 0) {
       this.snackbar.error(`Failed to upload: ${failed.join(', ')}`);
     }
-    if (notShared.length > 0) {
-      this.snackbar.warning(
-        `Saved to Drive but not shared to the Gallery: ${notShared.join(', ')}`,
-      );
-    }
   }
 
-  private createNode(
-    item: MediaUploadItem,
-    parentId: string,
-    uploadedBy: string,
-  ): Promise<DriveNode> {
-    const node: DriveNode = {
+  private async runUploads(
+    items: MediaUploadItem[],
+    post: (item: MediaUploadItem) => Observable<unknown>,
+  ): Promise<MediaUploadOutcome> {
+    const outcome: MediaUploadOutcome = { uploaded: [], tooLarge: [], failed: [] };
+
+    for (const [index, item] of items.entries()) {
+      try {
+        if (index) await pause();
+        await firstValueFrom(post(item));
+        outcome.uploaded.push(item.name);
+      } catch (error) {
+        outcome.failed.push(item.name);
+        
+        if (isConnectionLost(error)) {
+          outcome.failed.push(...items.slice(index + 1).map((rest) => rest.name));
+          break;
+        }
+      }
+    }
+
+    return outcome;
+  }
+
+  private nodeFor(item: MediaUploadItem, parentId: string, uploadedBy: string): DriveNode {
+    return {
       id: 'file-' + Math.random().toString(36).substring(2, 9),
       name: item.name,
       type: 'file',
@@ -154,26 +151,17 @@ export class MediaUploadService {
       uploadedBy,
       createdAt: new Date().toISOString(),
     };
-    return firstValueFrom(this.http.post<DriveNode>(this.nodesUrl, node));
   }
 
-  private async mirrorToGallery(node: DriveNode): Promise<ImageItem> {
-    const image = await firstValueFrom(
-      this.http.post<ImageItem>(this.imagesUrl, {
-        name: node.name,
-        url: node.dataUrl,
-        size: node.size || 0,
-        type: node.mimeType || 'image/*',
-        uploadedBy: node.uploadedBy || 'User',
-        createdAt: node.createdAt,
-        driveNodeId: node.id,
-      }),
-    );
-
-    await firstValueFrom(
-      this.http.patch<DriveNode>(`${this.nodesUrl}/${node.id}`, { galleryId: image.id }),
-    );
-    return image;
+  private imageFor(item: MediaUploadItem, uploadedBy: string): Omit<ImageItem, 'id'> {
+    return {
+      name: item.name,
+      url: item.dataUrl,
+      size: item.size,
+      type: item.type,
+      uploadedBy,
+      createdAt: new Date().toISOString(),
+    };
   }
 
   private readAsDataUrl(file: File): Promise<string> {
