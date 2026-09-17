@@ -27,9 +27,29 @@
     gap: 8px !important;
   }
 
+  /* Title and badge share one row. The badge is what looked broken before: it
+     was being allowed to wrap, so "22 Folders, 43 Files" broke across two
+     lines. Pinning it to one line and stopping it from shrinking means the
+     title absorbs the pressure instead — it wraps, which reads fine, and
+     min-width:0 is what permits that rather than forcing the row wider. */
+  .page-header-container .title-row {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
   .page-header-container .page-title {
-    font-size: 21px !important;
+    font-size: 19px !important;
     line-height: 1.25 !important;
+    min-width: 0 !important;
+  }
+
+  .page-header-container .header-badge {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    font-size: 11px !important;
+    padding: 2px 8px !important;
   }
 
   /* The subtitle is the least useful thing competing with the table for
@@ -164,26 +184,48 @@
   .drive-page {
     height: 100% !important;
     margin-bottom: 0 !important;
+    gap: 8px !important;
   }
 
+  /* The scroll area is the only part that should move; it has to be able to
+     shrink to its container for that, hence min-height: 0. */
+  .drive-page .drive-scrollable-content {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Breadcrumbs take the first row; search and the grid/list switch share the
+     second. Stacking all three cost a row of folders for no benefit — the
+     switch is two icons and never needed a line of its own. */
   .drive-toolbar-card {
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 10px !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
   }
 
-  .drive-toolbar-card .toolbar-right {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-
-  .drive-toolbar-card .drive-search {
+  .drive-toolbar-card .toolbar-left {
     width: 100% !important;
   }
 
-  /* Keep the grid/list switch on its own row, centred, not stretched. */
+  .drive-toolbar-card .toolbar-right {
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+  }
+
+  /* min-width:0 is what lets the search shrink past its base width instead of
+     pushing the switch off the edge. */
+  .drive-toolbar-card .drive-search {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
   .drive-toolbar-card .view-toggle-group {
-    align-self: flex-end !important;
+    flex: 0 0 auto !important;
+    align-self: auto !important;
   }
 
   .folders-grid {
@@ -200,10 +242,18 @@
     grid-template-columns: 1fr !important;
   }
 
-  /* The hover lens has no meaning on touch, and the floating zoom panel would
-     overlap the image. Tapping through to the lightbox is the path here. */
+  /* The zoom panel is parked to the right of the image on desktop
+     (left: 100% + 20px), which on a phone puts it completely off-screen — the
+     lens tracked your finger but the magnified view was never visible.
+     Overlay it on the image instead: drag to inspect, lift to see the photo
+     again. */
   .zoom-result-window {
-    display: none !important;
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 120 !important;
   }
 
   .gallery-grid {
@@ -225,6 +275,15 @@
   .inspector-controls {
     flex-wrap: wrap !important;
     gap: 8px !important;
+  }
+
+  /* These wrap below the card title, where nothing pushes them anywhere, so
+     they end up on the left. Send them to the right edge of their own line. */
+  .inspector-controls,
+  .gallery-header-actions,
+  .queue-actions {
+    margin-left: auto !important;
+    justify-content: flex-end !important;
   }
 }
 
@@ -270,6 +329,15 @@
 
   .page-content {
     padding: 20px !important;
+  }
+
+  /* When the title and subtitle are long enough to claim the whole first line
+     — Drive is — the action buttons wrap below and, left to themselves, stack
+     up on the left. `margin-left: auto` pushes them to the right edge on that
+     wrapped line, so they sit where they do when everything fits on one row. */
+  .page-header-container .header-actions {
+    margin-left: auto !important;
+    justify-content: flex-end !important;
   }
 
   .data-table-toolbar .search-container {
