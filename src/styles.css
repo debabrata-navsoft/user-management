@@ -100,6 +100,17 @@ img {
   display: block;
 }
 
+/* Lucide draws its <svg> inside its own host element. Left inline, that host
+   sits on the text baseline and carries descender space, so the glyph rides
+   high against any label beside it and the box measures taller than the icon.
+   Every consumer wants the same thing: a box the exact size of the artwork. */
+lucide-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;

@@ -223,24 +223,14 @@
                       (click)="$event.stopPropagation()"
                     >
                       <button
-                        type="button"
-                        class="action-icon-btn more-dots-btn"
+                        appIconButton
+                        class="more-dots-btn"
+                        icon="ellipsis-vertical"
+                        [size]="16"
+                        label="More actions"
                         [class.active]="activeMenuNode()?.id === folder.id"
                         (click)="toggleMenu(folder, $event)"
-                        title="More actions"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <circle cx="12" cy="5" r="2"></circle>
-                          <circle cx="12" cy="12" r="2"></circle>
-                          <circle cx="12" cy="19" r="2"></circle>
-                        </svg>
-                      </button>
+                      ></button>
 
                       <!-- Context Dropdown Menu -->
                       @if (activeMenuNode()?.id === folder.id) {
@@ -317,24 +307,14 @@
                         (click)="$event.stopPropagation()"
                       >
                         <button
-                          type="button"
-                          class="action-icon-btn more-dots-btn"
+                          appIconButton
+                          class="more-dots-btn"
+                          icon="ellipsis-vertical"
+                          [size]="16"
+                          label="More actions"
                           [class.active]="activeMenuNode()?.id === file.id"
                           (click)="toggleMenu(file, $event)"
-                          title="More actions"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <circle cx="12" cy="5" r="2"></circle>
-                            <circle cx="12" cy="12" r="2"></circle>
-                            <circle cx="12" cy="19" r="2"></circle>
-                          </svg>
-                        </button>
+                        ></button>
 
                         <!-- Context Dropdown Menu -->
                         @if (activeMenuNode()?.id === file.id) {
@@ -362,24 +342,10 @@
               <thead>
                 <tr>
                   <th class="th-name">
-                    <div class="th-sort-wrapper">
+                    Name
+                    <!-- <div class="th-sort-wrapper">
                       <span>Name</span>
-                      <!-- <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#4f46e5"
-                        stroke-width="2.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="sort-arrow"
-                      >
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                      </svg> -->
-                    </div>
+                    </div> -->
                   </th>
                   <th class="th-owner">Owner</th>
                   <th class="th-date">Date modified</th>
@@ -419,75 +385,32 @@
                         <!-- Hover Quick Actions (visible on row hover) -->
                         <div class="hover-quick-actions">
                           <button
-                            type="button"
-                            class="action-icon-btn"
+                            appIconButton
+                            icon="square-pen"
+                            [size]="14"
+                            label="Rename"
                             (click)="openRenameModal(folder)"
-                            title="Rename"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <path
-                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                              ></path>
-                              <path
-                                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                              ></path>
-                            </svg>
-                          </button>
+                          ></button>
                           <button
-                            type="button"
-                            class="action-icon-btn danger"
+                            appIconButton
+                            icon="trash-2"
+                            [size]="14"
+                            label="Delete"
+                            variant="danger"
                             (click)="confirmDelete(folder)"
-                            title="Delete"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6"></polyline>
-                              <path
-                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                              ></path>
-                            </svg>
-                          </button>
+                          ></button>
                         </div>
 
                         <!-- Three Dots Button (Always visible) -->
                         <button
-                          type="button"
-                          class="action-icon-btn more-dots-btn"
+                          appIconButton
+                          class="more-dots-btn"
+                          icon="ellipsis-vertical"
+                          [size]="16"
+                          label="More actions"
                           [class.active]="activeMenuNode()?.id === folder.id"
                           (click)="toggleMenu(folder, $event)"
-                          title="More actions"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <circle cx="12" cy="5" r="2"></circle>
-                            <circle cx="12" cy="12" r="2"></circle>
-                            <circle cx="12" cy="19" r="2"></circle>
-                          </svg>
-                        </button>
+                        ></button>
 
                         <!-- Context Dropdown Menu -->
                         @if (activeMenuNode()?.id === folder.id) {
@@ -541,97 +464,39 @@
                         <!-- Hover Quick Actions (visible on row hover) -->
                         <div class="hover-quick-actions">
                           <button
-                            type="button"
-                            class="action-icon-btn"
+                            appIconButton
+                            icon="download"
+                            [size]="14"
+                            label="Download"
                             (click)="downloadFile(file)"
-                            title="Download"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                              <polyline points="7 10 12 15 17 10"></polyline>
-                              <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                          </button>
+                          ></button>
                           <button
-                            type="button"
-                            class="action-icon-btn"
+                            appIconButton
+                            icon="square-pen"
+                            [size]="14"
+                            label="Rename"
                             (click)="openRenameModal(file)"
-                            title="Rename"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <path
-                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                              ></path>
-                              <path
-                                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                              ></path>
-                            </svg>
-                          </button>
+                          ></button>
                           <button
-                            type="button"
-                            class="action-icon-btn danger"
+                            appIconButton
+                            icon="trash-2"
+                            [size]="14"
+                            label="Delete"
+                            variant="danger"
                             (click)="confirmDelete(file)"
-                            title="Delete"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6"></polyline>
-                              <path
-                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                              ></path>
-                            </svg>
-                          </button>
+                          ></button>
                         </div>
 
                         <!-- Three Dots Button (Always visible) -->
                         <button
-                          type="button"
-                          class="action-icon-btn more-dots-btn"
+                          appIconButton
+                          class="more-dots-btn"
+                          icon="ellipsis-vertical"
+                          [size]="16"
+                          label="More actions"
                           [class.active]="activeMenuNode()?.id === file.id"
                           (click)="toggleMenu(file, $event)"
-                          title="More actions"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <circle cx="12" cy="5" r="2"></circle>
-                            <circle cx="12" cy="12" r="2"></circle>
-                            <circle cx="12" cy="19" r="2"></circle>
-                          </svg>
-                        </button>
+                        ></button>
 
                         <!-- Context Dropdown Menu -->
                         @if (activeMenuNode()?.id === file.id) {

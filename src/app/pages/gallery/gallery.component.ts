@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 import { catchError, concatMap, from, map, of } from 'rxjs';
 import { ImageItem, ImageUploadPreview } from '../../core/models/image.model';
 import { AuthService } from '../../core/services/auth.service';
@@ -30,6 +31,7 @@ import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.c
     ConfirmDialogComponent,
     EmptyStateComponent,
     LoaderComponent,
+    LucideAngularModule,
   ],
   templateUrl: './gallery.component.html',
   styleUrl: './gallery.component.css',
@@ -60,6 +62,8 @@ export class GalleryComponent implements OnInit {
   formatDate = formatDate;
 
   maxVisibleThumbnails = 8;
+
+  magnifierZoom = 6;
 
   validPreviewsCount = computed(() => {
     return this.selectedPreviews().filter((p) => !p.error && p.dataUrl).length;
@@ -163,14 +167,12 @@ export class GalleryComponent implements OnInit {
     this.selectedPreviews.set([]);
   }
 
-  /** Runs through MediaUploadService, so an image lands in the Gallery and Drive. */
   async uploadAll(): Promise<void> {
     const valid = this.selectedPreviews().filter((p) => !p.error && p.dataUrl);
     if (valid.length === 0) return;
 
     this.isUploading.set(true);
-    // The previews already hold the decoded data URL, so nothing is re-read
-    // here — the picked File objects are long detached by this point.
+
     const outcome = await this.mediaUpload.uploadShared(
       valid.map((p) => ({ name: p.name, size: p.size, type: p.type, dataUrl: p.dataUrl })),
       { uploadedBy: this.authService.currentUser()?.name || 'User' },
@@ -178,7 +180,6 @@ export class GalleryComponent implements OnInit {
     this.mediaUpload.report(outcome, 'Gallery and Drive');
     this.isUploading.set(false);
 
-    // Keep only what still needs uploading so a retry cannot duplicate.
     const landed = new Set(outcome.uploaded);
     this.selectedPreviews.update((curr) => curr.filter((p) => !landed.has(p.name)));
 
@@ -232,7 +233,6 @@ export class GalleryComponent implements OnInit {
     this.isDeleting.set(true);
     const removed: ImageItem[] = [];
 
-    // Serialised like uploadAll(), so a failure part-way leaves a known state.
     from(targets)
       .pipe(concatMap((img) => this.imageService.deleteImage(img.id).pipe(map(() => img))))
       .subscribe({
@@ -277,7 +277,6 @@ export class GalleryComponent implements OnInit {
     });
   }
 
-  /** Select every filtered image, or deselect them when they are all selected. */
   toggleSelectAll(): void {
     const selectAll = !this.allFilteredSelected();
     this.editSelection((ids) => {
@@ -300,7 +299,6 @@ export class GalleryComponent implements OnInit {
     });
   }
 
-  /** Drop deleted ids from the selection and clear the inspector if it showed one. */
   private forgetImages(ids: (string | number)[]): void {
     this.editSelection((set) => ids.forEach((id) => set.delete(id)));
 

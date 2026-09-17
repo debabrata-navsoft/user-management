@@ -5,7 +5,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
-import { LucideAngularModule, Search, X } from 'lucide-angular';
+import {
+  AlertCircle,
+  Download,
+  LucideAngularModule,
+  Maximize2,
+  Plus,
+  Search,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-angular';
 import { ImageItem } from '../../core/models/image.model';
 import { ImageService } from '../../core/services/image.service';
 import { GalleryComponent } from './gallery.component';
@@ -44,7 +54,18 @@ describe('GalleryComponent selection', () => {
         provideHttpClientTesting(),
         provideRouter([]),
         provideNoopAnimations(),
-        importProvidersFrom(LucideAngularModule.pick({ Search, X })),
+        importProvidersFrom(
+          LucideAngularModule.pick({
+            AlertCircle,
+            Download,
+            Maximize2,
+            Plus,
+            Search,
+            Trash2,
+            Upload,
+            X,
+          }),
+        ),
         { provide: ImageService, useValue: { getImages: () => of(mockImages) } },
       ],
     }).compileComponents();

@@ -10,7 +10,6 @@
   cursor: default;
 }
 
-/* Flipped above the trigger when there is no room below. */
 .drive-context-menu.drop-up {
   top: auto;
   bottom: calc(100% + 6px);

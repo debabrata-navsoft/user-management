@@ -14,16 +14,13 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 import { FileTypeIconComponent } from '../../shared/components/file-type-icon/file-type-icon.component';
 import { DriveItemMenuComponent } from './drive-item-menu/drive-item-menu.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { IconButtonComponent } from '../../shared/components/icon-button/icon-button.component';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SearchInputComponent } from '../../shared/components/search-input/search-input.component';
 import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.component';
 
-/**
- * Worst-case height of the row/card context menu (four items plus padding).
- * Used to decide whether it opens downwards or flips above the trigger.
- */
 const CONTEXT_MENU_HEIGHT_PX = 200;
 
 @Component({
@@ -39,6 +36,7 @@ const CONTEXT_MENU_HEIGHT_PX = 200;
     DriveItemMenuComponent,
     EmptyStateComponent,
     FileTypeIconComponent,
+    IconButtonComponent,
     LoaderComponent,
   ],
   templateUrl: './drive.component.html',
@@ -64,7 +62,6 @@ export class DriveComponent implements OnInit {
   viewMode = signal<'grid' | 'list'>('grid');
   searchQuery = signal<string>('');
 
-  // Modals
   isCreateFolderOpen = signal<boolean>(false);
   newFolderName = signal<string>('');
 
@@ -78,9 +75,7 @@ export class DriveComponent implements OnInit {
   isDeleteOpen = signal<boolean>(false);
   nodeToDelete = signal<DriveNode | null>(null);
 
-  // Three-dot row context menu
   activeMenuNode = signal<DriveNode | null>(null);
-  /** True when the open context menu has to render above its trigger. */
   menuDropUp = signal<boolean>(false);
 
   formatBytes = formatBytes;
@@ -191,8 +186,6 @@ export class DriveComponent implements OnInit {
       return;
     }
 
-    // Open upwards when the menu would not fit below the trigger, so rows near
-    // the bottom of the viewport stay fully visible.
     const trigger = (event.currentTarget as HTMLElement | null)?.getBoundingClientRect();
     const spaceBelow = trigger ? window.innerHeight - trigger.bottom : Number.POSITIVE_INFINITY;
     this.menuDropUp.set(spaceBelow < CONTEXT_MENU_HEIGHT_PX);
@@ -212,12 +205,10 @@ export class DriveComponent implements OnInit {
     return isVideoType(node.name, node.mimeType);
   }
 
-  /** Images and videos both play in the lightbox. */
   isPlayableFile(node: DriveNode): boolean {
     return this.isImageFile(node) || this.isVideoFile(node);
   }
 
-  // Create Folder
   openCreateFolderModal(): void {
     this.newFolderName.set('');
     this.isCreateFolderOpen.set(true);
@@ -256,13 +247,10 @@ export class DriveComponent implements OnInit {
     });
   }
 
-  // Upload Files
   async onUploadFileInput(e: Event): Promise<void> {
     const input = e.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
-    // The input is reset on click, not here: clearing `value` detaches the File
-    // objects, and they still have to be readable while the upload runs.
     this.isLoading.set(true);
     const outcome = await this.mediaUpload.readAndUpload(Array.from(input.files), {
       uploadedBy: this.authService.currentUser()?.name || 'User',
@@ -274,7 +262,6 @@ export class DriveComponent implements OnInit {
     this.loadStats();
   }
 
-  // Rename
   openRenameModal(node: DriveNode): void {
     this.nodeToRename.set(node);
     this.renameValue.set(node.name);
@@ -310,7 +297,6 @@ export class DriveComponent implements OnInit {
     });
   }
 
-  // Preview
   openPreview(node: DriveNode): void {
     if (node.type === 'folder') {
       this.navigateToFolder(node.id);

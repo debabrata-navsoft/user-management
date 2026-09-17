@@ -1,5 +1,4 @@
 <div class="magnifier-container">
-  <!-- Main Thumbnail Box (Compact Preview) -->
   <div
     #imageWrapper
     class="main-image-wrapper"
@@ -25,21 +24,7 @@
 
     @if (hasError()) {
       <div class="img-error-overlay">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
+        <lucide-icon name="alert-circle" [size]="32"></lucide-icon>
         <span>Failed to load image</span>
       </div>
     }
@@ -47,22 +32,7 @@
     <!-- Click To Expand Badge Overlay -->
     @if (!isLoading() && !hasError()) {
       <div class="expand-hint-badge">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="13"
-          height="13"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="15 3 21 3 21 9"></polyline>
-          <polyline points="9 21 3 21 3 15"></polyline>
-          <line x1="21" y1="3" x2="14" y2="10"></line>
-          <line x1="3" y1="21" x2="10" y2="14"></line>
-        </svg>
+        <lucide-icon name="maximize-2" [size]="13" [strokeWidth]="2.5"></lucide-icon>
         <span>Click to expand</span>
       </div>
     }

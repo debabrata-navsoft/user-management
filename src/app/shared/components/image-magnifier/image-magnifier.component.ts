@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, ViewChild, inject, input, signal } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 import { ImageModalService, LightboxImage } from '../../../core/services/image-modal.service';
 
 @Component({
   selector: 'app-image-magnifier',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   templateUrl: './image-magnifier.component.html',
   styleUrl: './image-magnifier.component.css',
 })
@@ -16,7 +17,7 @@ export class ImageMagnifierComponent {
 
   imageUrl = input.required<string>();
   alt = input<string>('Zoom Preview');
-  zoomLevel = input<number>(2.8);
+  zoomLevel = input<number>(6);
   galleryImages = input<(string | LightboxImage)[]>([]);
   currentIndex = input<number>(0);
 

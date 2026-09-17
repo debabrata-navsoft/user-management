@@ -1,0 +1,33 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--text-dim, #94a3b8);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+:host(:hover) {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+:host(.danger:hover) {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+:host([disabled]) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+:host([disabled]:hover) {
+  background: transparent;
+  color: var(--text-dim, #94a3b8);
+}
