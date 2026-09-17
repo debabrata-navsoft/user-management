@@ -8,32 +8,31 @@
     >
       <div actions>
         <!-- Upload File Button -->
-        <label class="btn-file-upload">
-          <input
-            type="file"
-            multiple
-            class="hidden-file-input"
-            (change)="onUploadFileInput($event)"
-          />
-          <span class="btn-span">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            Upload Files
-          </span>
-        </label>
+        <input
+          #fileInput
+          type="file"
+          multiple
+          class="hidden-file-input"
+          (change)="onUploadFileInput($event)"
+        />
+        <app-ui-button variant="secondary" size="md" (click)="fileInput.click()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Upload Files
+        </app-ui-button>
 
         <!-- New Folder Button -->
         <app-ui-button variant="primary" size="md" (click)="openCreateFolderModal()">

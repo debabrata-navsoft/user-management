@@ -17,6 +17,17 @@
   cursor: not-allowed;
 }
 
+/* Projected icons must not squash when a label is long or space is tight. */
+.btn > svg,
+.btn > img {
+  flex-shrink: 0;
+}
+
+/* One press effect for every variant, instead of per-variant transforms. */
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
 .btn-sm {
   padding: 6px 12px;
   font-size: 13px;
@@ -47,10 +58,6 @@
 .btn-primary:hover:not(:disabled) {
   background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
   box-shadow: 0 4px 14px rgba(79, 70, 229, 0.38);
-  /* transform: translateY(-1px); */
-}
-.btn-primary:active:not(:disabled) {
-  transform: translateY(0);
 }
 
 .btn-secondary {
@@ -70,7 +77,7 @@
 }
 .btn-danger:hover:not(:disabled) {
   background: #dc2626;
-  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
 }
 
 .btn-outline {
