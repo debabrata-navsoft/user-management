@@ -105,82 +105,83 @@
     size="md"
     (close)="closeAddModal()"
   >
-    <form [formGroup]="addForm" class="user-modal-form">
-      <div class="form-group">
-        <label for="addName">Full Name *</label>
+    <form [formGroup]="addForm" class="user-modal-form" autocomplete="off">
+      <app-form-field label="Full Name" [control]="addForm.controls['name']" [required]="true">
         <input
           id="addName"
           type="text"
           formControlName="name"
           placeholder="Jane Doe"
           class="form-control"
+          autocomplete="off"
         />
-      </div>
+      </app-form-field>
 
-      <div class="form-group">
-        <label for="addEmail">Email Address *</label>
+      <app-form-field label="Email Address" [control]="addForm.controls['email']" [required]="true">
         <input
           id="addEmail"
           type="email"
           formControlName="email"
           placeholder="jane.doe@example.com"
           class="form-control"
+          autocomplete="off"
         />
-      </div>
+      </app-form-field>
 
       <div class="form-row">
-        <div class="form-group">
-          <label for="addRole">Role *</label>
+        <app-form-field label="Role" [control]="addForm.controls['role']" [required]="true">
           <select id="addRole" formControlName="role" class="form-control">
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
             <option value="employee">Employee</option>
           </select>
-        </div>
+        </app-form-field>
 
-        <div class="form-group">
-          <label for="addStatus">Status *</label>
+        <app-form-field label="Status" [control]="addForm.controls['status']" [required]="true">
           <select id="addStatus" formControlName="status" class="form-control">
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-        </div>
+        </app-form-field>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="addDept">Department</label>
-          <select id="addDept" formControlName="department" class="form-control">
-            <option value="Engineering">Engineering</option>
-            <option value="Sales">Sales</option>
-            <option value="Design">Design</option>
-            <option value="Support">Support</option>
-            <option value="Finance">Finance</option>
-          </select>
-        </div>
+      <app-form-field label="Department" [control]="addForm.controls['department']">
+        <select id="addDept" formControlName="department" class="form-control">
+          <option value="Engineering">Engineering</option>
+          <option value="Sales">Sales</option>
+          <option value="Design">Design</option>
+          <option value="Support">Support</option>
+          <option value="Finance">Finance</option>
+        </select>
+      </app-form-field>
 
-        <div class="form-group">
-          <label for="addPhone">Phone Number</label>
+      <!-- Phone gets its own row: the code picker plus the number needs the width. -->
+      <app-form-field label="Phone Number" [control]="addForm.controls['phone']">
+        <app-phone-input inputId="addPhone" formControlName="phone"></app-phone-input>
+      </app-form-field>
+
+      <app-form-field
+        label="Initial Password"
+        [control]="addForm.controls['password']"
+        [required]="true"
+      >
+        <div class="password-wrapper">
           <input
-            id="addPhone"
-            type="tel"
-            formControlName="phone"
-            placeholder="+1 555-0123"
+            id="addPassword"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
             class="form-control"
+            autocomplete="new-password"
           />
+          <button
+            type="button"
+            class="toggle-pwd-btn"
+            (click)="toggleShowPassword()"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          >
+            <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
+          </button>
         </div>
-      </div>
-
-      <div class="form-group">
-        <label for="addPassword">Initial Password *</label>
-        <input
-          id="addPassword"
-          type="password"
-          formControlName="password"
-          placeholder="••••••••"
-          class="form-control"
-        />
-      </div>
+      </app-form-field>
     </form>
 
     <div footer>
@@ -203,53 +204,62 @@
     size="md"
     (close)="closeEditModal()"
   >
-    <form [formGroup]="editForm" class="user-modal-form">
-      <div class="form-group">
-        <label for="editName">Full Name *</label>
-        <input id="editName" type="text" formControlName="name" class="form-control" />
-      </div>
+    <form [formGroup]="editForm" class="user-modal-form" autocomplete="off">
+      <app-form-field label="Full Name" [control]="editForm.controls['name']" [required]="true">
+        <input
+          id="editName"
+          type="text"
+          formControlName="name"
+          class="form-control"
+          autocomplete="off"
+        />
+      </app-form-field>
 
-      <div class="form-group">
-        <label for="editEmail">Email Address *</label>
-        <input id="editEmail" type="email" formControlName="email" class="form-control" />
-      </div>
+      <app-form-field
+        label="Email Address"
+        [control]="editForm.controls['email']"
+        [required]="true"
+      >
+        <input
+          id="editEmail"
+          type="email"
+          formControlName="email"
+          class="form-control"
+          autocomplete="off"
+        />
+      </app-form-field>
 
       <div class="form-row">
-        <div class="form-group">
-          <label for="editRole">Role *</label>
+        <app-form-field label="Role" [control]="editForm.controls['role']" [required]="true">
           <select id="editRole" formControlName="role" class="form-control">
             <option value="admin">Admin</option>
             <option value="manager">Manager</option>
             <option value="employee">Employee</option>
           </select>
-        </div>
+        </app-form-field>
 
-        <div class="form-group">
-          <label for="editStatus">Status *</label>
+        <app-form-field label="Status" [control]="editForm.controls['status']" [required]="true">
           <select id="editStatus" formControlName="status" class="form-control">
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-        </div>
+        </app-form-field>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="editDept">Department</label>
-          <select id="editDept" formControlName="department" class="form-control">
-            <option value="Engineering">Engineering</option>
-            <option value="Sales">Sales</option>
-            <option value="Design">Design</option>
-            <option value="Support">Support</option>
-            <option value="Finance">Finance</option>
-          </select>
-        </div>
+      <app-form-field label="Department" [control]="editForm.controls['department']">
+        <select id="editDept" formControlName="department" class="form-control">
+          <option value="Engineering">Engineering</option>
+          <option value="Sales">Sales</option>
+          <option value="Design">Design</option>
+          <option value="Support">Support</option>
+          <option value="Finance">Finance</option>
+        </select>
+      </app-form-field>
 
-        <div class="form-group">
-          <label for="editPhone">Phone Number</label>
-          <input id="editPhone" type="tel" formControlName="phone" class="form-control" />
-        </div>
-      </div>
+      <!-- Phone gets its own row: the code picker plus the number needs the width. -->
+      <app-form-field label="Phone Number" [control]="editForm.controls['phone']">
+        <app-phone-input inputId="editPhone" formControlName="phone"></app-phone-input>
+      </app-form-field>
     </form>
 
     <div footer>

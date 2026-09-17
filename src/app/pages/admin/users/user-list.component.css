@@ -157,6 +157,54 @@
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
+/* Password field with a show/hide toggle. */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper .form-control {
+  padding-right: 42px;
+}
+
+.toggle-pwd-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-xs);
+  transition: color 0.15s ease;
+}
+
+.toggle-pwd-btn:hover {
+  color: var(--text);
+}
+
+/* Invalid fields keep the red outline, including while focused. */
+.form-control.is-invalid {
+  border-color: var(--danger);
+}
+
+.form-control.is-invalid:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.error-msg {
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--danger);
+}
+
 /* View Details Modal */
 .view-user-container {
   display: flex;

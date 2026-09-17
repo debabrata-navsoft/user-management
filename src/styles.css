@@ -116,6 +116,126 @@ img {
   display: contents;
 }
 
+/* ---------------------------------------------------------------- Forms
+   Shared field styling, used by <app-form-field> and any plain markup that
+   follows the same .form-group / .form-control convention. Pages that still
+   define their own copies keep winning, since Angular's scoped selectors are
+   more specific than these. */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.form-control {
+  width: 100%;
+  height: 42px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Invalid fields keep the red outline, including while focused. The class sits
+   on <app-form-field>, which owns the control it projects. */
+.form-control.is-invalid,
+app-form-field.is-invalid .form-control {
+  border-color: var(--danger);
+}
+
+.form-control.is-invalid:focus,
+app-form-field.is-invalid .form-control:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.error-msg {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--danger);
+}
+
+/* Chrome repaints autofilled inputs with its own blue background and text
+   colour, which overrides the field styling. Paint it back. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+  box-shadow: 0 0 0 1000px var(--surface) inset;
+  /* Outlast the browser's own background animation. */
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+.required-mark {
+  color: var(--danger);
+}
+
+/* Country picker panel for <app-phone-input>. It renders in the CDK overlay,
+   outside the component, so the component's scoped styles cannot reach it.
+   Material sizes the panel to the trigger, which is a narrow "Code" field —
+   without a floor, every country name wraps over several lines. */
+.country-panel.mat-mdc-select-panel {
+  min-width: 320px !important;
+  max-width: 380px;
+  /* Material pads the panel 8px top/bottom. The search box is sticky, so that
+     top padding leaves a strip where scrolled options show above it. The search
+     box supplies its own padding instead. */
+  padding-top: 0;
+}
+
+.country-panel .mat-mdc-option {
+  min-height: 40px;
+}
+
+.country-panel .mat-mdc-option .mdc-list-item__primary-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.country-panel .opt-flag {
+  flex-shrink: 0;
+}
+
+.country-panel .opt-dial {
+  flex-shrink: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.country-panel .opt-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ---------------------------------------------------------------- Utilities */
 .truncate {
   overflow: hidden;

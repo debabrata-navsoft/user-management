@@ -395,7 +395,7 @@
       "role": "employee",
       "phone": "+91 9200484452",
       "department": "Finance",
-      "status": "active",
+      "status": "inactive",
       "createdAt": "2026-02-06T10:30:00.000Z"
     },
     {
@@ -427,7 +427,7 @@
       "password": "Demo@123",
       "role": "employee",
       "phone": "+91 9200524823",
-      "department": "Engineering",
+      "department": "Sales",
       "status": "inactive",
       "createdAt": "2026-02-09T10:30:00.000Z"
     },

@@ -6,12 +6,22 @@ import { AuthService } from '../../../core/services/auth.service';
 import { SnackbarService } from '../../../core/services/snackbar.service';
 import { AppValidators } from '../../../core/utils/validators';
 import { LucideAngularModule } from 'lucide-angular';
+import { FormFieldComponent } from '../../../shared/components/form-field/form-field.component';
+import { PhoneInputComponent } from '../../../shared/components/phone-input/phone-input.component';
 import { UiButtonComponent } from '../../../shared/components/ui-button/ui-button.component';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, UiButtonComponent, LucideAngularModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    UiButtonComponent,
+    FormFieldComponent,
+    PhoneInputComponent,
+    LucideAngularModule,
+  ],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css',
 })
@@ -26,7 +36,7 @@ export class SignupComponent {
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       department: ['Engineering'],
-      phone: [''],
+      phone: ['', [AppValidators.phoneNumber()]],
       password: ['', [Validators.required, AppValidators.passwordStrength()]],
       confirmPassword: ['', [Validators.required]],
     },

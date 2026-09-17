@@ -7,11 +7,14 @@ import { Role, User, UserStatus } from '../../../core/models/user.model';
 import { SnackbarService } from '../../../core/services/snackbar.service';
 import { UserService } from '../../../core/services/user.service';
 import { formatDate, getInitials } from '../../../core/utils/formatters';
+import { AppValidators } from '../../../core/utils/validators';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { PhoneInputComponent } from '../../../shared/components/phone-input/phone-input.component';
+import { FormFieldComponent } from '../../../shared/components/form-field/form-field.component';
 import { UiButtonComponent } from '../../../shared/components/ui-button/ui-button.component';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -27,6 +30,8 @@ import { LucideAngularModule } from 'lucide-angular';
     BadgeComponent,
     ModalComponent,
     ConfirmDialogComponent,
+    FormFieldComponent,
+    PhoneInputComponent,
     LucideAngularModule,
   ],
   templateUrl: './user-list.component.html',
@@ -40,6 +45,7 @@ export class UserListComponent implements OnInit {
   isLoading = signal<boolean>(true);
   isSubmitting = signal<boolean>(false);
   isDeleting = signal<boolean>(false);
+  showPassword = signal<boolean>(false);
 
   users = signal<User[]>([]);
   allUsers = signal<User[]>([]);
@@ -161,22 +167,26 @@ export class UserListComponent implements OnInit {
   addForm: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
-    role: ['user', [Validators.required]],
+    role: ['employee', [Validators.required]],
     department: ['Engineering'],
-    phone: [''],
+    phone: ['', [AppValidators.phoneNumber()]],
     status: ['active', [Validators.required]],
-    password: ['Demo@123', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
   editForm: FormGroup = this.fb.group({
     id: [''],
     name: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
-    role: ['user', [Validators.required]],
+    role: ['employee', [Validators.required]],
     department: ['Engineering'],
-    phone: [''],
+    phone: ['', [AppValidators.phoneNumber()]],
     status: ['active', [Validators.required]],
   });
+
+  toggleShowPassword(): void {
+    this.showPassword.update((v) => !v);
+  }
 
   ngOnInit(): void {
     this.loadAllUsersForCounts();
@@ -243,12 +253,13 @@ export class UserListComponent implements OnInit {
     this.addForm.reset({
       name: '',
       email: '',
-      role: 'user',
+      role: 'employee',
       department: 'Engineering',
       phone: '',
       status: 'active',
-      password: 'Demo@123',
+      password: '',
     });
+    this.showPassword.set(false);
     this.isAddModalOpen.set(true);
   }
 
@@ -259,7 +270,7 @@ export class UserListComponent implements OnInit {
   submitAddUser(): void {
     if (this.addForm.invalid) {
       this.addForm.markAllAsTouched();
-      this.snackbar.warning('Please fill in all required fields properly.');
+      this.snackbar.warning('Please check the highlighted fields.');
       return;
     }
 
@@ -272,6 +283,7 @@ export class UserListComponent implements OnInit {
         this.closeAddModal();
         this.snackbar.success(`User "${created.name}" created successfully!`);
         this.fetchUsers();
+        this.loadAllUsersForCounts();
       },
       error: () => {
         this.isSubmitting.set(false);
@@ -309,7 +321,7 @@ export class UserListComponent implements OnInit {
   submitEditUser(): void {
     if (this.editForm.invalid) {
       this.editForm.markAllAsTouched();
-      this.snackbar.warning('Please fill in all required fields properly.');
+      this.snackbar.warning('Please check the highlighted fields.');
       return;
     }
 

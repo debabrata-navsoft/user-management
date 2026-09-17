@@ -1,0 +1,58 @@
+<div class="phone-row" [class.is-invalid]="showError()">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="code-field">
+    <mat-label>{{ codeLabel() }}</mat-label>
+    <mat-select
+      [value]="dial()"
+      [disabled]="disabled()"
+      panelClass="country-panel"
+      (selectionChange)="onDialChange($event.value)"
+      (closed)="onPanelClosed()"
+      aria-label="Country dial code"
+    >
+      <mat-select-trigger>
+        <span class="trigger-flag">{{ selectedFlag() }}</span>
+        <span class="trigger-dial">{{ dial() }}</span>
+      </mat-select-trigger>
+
+      <!-- Typed text must reach the box, not the select's own key navigation. -->
+      <div
+        class="country-search"
+        (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()"
+      >
+        <input
+          type="text"
+          class="country-search-input"
+          placeholder="Search country..."
+          [value]="search()"
+          (input)="onSearch($event)"
+        />
+      </div>
+
+      @for (country of filteredCountries(); track country.code) {
+        <mat-option [value]="country.dial">
+          <span class="opt-flag">{{ country.flag }}</span>
+          <span class="opt-dial">{{ country.dial }}</span>
+          <span class="opt-sep">-</span>
+          <span class="opt-name">{{ country.name }}</span>
+        </mat-option>
+      } @empty {
+        <div class="country-empty">No country found</div>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="number-field">
+    <input
+      matInput
+      type="tel"
+      [id]="inputId()"
+      [value]="number()"
+      [placeholder]="placeholder()"
+      [disabled]="disabled()"
+      (input)="onNumberChange($event)"
+      (blur)="markTouched()"
+      autocomplete="off"
+    />
+  </mat-form-field>
+</div>
