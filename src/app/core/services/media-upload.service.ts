@@ -9,32 +9,18 @@ import { DRIVE_ROOT } from './drive.service';
 import { SnackbarService } from './snackbar.service';
 
 export interface MediaUploadOutcome {
-  /** Names that were stored successfully. */
   uploaded: string[];
-  /** Rejected before any request, because of the size ceiling. */
   tooLarge: string[];
-  /** Could not be read, or the request failed; nothing was stored. */
   failed: string[];
-  /** Stored, but the copy in the other collection could not be created. */
   notShared: string[];
 }
 
 export interface MediaUploadOptions {
   uploadedBy: string;
-  /** Drive folder the file belongs to. Gallery uploads land at the root. */
   driveParentId?: string;
-  /** Overrides `environment.maxDriveUploadMb`. */
   maxMb?: number;
 }
 
-/**
- * A file already read into a data URL.
- *
- * Uploads deliberately take these instead of `File` objects: a `File` is only
- * readable while its `<input>` still holds the selection, and the input has to
- * be reset so that picking the same file twice re-fires `change`. Reading it
- * later therefore fails. Read while the selection is live, then upload.
- */
 export interface MediaUploadItem {
   name: string;
   size: number;
@@ -44,20 +30,10 @@ export interface MediaUploadItem {
 
 export interface ReadFilesResult {
   items: MediaUploadItem[];
-  /** Over the ceiling, so never read. */
   tooLarge: string[];
-  /** Read failed. */
   unreadable: string[];
 }
 
-/**
- * The single upload path shared by the Gallery and the Drive.
- *
- * Every accepted file is written to the drive's `nodes`; images are additionally
- * written to `images` and cross-linked, so one upload appears in both places.
- * Requests are issued one at a time because json-server rewrites the whole of
- * db.json per write.
- */
 @Injectable({
   providedIn: 'root',
 })
@@ -67,15 +43,10 @@ export class MediaUploadService {
   private imagesUrl = `${environment.apiUrl}/images`;
   private nodesUrl = `${environment.apiUrl}/nodes`;
 
-  /** Human-readable ceiling, for messages and drop-zone hints. */
   get maxUploadMb(): number {
     return environment.maxDriveUploadMb;
   }
 
-  /**
-   * Read picked files into upload items. Call this straight from the `change`
-   * handler, before resetting the input, while the selection is still live.
-   */
   async readFiles(files: File[], maxMb = this.maxUploadMb): Promise<ReadFilesResult> {
     const maxBytes = maxMb * 1024 * 1024;
     const result: ReadFilesResult = { items: [], tooLarge: [], unreadable: [] };
@@ -132,7 +103,6 @@ export class MediaUploadService {
     return outcome;
   }
 
-  /** Read then upload, for callers that start from a file input. */
   async readAndUpload(files: File[], opts: MediaUploadOptions): Promise<MediaUploadOutcome> {
     const read = await this.readFiles(files, opts.maxMb ?? this.maxUploadMb);
     const outcome = await this.uploadShared(read.items, opts);
@@ -141,7 +111,6 @@ export class MediaUploadService {
     return outcome;
   }
 
-  /** Turns an outcome into toasts, so both pages report uploads identically. */
   report(outcome: MediaUploadOutcome, destination = 'current folder'): void {
     const { uploaded, tooLarge, failed, notShared } = outcome;
 

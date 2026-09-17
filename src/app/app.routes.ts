@@ -33,7 +33,7 @@ export const routes: Routes = [
   // Protected App Shell Routes
   {
     path: '',
-    loadComponent: () => import('./layout/app-shell.component').then((m) => m.AppShellComponent),
+    loadComponent: () => import('./layout/layout.component').then((m) => m.LayoutComponent),
     canActivate: [authGuard],
     children: [
       {

@@ -31,9 +31,6 @@ export class ImageService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  /**
-   * Helper to validate and convert a File to an ImageUploadPreview object
-   */
   processFileForPreview(file: File): Promise<ImageUploadPreview> {
     return new Promise((resolve) => {
       const allowedTypes = [

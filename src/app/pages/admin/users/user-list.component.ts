@@ -55,12 +55,8 @@ export class UserListComponent implements OnInit {
   search = signal<string>('');
   activeFilters = signal<ActiveFilterState>({});
 
-  /** Widths keep the columns steady as content changes between pages. */
   columns: TableColumn[] = [
-    // 80px, not 70: a centred sortable header reserves arrow space on both
-    // sides of the label, and "ID" plus that padding does not fit in 70.
     { key: 'id', header: 'ID', width: '80px', align: 'center', sortable: true },
-    // Sorts on the underlying name, since the cell renders name + email.
     { key: 'name', header: 'User', width: '24%', sortable: true },
     { key: 'role', header: 'Role', width: '130px', align: 'center', sortable: true },
     { key: 'department', header: 'Department', width: '14%', sortable: true },
@@ -73,7 +69,6 @@ export class UserListComponent implements OnInit {
   sort = signal<string>('id');
   order = signal<'asc' | 'desc'>('desc');
 
-  // Dynamic filter groups computed with live counts from all users
   filterGroups = computed<FilterGroup[]>(() => {
     const all = this.allUsers();
 
@@ -140,7 +135,6 @@ export class UserListComponent implements OnInit {
     ];
   });
 
-  // Calculate live matching users based on currently selected drawer filters
   calculateMatchingCount = (filters: ActiveFilterState): number => {
     const all = this.allUsers();
     const roles = (filters['role'] || []).map((r) => r.toLowerCase());

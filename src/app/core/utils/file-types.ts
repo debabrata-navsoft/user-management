@@ -1,7 +1,3 @@
-/**
- * Maps a file to a Google Drive-style icon and colour so every view (grid,
- * table, preview) labels the same file the same way.
- */
 export type FileKind =
   | 'image'
   | 'video'
@@ -17,16 +13,12 @@ export type FileKind =
 
 export interface FileTypeInfo {
   kind: FileKind;
-  /** Lucide icon name (kebab-case), used when there is no `asset`. */
   icon: string;
-  /** Artwork in `public/`, served from the site root. Preferred when present. */
   asset?: string;
-  /** Google Workspace palette, applied to the Lucide fallback. */
   color: string;
   label: string;
 }
 
-/** Folder artwork, for the drive's folder rows and cards. */
 export const FOLDER_ASSET = '/folder.png';
 
 const TYPES: Record<FileKind, Omit<FileTypeInfo, 'kind'>> = {
@@ -67,7 +59,6 @@ const BY_EXTENSION = new Map<string, FileKind>(
   ),
 );
 
-/** Mime types win over the extension; both are unreliable on their own. */
 function kindOf(name?: string, mimeType?: string): FileKind {
   const mime = (mimeType || '').toLowerCase();
 

@@ -20,7 +20,7 @@ interface NavItem {
 }
 
 @Component({
-  selector: 'app-shell',
+  selector: 'app-layout',
   standalone: true,
   imports: [
     CommonModule,
@@ -32,10 +32,10 @@ interface NavItem {
     ImageModalComponent,
     LucideAngularModule,
   ],
-  templateUrl: './app-shell.component.html',
-  styleUrl: './app-shell.component.css',
+  templateUrl: './layout.component.html',
+  styleUrl: './layout.component.css',
 })
-export class AppShellComponent {
+export class LayoutComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   loadingService = inject(LoadingService);

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { LucideAngularModule } from 'lucide-angular';
 import { BreadcrumbItem, DriveNode, DriveStats } from '../../core/models/drive.model';
 import { AuthService } from '../../core/services/auth.service';
 import { DRIVE_ROOT, DriveService } from '../../core/services/drive.service';
@@ -38,6 +39,7 @@ const CONTEXT_MENU_HEIGHT_PX = 200;
     FileTypeIconComponent,
     IconButtonComponent,
     LoaderComponent,
+    LucideAngularModule,
   ],
   templateUrl: './drive.component.html',
   styleUrl: './drive.component.css',

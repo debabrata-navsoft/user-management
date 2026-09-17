@@ -70,7 +70,6 @@ export class DriveService {
   }
 
   deleteNode(id: string): Observable<void> {
-    // First find all descendant IDs if it's a folder, and delete them
     return this.getAllNodes().pipe(
       switchMap((allNodes) => {
         const toDeleteIds = this.getDescendantIds(id, allNodes);
