@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-angular';
 import { environment } from '../../../environments/environment';
+import { LoadingService } from './loading.service';
 import { MediaUploadItem, MediaUploadService } from './media-upload.service';
 
 const item = (name: string, type: string): MediaUploadItem => ({
@@ -140,6 +141,34 @@ describe('MediaUploadService', () => {
       const outcome = await pending;
       expect(outcome.uploaded).toEqual(['fox.jpg']);
       expect(outcome.failed).toEqual(['dog.jpg']);
+    });
+  });
+
+  describe('global loader', () => {
+    it('stays up for the whole paced batch instead of blinking per file', async () => {
+      const loading = TestBed.inject(LoadingService);
+
+      // Sample faster than WRITE_GAP_MS, so a drop in the gap between two
+      // writes — the flicker this guards against — cannot slip past.
+      const samples: boolean[] = [];
+      const sampler = setInterval(() => samples.push(loading.isLoading()), 10);
+
+      const pending = service.uploadToDrive(
+        [item('a.pdf', 'application/pdf'), item('b.pdf', 'application/pdf')],
+        { uploadedBy: 'Tester' },
+      );
+
+      for (let i = 0; i < 2; i++) {
+        const req = await waitForRequest(httpMock, `${environment.apiUrl}/nodes`);
+        req.flush({ ...req.request.body });
+      }
+
+      await pending;
+      clearInterval(sampler);
+
+      expect(samples.length).toBeGreaterThan(0);
+      expect(samples.every(Boolean)).toBe(true);
+      expect(loading.isLoading()).toBe(false);
     });
   });
 

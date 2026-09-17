@@ -6,6 +6,7 @@ import { DriveNode } from '../models/drive.model';
 import { ImageItem } from '../models/image.model';
 import { isConnectionLost, pause } from '../utils/write-pacing';
 import { DRIVE_ROOT } from './drive.service';
+import { LoadingService } from './loading.service';
 import { SnackbarService } from './snackbar.service';
 
 export interface MediaUploadOutcome {
@@ -39,6 +40,7 @@ export interface ReadFilesResult {
 export class MediaUploadService {
   private http = inject(HttpClient);
   private snackbar = inject(SnackbarService);
+  private loading = inject(LoadingService);
   private imagesUrl = `${environment.apiUrl}/images`;
   private nodesUrl = `${environment.apiUrl}/nodes`;
 
@@ -86,11 +88,19 @@ export class MediaUploadService {
   }
 
   async readAndUploadToDrive(files: File[], opts: MediaUploadOptions): Promise<MediaUploadOutcome> {
-    const read = await this.readFiles(files, opts.maxMb ?? this.maxUploadMb);
-    const outcome = await this.uploadToDrive(read.items, opts);
-    outcome.tooLarge.push(...read.tooLarge);
-    outcome.failed.push(...read.unreadable);
-    return outcome;
+    // Reading a batch of base64 blobs is slow but issues no request, so without
+    // this the overlay only appears once the first POST goes out. Nesting is
+    // safe: LoadingService counts holds.
+    this.loading.show();
+    try {
+      const read = await this.readFiles(files, opts.maxMb ?? this.maxUploadMb);
+      const outcome = await this.uploadToDrive(read.items, opts);
+      outcome.tooLarge.push(...read.tooLarge);
+      outcome.failed.push(...read.unreadable);
+      return outcome;
+    } finally {
+      this.loading.hide();
+    }
   }
 
   report(outcome: MediaUploadOutcome, destination = 'current folder'): void {
@@ -121,19 +131,32 @@ export class MediaUploadService {
   ): Promise<MediaUploadOutcome> {
     const outcome: MediaUploadOutcome = { uploaded: [], tooLarge: [], failed: [] };
 
-    for (const [index, item] of items.entries()) {
-      try {
-        if (index) await pause();
-        await firstValueFrom(post(item));
-        outcome.uploaded.push(item.name);
-      } catch (error) {
-        outcome.failed.push(item.name);
-        
-        if (isConnectionLost(error)) {
-          outcome.failed.push(...items.slice(index + 1).map((rest) => rest.name));
-          break;
+    // One loader for the whole batch. The interceptor raises and drops the
+    // global loader per request, so across a paced batch the request count hits
+    // zero in every gap: the overlay unmounts, the page's own inline loader
+    // (which only hides while the overlay is up) takes its place, and the next
+    // file swaps them back — two loaders flickering, once per file. Holding the
+    // count above zero for the batch keeps it to a single, steady overlay.
+    this.loading.show();
+    try {
+      for (const [index, item] of items.entries()) {
+        try {
+          if (index) await pause();
+          await firstValueFrom(post(item));
+          outcome.uploaded.push(item.name);
+        } catch (error) {
+          outcome.failed.push(item.name);
+
+          // Once the connection is gone the rest cannot land either, and each
+          // attempt would raise its own error toast. Record them and stop.
+          if (isConnectionLost(error)) {
+            outcome.failed.push(...items.slice(index + 1).map((rest) => rest.name));
+            break;
+          }
         }
       }
+    } finally {
+      this.loading.hide();
     }
 
     return outcome;

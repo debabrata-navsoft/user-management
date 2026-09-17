@@ -253,7 +253,11 @@ export class DriveComponent implements OnInit {
     const input = e.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
-    this.isLoading.set(true);
+    // No `isLoading` here: the upload already owns the global overlay for the
+    // whole batch, and this page's own loader would only surface in the gaps
+    // between files — a second, different spinner blinking in and out. The
+    // reload below raises the overlay again in the same synchronous block, so
+    // the hand-off never reaches a paint.
     const outcome = await this.mediaUpload.readAndUploadToDrive(Array.from(input.files), {
       uploadedBy: this.authService.currentUser()?.name || 'User',
       driveParentId: this.currentFolderId(),
