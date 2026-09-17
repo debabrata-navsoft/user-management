@@ -105,14 +105,15 @@ img {
   outline-offset: 2px;
 }
 
-/* The action row projected into <app-page-header>. It is declared in each page's
-   template, so neither the header's nor the page's scoped styles can lay it out
-   — hence the one global rule. */
-[actions] {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+/* Projection slots: `<div actions>` for <app-page-header> and `<div footer>` for
+   <app-modal>. Each wrapper is written in the consuming page's template, so
+   neither the host component's nor the page's scoped styles can reach it, and
+   the bar's own `gap` applies around the wrapper instead of between its buttons.
+   `display: contents` drops the wrapper from layout so the buttons become direct
+   flex children of the bar and inherit its gap and alignment. */
+[actions],
+[footer] {
+  display: contents;
 }
 
 /* ---------------------------------------------------------------- Utilities */
