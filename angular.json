@@ -25,13 +25,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/material-theme.scss",
-              "src/styles.css",
-              "src/styles/admin.css",
-              "src/styles/manager.css",
-              "src/styles/employee.css"
-            ]
+            "styles": ["src/material-theme.scss", "src/styles.css", "src/styles/responsive.css"]
           },
           "configurations": {
             "production": {
