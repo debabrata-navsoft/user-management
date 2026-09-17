@@ -1,0 +1,92 @@
+<app-modal [isOpen]="isOpen()" [title]="title()" size="md" (close)="cancel.emit()">
+  <form [formGroup]="form" class="user-modal-form" autocomplete="off">
+    <app-form-field label="Full Name" [control]="form.controls['name']" [required]="true">
+      <input
+        id="userName"
+        type="text"
+        formControlName="name"
+        placeholder="Jane Doe"
+        class="form-control"
+        autocomplete="off"
+      />
+    </app-form-field>
+
+    <app-form-field label="Email Address" [control]="form.controls['email']" [required]="true">
+      <input
+        id="userEmail"
+        type="email"
+        formControlName="email"
+        placeholder="jane.doe@example.com"
+        class="form-control"
+        autocomplete="off"
+      />
+    </app-form-field>
+
+    <div class="form-row">
+      <app-form-field label="Role" [control]="form.controls['role']" [required]="true">
+        <select id="userRole" formControlName="role" class="form-control">
+          @for (option of roleOptions(); track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </app-form-field>
+
+      <app-form-field label="Status" [control]="form.controls['status']" [required]="true">
+        <select id="userStatus" formControlName="status" class="form-control">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </app-form-field>
+    </div>
+
+    <app-form-field label="Department" [control]="form.controls['department']">
+      <select id="userDept" formControlName="department" class="form-control">
+        <option value="Engineering">Engineering</option>
+        <option value="Sales">Sales</option>
+        <option value="Design">Design</option>
+        <option value="Support">Support</option>
+        <option value="Finance">Finance</option>
+      </select>
+    </app-form-field>
+
+    <!-- Phone gets its own row: the code picker plus the number needs the width. -->
+    <app-form-field label="Phone Number" [control]="form.controls['phone']">
+      <app-phone-input inputId="userPhone" formControlName="phone"></app-phone-input>
+    </app-form-field>
+
+    <!-- Passwords are set on creation only; changing one is the owner's job. -->
+    @if (!isEdit()) {
+      <app-form-field
+        label="Initial Password"
+        [control]="form.controls['password']"
+        [required]="true"
+      >
+        <div class="password-wrapper">
+          <input
+            id="userPassword"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            class="form-control"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-pwd-btn"
+            (click)="toggleShowPassword()"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          >
+            <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      </app-form-field>
+    }
+  </form>
+
+  <div footer>
+    <app-ui-button variant="secondary" size="md" (click)="cancel.emit()">Cancel</app-ui-button>
+    <app-ui-button variant="primary" size="md" [loading]="isSubmitting()" (click)="submit()">
+      {{ submitLabel() }}
+    </app-ui-button>
+  </div>
+</app-modal>

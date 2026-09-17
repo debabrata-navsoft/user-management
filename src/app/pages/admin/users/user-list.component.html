@@ -104,232 +104,24 @@
     </ng-template>
   </app-data-table>
 
-  <!-- Add User Modal -->
-  <app-modal
-    [isOpen]="isAddModalOpen()"
-    title="Create New User"
-    size="md"
-    (close)="closeAddModal()"
-  >
-    <form [formGroup]="addForm" class="user-modal-form" autocomplete="off">
-      <app-form-field label="Full Name" [control]="addForm.controls['name']" [required]="true">
-        <input
-          id="addName"
-          type="text"
-          formControlName="name"
-          placeholder="Jane Doe"
-          class="form-control"
-          autocomplete="off"
-        />
-      </app-form-field>
+  <!-- Create / Edit dialog: one component, switched by mode -->
+  <app-user-form-modal
+    [isOpen]="isFormModalOpen()"
+    [mode]="formMode()"
+    [user]="selectedUser()"
+    [isSubmitting]="isSubmitting()"
+    (save)="submitUserForm($event)"
+    (invalid)="onFormInvalid()"
+    (cancel)="closeFormModal()"
+  ></app-user-form-modal>
 
-      <app-form-field label="Email Address" [control]="addForm.controls['email']" [required]="true">
-        <input
-          id="addEmail"
-          type="email"
-          formControlName="email"
-          placeholder="jane.doe@example.com"
-          class="form-control"
-          autocomplete="off"
-        />
-      </app-form-field>
-
-      <div class="form-row">
-        <app-form-field label="Role" [control]="addForm.controls['role']" [required]="true">
-          <select id="addRole" formControlName="role" class="form-control">
-            <option value="employee">Employee</option>
-          </select>
-        </app-form-field>
-
-        <app-form-field label="Status" [control]="addForm.controls['status']" [required]="true">
-          <select id="addStatus" formControlName="status" class="form-control">
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </app-form-field>
-      </div>
-
-      <app-form-field label="Department" [control]="addForm.controls['department']">
-        <select id="addDept" formControlName="department" class="form-control">
-          <option value="Engineering">Engineering</option>
-          <option value="Sales">Sales</option>
-          <option value="Design">Design</option>
-          <option value="Support">Support</option>
-          <option value="Finance">Finance</option>
-        </select>
-      </app-form-field>
-
-      <!-- Phone gets its own row: the code picker plus the number needs the width. -->
-      <app-form-field label="Phone Number" [control]="addForm.controls['phone']">
-        <app-phone-input inputId="addPhone" formControlName="phone"></app-phone-input>
-      </app-form-field>
-
-      <app-form-field
-        label="Initial Password"
-        [control]="addForm.controls['password']"
-        [required]="true"
-      >
-        <div class="password-wrapper">
-          <input
-            id="addPassword"
-            [type]="showPassword() ? 'text' : 'password'"
-            formControlName="password"
-            placeholder="••••••••"
-            class="form-control"
-            autocomplete="new-password"
-          />
-          <button
-            type="button"
-            class="toggle-pwd-btn"
-            (click)="toggleShowPassword()"
-            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
-          >
-            <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
-          </button>
-        </div>
-      </app-form-field>
-    </form>
-
-    <div footer>
-      <app-ui-button variant="secondary" size="md" (click)="closeAddModal()">Cancel</app-ui-button>
-      <app-ui-button
-        variant="primary"
-        size="md"
-        [loading]="isSubmitting()"
-        (click)="submitAddUser()"
-      >
-        Create User
-      </app-ui-button>
-    </div>
-  </app-modal>
-
-  <!-- Edit User Modal -->
-  <app-modal
-    [isOpen]="isEditModalOpen()"
-    title="Edit User Profile"
-    size="md"
-    (close)="closeEditModal()"
-  >
-    <form [formGroup]="editForm" class="user-modal-form" autocomplete="off">
-      <app-form-field label="Full Name" [control]="editForm.controls['name']" [required]="true">
-        <input
-          id="editName"
-          type="text"
-          formControlName="name"
-          class="form-control"
-          autocomplete="off"
-        />
-      </app-form-field>
-
-      <app-form-field
-        label="Email Address"
-        [control]="editForm.controls['email']"
-        [required]="true"
-      >
-        <input
-          id="editEmail"
-          type="email"
-          formControlName="email"
-          class="form-control"
-          autocomplete="off"
-        />
-      </app-form-field>
-
-      <div class="form-row">
-        <app-form-field label="Role" [control]="editForm.controls['role']" [required]="true">
-          <select id="editRole" formControlName="role" class="form-control">
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
-            <option value="employee">Employee</option>
-          </select>
-        </app-form-field>
-
-        <app-form-field label="Status" [control]="editForm.controls['status']" [required]="true">
-          <select id="editStatus" formControlName="status" class="form-control">
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </app-form-field>
-      </div>
-
-      <app-form-field label="Department" [control]="editForm.controls['department']">
-        <select id="editDept" formControlName="department" class="form-control">
-          <option value="Engineering">Engineering</option>
-          <option value="Sales">Sales</option>
-          <option value="Design">Design</option>
-          <option value="Support">Support</option>
-          <option value="Finance">Finance</option>
-        </select>
-      </app-form-field>
-
-      <!-- Phone gets its own row: the code picker plus the number needs the width. -->
-      <app-form-field label="Phone Number" [control]="editForm.controls['phone']">
-        <app-phone-input inputId="editPhone" formControlName="phone"></app-phone-input>
-      </app-form-field>
-    </form>
-
-    <div footer>
-      <app-ui-button variant="secondary" size="md" (click)="closeEditModal()">Cancel</app-ui-button>
-      <app-ui-button
-        variant="primary"
-        size="md"
-        [loading]="isSubmitting()"
-        (click)="submitEditUser()"
-      >
-        Save Changes
-      </app-ui-button>
-    </div>
-  </app-modal>
-
-  <!-- View User Details Modal -->
-  <app-modal [isOpen]="isViewModalOpen()" title="User Details" size="md" (close)="closeViewModal()">
-    @if (selectedUser(); as u) {
-      <div class="view-user-container">
-        <div class="view-header">
-          <div class="view-avatar">{{ getInitials(u.name) }}</div>
-          <div class="view-title-meta">
-            <h3>{{ u.name }}</h3>
-            <div class="view-chips">
-              <app-badge [variant]="getRoleBadge(u.role)">{{ u.role }}</app-badge>
-              <app-badge [variant]="u.status === 'active' ? 'success' : 'danger'" [dot]="true">
-                {{ u.status }}
-              </app-badge>
-            </div>
-          </div>
-        </div>
-
-        <div class="detail-rows">
-          <div class="detail-row">
-            <span class="detail-label">User ID</span>
-            <span class="detail-val">#{{ u.id }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Email Address</span>
-            <span class="detail-val">{{ u.email }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Department</span>
-            <span class="detail-val">{{ u.department || 'General' }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Phone</span>
-            <span class="detail-val">{{ u.phone || 'Not provided' }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Account Created</span>
-            <span class="detail-val">{{ formatDate(u.createdAt) }}</span>
-          </div>
-        </div>
-      </div>
-    }
-
-    <div footer>
-      <app-ui-button variant="secondary" size="md" (click)="closeViewModal()">Close</app-ui-button>
-      <app-ui-button variant="primary" size="md" (click)="openEditModalFromView()">
-        Edit This User
-      </app-ui-button>
-    </div>
-  </app-modal>
+  <!-- User details dialog -->
+  <app-user-view-modal
+    [isOpen]="isViewModalOpen()"
+    [user]="selectedUser()"
+    (edit)="openEditModal($event)"
+    (close)="closeViewModal()"
+  ></app-user-view-modal>
 
   <!-- Confirm Delete Dialog -->
   <app-confirm-dialog

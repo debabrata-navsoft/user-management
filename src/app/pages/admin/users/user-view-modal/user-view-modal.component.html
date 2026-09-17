@@ -1,0 +1,48 @@
+<app-modal [isOpen]="isOpen()" title="User Details" size="md" (close)="close.emit()">
+  @if (user(); as u) {
+    <div class="view-user-container">
+      <div class="view-header">
+        <div class="view-avatar">{{ getInitials(u.name) }}</div>
+        <div class="view-title-meta">
+          <h3>{{ u.name }}</h3>
+          <div class="view-chips">
+            <app-badge [variant]="roleBadgeVariant(u.role)">{{ u.role }}</app-badge>
+            <app-badge [variant]="u.status === 'active' ? 'success' : 'danger'" [dot]="true">
+              {{ u.status }}
+            </app-badge>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-rows">
+        <div class="detail-row">
+          <span class="detail-label">User ID</span>
+          <span class="detail-val">#{{ u.id }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Email Address</span>
+          <span class="detail-val">{{ u.email }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Department</span>
+          <span class="detail-val">{{ u.department || 'General' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Phone</span>
+          <span class="detail-val">{{ u.phone || 'Not provided' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Account Created</span>
+          <span class="detail-val">{{ formatDate(u.createdAt) }}</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div footer>
+    <app-ui-button variant="secondary" size="md" (click)="close.emit()">Close</app-ui-button>
+    <app-ui-button variant="primary" size="md" (click)="requestEdit()">
+      Edit This User
+    </app-ui-button>
+  </div>
+</app-modal>
