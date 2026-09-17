@@ -79,14 +79,28 @@
         <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="pwd-form">
           <div class="form-group">
             <label for="currentPassword">Current Password *</label>
-            <input
-              id="currentPassword"
-              type="password"
-              formControlName="currentPassword"
-              placeholder="••••••••"
-              class="form-control"
-              [class.is-invalid]="isFieldInvalid('currentPassword')"
-            />
+            <div class="password-wrapper">
+              <input
+                id="currentPassword"
+                [type]="showCurrentPassword() ? 'text' : 'password'"
+                formControlName="currentPassword"
+                placeholder="••••••••"
+                class="form-control"
+                autocomplete="current-password"
+                [class.is-invalid]="isFieldInvalid('currentPassword')"
+              />
+              <button
+                type="button"
+                class="toggle-pwd-btn"
+                (click)="showCurrentPassword.set(!showCurrentPassword())"
+                [attr.aria-label]="showCurrentPassword() ? 'Hide password' : 'Show password'"
+              >
+                <lucide-icon
+                  [name]="showCurrentPassword() ? 'eye-off' : 'eye'"
+                  [size]="16"
+                ></lucide-icon>
+              </button>
+            </div>
             @if (isFieldInvalid('currentPassword')) {
               <div class="error-msg">Current password is required.</div>
             }
@@ -94,14 +108,28 @@
 
           <div class="form-group">
             <label for="newPassword">New Password *</label>
-            <input
-              id="newPassword"
-              type="password"
-              formControlName="newPassword"
-              placeholder="••••••••"
-              class="form-control"
-              [class.is-invalid]="isFieldInvalid('newPassword')"
-            />
+            <div class="password-wrapper">
+              <input
+                id="newPassword"
+                [type]="showNewPassword() ? 'text' : 'password'"
+                formControlName="newPassword"
+                placeholder="••••••••"
+                class="form-control"
+                autocomplete="new-password"
+                [class.is-invalid]="isFieldInvalid('newPassword')"
+              />
+              <button
+                type="button"
+                class="toggle-pwd-btn"
+                (click)="showNewPassword.set(!showNewPassword())"
+                [attr.aria-label]="showNewPassword() ? 'Hide password' : 'Show password'"
+              >
+                <lucide-icon
+                  [name]="showNewPassword() ? 'eye-off' : 'eye'"
+                  [size]="16"
+                ></lucide-icon>
+              </button>
+            </div>
             @if (isFieldInvalid('newPassword')) {
               <div class="error-msg">
                 New password must be at least 6 characters with uppercase, lowercase, and numbers.
@@ -111,16 +139,30 @@
 
           <div class="form-group">
             <label for="confirmNewPassword">Confirm New Password *</label>
-            <input
-              id="confirmNewPassword"
-              type="password"
-              formControlName="confirmNewPassword"
-              placeholder="••••••••"
-              class="form-control"
-              [class.is-invalid]="
-                isFieldInvalid('confirmNewPassword') || passwordForm.hasError('mismatch')
-              "
-            />
+            <div class="password-wrapper">
+              <input
+                id="confirmNewPassword"
+                [type]="showConfirmPassword() ? 'text' : 'password'"
+                formControlName="confirmNewPassword"
+                placeholder="••••••••"
+                class="form-control"
+                autocomplete="new-password"
+                [class.is-invalid]="
+                  isFieldInvalid('confirmNewPassword') || passwordForm.hasError('mismatch')
+                "
+              />
+              <button
+                type="button"
+                class="toggle-pwd-btn"
+                (click)="showConfirmPassword.set(!showConfirmPassword())"
+                [attr.aria-label]="showConfirmPassword() ? 'Hide password' : 'Show password'"
+              >
+                <lucide-icon
+                  [name]="showConfirmPassword() ? 'eye-off' : 'eye'"
+                  [size]="16"
+                ></lucide-icon>
+              </button>
+            </div>
             @if (
               isFieldInvalid('confirmNewPassword') ||
               (passwordForm.get('confirmNewPassword')?.touched && passwordForm.hasError('mismatch'))

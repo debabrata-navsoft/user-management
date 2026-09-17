@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
 import { formatDate, getInitials } from '../../core/utils/formatters';
 import { AppValidators } from '../../core/utils/validators';
+import { LucideAngularModule } from 'lucide-angular';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.component';
@@ -18,6 +19,7 @@ import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.c
     PageHeaderComponent,
     UiButtonComponent,
     BadgeComponent,
+    LucideAngularModule,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
@@ -34,6 +36,10 @@ export class ProfileComponent {
 
   isLoading = signal<boolean>(false);
   errorMessage = signal<string>('');
+
+  showCurrentPassword = signal<boolean>(false);
+  showNewPassword = signal<boolean>(false);
+  showConfirmPassword = signal<boolean>(false);
 
   passwordForm: FormGroup = this.fb.group(
     {
@@ -75,6 +81,11 @@ export class ProfileComponent {
           this.isLoading.set(false);
           this.snackbar.success('Your password has been changed successfully!', 'Security Updated');
           this.passwordForm.reset();
+          // Clearing the fields should clear their revealed state too, so the
+          // next entry starts masked.
+          this.showCurrentPassword.set(false);
+          this.showNewPassword.set(false);
+          this.showConfirmPassword.set(false);
         },
         error: (err) => {
           this.isLoading.set(false);
