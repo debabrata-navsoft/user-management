@@ -61,12 +61,34 @@ export class DataTableComponent {
   showTotalCount = input<boolean>(true);
   matchingCountCalculator = input<((filters: ActiveFilterState) => number) | undefined>(undefined);
 
+  /** Column key currently sorted, and its direction. */
+  sort = input<string>('');
+  order = input<'asc' | 'desc'>('asc');
+
   searchChange = output<string>();
   pageChange = output<number>();
   limitChange = output<number>();
   filterChange = output<ActiveFilterState>();
+  sortChange = output<{ sort: string; order: 'asc' | 'desc' }>();
 
   isFilterDrawerOpen = signal<boolean>(false);
+
+  /** Click a column to sort ascending; click it again to flip to descending. */
+  toggleSort(key: string): void {
+    const next: 'asc' | 'desc' = this.sort() === key && this.order() === 'asc' ? 'desc' : 'asc';
+    this.sortChange.emit({ sort: key, order: next });
+  }
+
+  /** Direction of the sorted column; unsorted columns render no arrow at all. */
+  sortIcon(key: string): string {
+    if (this.sort() !== key) return 'arrow-up';
+    return this.order() === 'asc' ? 'arrow-up' : 'arrow-down';
+  }
+
+  ariaSort(key: string): 'ascending' | 'descending' | 'none' {
+    if (this.sort() !== key) return 'none';
+    return this.order() === 'asc' ? 'ascending' : 'descending';
+  }
 
   openFilterDrawer(): void {
     this.isFilterDrawerOpen.set(true);

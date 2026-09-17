@@ -55,15 +55,23 @@ export class UserListComponent implements OnInit {
   search = signal<string>('');
   activeFilters = signal<ActiveFilterState>({});
 
+  /** Widths keep the columns steady as content changes between pages. */
   columns: TableColumn[] = [
-    { key: 'user', header: 'User' },
-    { key: 'role', header: 'Role' },
-    { key: 'department', header: 'Department' },
-    { key: 'phone', header: 'Phone' },
-    { key: 'status', header: 'Status' },
-    { key: 'createdAt', header: 'Joined Date' },
-    { key: 'actions', header: 'Actions', align: 'right', width: '130px' },
+    // 80px, not 70: a centred sortable header reserves arrow space on both
+    // sides of the label, and "ID" plus that padding does not fit in 70.
+    { key: 'id', header: 'ID', width: '80px', align: 'center', sortable: true },
+    // Sorts on the underlying name, since the cell renders name + email.
+    { key: 'name', header: 'User', width: '24%', sortable: true },
+    { key: 'role', header: 'Role', width: '130px', align: 'center', sortable: true },
+    { key: 'department', header: 'Department', width: '14%', sortable: true },
+    { key: 'phone', header: 'Phone', width: '16%' },
+    { key: 'status', header: 'Status', width: '130px', align: 'center', sortable: true },
+    { key: 'createdAt', header: 'Joined Date', width: '130px', sortable: true },
+    { key: 'actions', header: 'Actions', width: '130px', align: 'center' },
   ];
+
+  sort = signal<string>('id');
+  order = signal<'asc' | 'desc'>('desc');
 
   // Dynamic filter groups computed with live counts from all users
   filterGroups = computed<FilterGroup[]>(() => {
@@ -210,6 +218,8 @@ export class UserListComponent implements OnInit {
         page: this.page(),
         limit: this.limit(),
         search: this.search(),
+        sort: this.sort(),
+        order: this.order(),
         role: filters['role'],
         status: filters['status'],
         department: filters['department'],
@@ -224,6 +234,13 @@ export class UserListComponent implements OnInit {
           this.isLoading.set(false);
         },
       });
+  }
+
+  onSortChange(event: { sort: string; order: 'asc' | 'desc' }): void {
+    this.sort.set(event.sort);
+    this.order.set(event.order);
+    this.page.set(1); // a new ordering invalidates the current page
+    this.fetchUsers();
   }
 
   onSearchChange(query: string): void {

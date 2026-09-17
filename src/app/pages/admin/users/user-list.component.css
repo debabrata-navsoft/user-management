@@ -1,7 +1,10 @@
 .user-management-page {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 70px);
+  /* Explicit height, not flex: .app-layout uses min-height:100vh, so there is
+     no definite height for `flex: 1` to fill and the page would scroll instead
+     of the table scrolling inside it. 68px navbar + 28px page padding. */
+  height: calc(100vh - 96px);
   margin-bottom: -28px;
   gap: 10px;
   overflow: hidden;
@@ -18,6 +21,14 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* Record id: tabular figures so the column stays aligned down the page. */
+.user-id {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* User cell in table */
@@ -55,9 +66,19 @@
   }
 }
 
+/* min-width:0 lets the flex child shrink so long emails ellipsize instead of
+   forcing the column wider than its declared width. */
 .user-cell-meta {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.user-name,
+.user-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-name {

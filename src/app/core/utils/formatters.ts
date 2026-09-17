@@ -14,14 +14,15 @@ export function getInitials(name: string = ''): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+/** Day-first numeric date, e.g. 17/09/2026. */
 export function formatDate(dateStr?: string): string {
   if (!dateStr) return '-';
   try {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('en-US', {
+    return d.toLocaleDateString('en-GB', {
       year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
     });
   } catch {
     return dateStr;

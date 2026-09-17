@@ -93,10 +93,31 @@
                 @for (col of columns(); track col.key) {
                   <th
                     [style.width]="col.width"
-                    [class.actions-th]="col.key === 'actions' || col.align === 'right'"
+                    [class.actions-th]="
+                      col.align === 'right' || (col.key === 'actions' && !col.align)
+                    "
                     [class.text-center]="col.align === 'center'"
+                    [class.sortable-th]="col.sortable"
+                    [class.is-sorted]="sort() === col.key"
+                    [attr.aria-sort]="ariaSort(col.key)"
                   >
-                    {{ col.header }}
+                    @if (col.sortable) {
+                      <button
+                        type="button"
+                        class="sort-btn"
+                        [title]="'Sort by ' + col.header"
+                        (click)="toggleSort(col.key)"
+                      >
+                        <span>{{ col.header }}</span>
+                        <lucide-icon
+                          class="sort-icon"
+                          [name]="sortIcon(col.key)"
+                          [size]="14"
+                        ></lucide-icon>
+                      </button>
+                    } @else {
+                      {{ col.header }}
+                    }
                   </th>
                 }
               </tr>
@@ -106,7 +127,9 @@
                 <tr>
                   @for (col of columns(); track col.key) {
                     <td
-                      [class.actions-cell]="col.key === 'actions' || col.align === 'right'"
+                      [class.actions-cell]="
+                        col.align === 'right' || (col.key === 'actions' && !col.align)
+                      "
                       [class.text-center]="col.align === 'center'"
                     >
                       @if (customCellTemplate) {

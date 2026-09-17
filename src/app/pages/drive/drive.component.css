@@ -1,6 +1,9 @@
 .drive-page {
   display: flex;
   flex-direction: column;
+  /* Explicit height, not flex: .app-layout uses min-height:100vh, so there is
+     no definite height for `flex: 1` to fill and the page would scroll instead
+     of the list scrolling inside it. 68px navbar + 28px page padding. */
   height: calc(100vh - 96px);
   margin-bottom: -28px;
   gap: 10px;
