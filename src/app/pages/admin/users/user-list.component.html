@@ -33,6 +33,15 @@
     (pageChange)="onPageChange($event)"
     (limitChange)="onLimitChange($event)"
   >
+    <!-- Phone only: sits beside the record count so the two share a row.
+         The page-header button is hidden at that width instead. -->
+    <div toolbarLeft class="toolbar-add-phone">
+      <app-ui-button variant="primary" size="sm" (click)="openAddModal()">
+        <lucide-icon name="plus" [size]="14"></lucide-icon>
+        <span>Add User</span>
+      </app-ui-button>
+    </div>
+
     <ng-template #cellTemplate let-row="row" let-col="column">
       @switch (col.key) {
         @case ('id') {

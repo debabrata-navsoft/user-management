@@ -230,13 +230,26 @@
   overflow-x: auto;
   scrollbar-gutter: stable;
   width: 100%;
+  /* A visible track, not a transparent one: when the table is wider than the
+     viewport the trough is the only thing telling you there are more columns
+     off to the right. An overlay thumb alone fades out and takes the hint
+     with it. */
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: #cbd5e1 #eef1f5;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table-scroll-area::-webkit-scrollbar {
   width: 6px;
-  height: 6px;
+  /* Taller than the vertical bar — a horizontal one is the harder of the two
+     to notice and the harder to grab. */
+  height: 10px;
+}
+
+.table-scroll-area::-webkit-scrollbar-track:horizontal {
+  background: #eef1f5;
+  border-radius: 999px;
 }
 
 .table-scroll-area::-webkit-scrollbar-thumb {

@@ -1,0 +1,382 @@
+/* =========================================================================
+   EMPLOYEE — phone & tablet
+   Covers the employee dashboard, plus the chrome and pages every signed-in
+   user shares: the layout shell, page headers, the data-table toolbar,
+   modals, Drive, Gallery and Profile.
+
+   Those shared blocks live here rather than being copied into admin.css and
+   manager.css — three copies of the same rules would drift. Admin and
+   manager load this file too, so they inherit them.
+
+   Breakpoints:  phone <= 640px   |   tablet 641px - 1024px
+   See admin.css for why these declarations are `!important`.
+   ========================================================================= */
+
+/* ------------------------------- PHONE ---------------------------------- */
+@media (max-width: 640px) {
+  /* ---- Shared shell ---- */
+  .page-content {
+    padding: 16px !important;
+    min-height: 0 !important;
+  }
+
+  /* Title, badge and action buttons each take a full row. */
+  .page-header-container .header-main {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .page-header-container .page-title {
+    font-size: 21px !important;
+    line-height: 1.25 !important;
+  }
+
+  /* The subtitle is the least useful thing competing with the table for
+     height, so it gets the tightest treatment rather than being dropped. */
+  .page-header-container .page-subtitle {
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+  }
+
+  .page-header-container .header-actions {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+
+  .page-header-container .header-actions app-ui-button {
+    flex: 1 1 auto !important;
+  }
+
+  .page-header-container .header-actions .btn {
+    width: 100% !important;
+  }
+
+  /* ---- Shared data-table toolbar ----
+     The count gets its own line, but search and Filters share one row. Each
+     stacked control costs ~48px of height, and on a phone that height is the
+     table: giving these two a row back is worth two more visible rows. */
+  .data-table-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+
+  .data-table-toolbar .toolbar-right {
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    margin-left: 0 !important;
+    gap: 8px !important;
+  }
+
+  /* Search takes whatever the Filters button leaves. min-width:0 is what
+     lets it shrink past its 280px base instead of pushing Filters off. */
+  .data-table-toolbar .search-container {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+  }
+
+  .data-table-toolbar .btn-filter-trigger {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    padding: 8px 12px !important;
+  }
+
+  .data-table-toolbar .table-total-count {
+    font-size: 13.5px !important;
+  }
+
+  /* ---- Shared pagination ----
+     MatPaginator wraps onto two rows here and eats ~40px of table. Dropping
+     the "Items per page:" wording (the select still says 10) and tightening
+     the controls gets it back onto one. */
+  .mat-mdc-paginator-container {
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    padding: 6px 10px !important;
+    min-height: 46px !important;
+    gap: 6px !important;
+  }
+
+  .mat-mdc-paginator-page-size-label {
+    display: none !important;
+  }
+
+  .mat-mdc-paginator-page-size {
+    margin-right: 0 !important;
+  }
+
+  .mat-mdc-paginator-page-size-select {
+    margin: 0 !important;
+    width: 68px !important;
+  }
+
+  .mat-mdc-paginator-range-label {
+    margin: 0 4px !important;
+    font-size: 12.5px !important;
+    white-space: nowrap !important;
+  }
+
+  .mat-mdc-paginator-range-actions .mat-mdc-icon-button {
+    width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+  }
+
+  /* ---- Shared dialogs ---- */
+  .modal-dialog {
+    width: calc(100vw - 24px) !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 32px) !important;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse !important;
+    gap: 8px !important;
+  }
+
+  .modal-footer app-ui-button,
+  .modal-footer .btn {
+    width: 100% !important;
+  }
+
+  /* Two-up field rows never fit; one control per line. */
+  .form-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ---- Employee dashboard ---- */
+  .dashboard-page .quick-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* ---- Profile ---- */
+  .profile-layout-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ---- Drive ---- */
+  .drive-page {
+    height: 100% !important;
+    margin-bottom: 0 !important;
+  }
+
+  .drive-toolbar-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .drive-toolbar-card .toolbar-right {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .drive-toolbar-card .drive-search {
+    width: 100% !important;
+  }
+
+  /* Keep the grid/list switch on its own row, centred, not stretched. */
+  .drive-toolbar-card .view-toggle-group {
+    align-self: flex-end !important;
+  }
+
+  .folders-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .files-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* ---- Gallery ---- */
+  .inspector-body {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* The hover lens has no meaning on touch, and the floating zoom panel would
+     overlap the image. Tapping through to the lightbox is the path here. */
+  .zoom-result-window {
+    display: none !important;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+  }
+
+  .thumbnail-cluster {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .gallery-header-actions,
+  .queue-header,
+  .queue-actions,
+  .inspector-controls {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+}
+
+/* ------------------------------- TABLET --------------------------------- */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* ---- Shared shell ----
+     The sidebar becomes a drawer for the whole tablet band, not just below
+     768px as layout.component.css does on its own. A tablet is ~1024px wide;
+     handing 260px of that to permanent navigation left the user table clipped
+     mid-column. The hamburger and overlay are already in the DOM at every
+     width — only CSS was keeping them hidden. */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+
+  .app-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    height: 100dvh !important;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: none !important;
+  }
+
+  .app-sidebar.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .mobile-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(15, 23, 42, 0.5) !important;
+    backdrop-filter: blur(2px) !important;
+    z-index: 999 !important;
+  }
+
+  .page-content {
+    padding: 20px !important;
+  }
+
+  .data-table-toolbar .search-container {
+    min-width: 200px !important;
+  }
+
+  .modal-dialog {
+    max-width: min(640px, calc(100vw - 48px)) !important;
+  }
+
+  /* ---- Employee dashboard ---- */
+  .dashboard-page .quick-cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* ---- Profile: the 360px sidebar plus a form is too tight here. ---- */
+  .profile-layout-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ---- Drive ---- */
+  .drive-page {
+    height: 100% !important;
+    margin-bottom: 0 !important;
+  }
+
+  .folders-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .files-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  }
+
+  /* ---- Gallery: magnifier above its details rather than beside them. ---- */
+  .inspector-body {
+    grid-template-columns: 1fr !important;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  }
+}
+
+/* ==================== APP FRAME — phone & tablet ========================
+   One block for both tiers, since the shell behaves the same in each.
+
+   `.app-layout` is `min-height`, which is not a *definite* height, so a
+   percentage height on anything inside it resolves to `auto`. Pages that ask
+   for `height: 100%` therefore grew with their content and scrolled the whole
+   document — page header, toolbar and all — instead of scrolling their own
+   table.
+
+   Pinning the shell to the viewport makes `.page-content` definite and turns
+   it into the scroll container. Pages that fit (User Management, Drive) hold
+   their header and toolbar still and scroll only their rows; pages that don't
+   (dashboards, Gallery, Profile) scroll inside .page-content, under a navbar
+   that now stays put.
+   ======================================================================== */
+@media (max-width: 1024px) {
+  .app-layout {
+    height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .main-wrapper {
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .page-content {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    /* No trailing padding: the table and Drive cards are drawn to bleed off
+       the bottom edge (square bottom corners, no bottom border). Scrolling
+       pages get their breathing room back individually, below. */
+    padding-bottom: 0 !important;
+  }
+
+  /* A routed component's host is an unstyled custom element, so it defaults to
+     display:inline and has no height of its own. `height: 100%` on the page
+     div inside it had nothing to resolve against and silently fell back to
+     auto — the reason these pages grew instead of filling. Give the hosts a
+     definite height and the chain works. */
+  .page-content > app-user-list,
+  .page-content > app-drive {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+
+  /* Header, toolbar and pagination are fixed furniture; only the rows move. */
+  .user-management-page app-page-header,
+  .user-management-page .data-table-toolbar,
+  .user-management-page app-pagination,
+  .drive-page .drive-header-sticky {
+    flex: 0 0 auto !important;
+  }
+
+  /* Pages that scroll rather than fill keep a gap after their last card. */
+  .page-content .dashboard-page,
+  .page-content .gallery-page,
+  .page-content .profile-page {
+    padding-bottom: 16px !important;
+  }
+}

@@ -45,9 +45,20 @@
   box-sizing: border-box;
 }
 
+/* A percentage height here resolves against the initial containing block,
+   which on mobile Safari is the *large* viewport — the size the page would be
+   with the browser's toolbars collapsed. The app shell is sized in dvh (the
+   visible viewport), so body ended up taller than the screen by exactly the
+   toolbar height and the whole document scrolled by that much, even on pages
+   meant to be fixed-height with their own inner scroll area.
+
+   dvh second so browsers without it keep the percentage. Pages whose content
+   genuinely exceeds the viewport still scroll: this sets the box height, not
+   an overflow rule. */
 html,
 body {
   height: 100%;
+  height: 100dvh;
 }
 
 /* Always reserve room for the scrollbar. Pages start short (loader) and grow

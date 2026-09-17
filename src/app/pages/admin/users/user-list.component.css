@@ -134,3 +134,10 @@
   color: #dc2626;
   background: #fef2f2;
 }
+
+/* Phone-only duplicate of the page-header action, projected into the table
+   toolbar so it can share a row with the record count. Revealed by the phone
+   rules in src/styles/admin.css, which hide the header one in exchange. */
+.toolbar-add-phone {
+  display: none;
+}

@@ -1,0 +1,79 @@
+/* =========================================================================
+   MANAGER — phone & tablet
+   Covers the manager dashboard: metric cards and the team directory table.
+
+   Breakpoints:  phone <= 640px   |   tablet 641px - 1024px
+   See admin.css for why these declarations are `!important`.
+   ========================================================================= */
+
+/* ------------------------------- PHONE ---------------------------------- */
+@media (max-width: 640px) {
+  .dashboard-page .metrics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .dashboard-page .metric-card {
+    padding: 14px !important;
+  }
+
+  .dashboard-page .metric-val {
+    font-size: 26px !important;
+  }
+
+  /* Card header holds a title and a search box side by side; stack them so
+     the search gets the full width instead of being squeezed to nothing. */
+  .dashboard-page .card-header.flex-between {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .dashboard-page .search-wrap {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* The directory table keeps its columns and scrolls sideways. */
+  .dashboard-page .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .dashboard-page .custom-table th,
+  .dashboard-page .custom-table td {
+    padding: 10px 12px !important;
+    font-size: 12.5px !important;
+    white-space: nowrap !important;
+  }
+
+  .dashboard-page .user-cell {
+    gap: 8px !important;
+  }
+
+  .dashboard-page .user-avatar-initials {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* ------------------------------- TABLET --------------------------------- */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .dashboard-page .metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .dashboard-page .search-wrap {
+    width: 240px !important;
+  }
+
+  .dashboard-page .table-container {
+    overflow-x: auto !important;
+  }
+
+  .dashboard-page .custom-table th,
+  .dashboard-page .custom-table td {
+    padding: 12px 14px !important;
+  }
+}

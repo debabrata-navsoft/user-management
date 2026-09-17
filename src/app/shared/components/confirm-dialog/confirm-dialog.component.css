@@ -21,9 +21,19 @@
   color: #dc2626;
 }
 
+/* The message often names a file, and a name like
+   ADMIN_HOT_DEALS_API_DOCUMENTATION.md is one unbreakable token as far as
+   normal wrapping is concerned — underscores and dots are not break
+   opportunities. Left alone it pushes the dialog wide enough to scroll
+   sideways and shove the buttons out of reach, so break it anywhere.
+   min-width:0 lets this flex child shrink below its content in the first
+   place; without it the text box refuses to narrow and nothing else helps. */
 .confirm-text {
   font-size: 14.5px;
   color: #475569;
   line-height: 1.5;
   padding-top: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }

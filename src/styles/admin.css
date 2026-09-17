@@ -1,0 +1,178 @@
+/* =========================================================================
+   ADMIN — phone & tablet
+   Covers the admin dashboard and the user-management page (table + dialogs).
+   Desktop is handled by each component's own stylesheet; these files only
+   add the two narrower tiers.
+
+   Breakpoints:  phone <= 640px   |   tablet 641px - 1024px
+
+   Declarations are `!important` on purpose. Angular appends component styles
+   to <head> after this global sheet, and a component rule like
+   `.metrics-grid[_ngcontent-x]` outranks a plain `.metrics-grid` here, so an
+   override layer has to say so explicitly.
+   ========================================================================= */
+
+/* ------------------------------- PHONE ---------------------------------- */
+@media (max-width: 640px) {
+  /* Admin dashboard: metric and analytics cards go single file. */
+  .dashboard-page .metrics-grid,
+  .dashboard-page .analytics-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .dashboard-page .metric-card {
+    padding: 14px !important;
+  }
+
+  .dashboard-page .metric-val {
+    font-size: 26px !important;
+  }
+
+  /* Fill the padded content box exactly, so the pagination lands flush at the
+     bottom. `height: 100%` beats the desktop `calc(100vh - 96px)`: that
+     hardcodes the navbar height and one padding value, and any drift between
+     those numbers and reality shows up as a strip of dead space under the
+     card. The parent has a definite height, so 100% resolves cleanly. */
+  .user-management-page {
+    height: 100% !important;
+    margin-bottom: 0 !important;
+    gap: 8px !important;
+  }
+
+  /* Everything above the table is fixed height; the table takes the rest.
+     min-height:0 is what allows this flex child to shrink to its container
+     and scroll internally instead of pushing the pagination off-screen. */
+  .user-management-page app-data-table,
+  .user-management-page .data-table-wrapper,
+  .user-management-page .table-content-card,
+  .user-management-page .table-scroll-area {
+    min-height: 0 !important;
+  }
+
+  .user-management-page .table-content-card {
+    flex: 1 1 auto !important;
+  }
+
+  /* Record count on the left, Add on the right, sharing the toolbar's first
+     row. The two live in different containers on desktop — the count in the
+     toolbar, the button in the page header — so the page projects a second,
+     phone-only button into the toolbar and the header one steps aside here.
+     A full-width button plus a bare count cost two rows of table height. */
+  .user-management-page .page-header-container .header-actions {
+    display: none !important;
+  }
+
+  .user-management-page .toolbar-add-phone {
+    display: flex !important;
+  }
+
+  .user-management-page .data-table-toolbar .toolbar-left {
+    width: 100% !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+
+  /* The desktop table is `table-layout: fixed` with a mix of px and % column
+     widths. Once the px columns alone (600px) outgrow a phone viewport, the
+     percentage ones — User, Department, Phone — resolve to nothing and those
+     columns disappear entirely rather than scrolling into view.
+
+     So on narrow screens drop to auto layout and let each column take the
+     width its content needs. `width: auto` has to beat the inline width the
+     component writes on each <th>, which an !important author rule does.
+     The table then overflows .table-scroll-area and scrolls sideways. */
+  .user-management-page .custom-table {
+    table-layout: auto !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
+
+  .user-management-page .custom-table th,
+  .user-management-page .custom-table td {
+    width: auto !important;
+    padding: 10px 12px !important;
+    font-size: 12.5px !important;
+  }
+
+  .user-management-page .custom-table th.sortable-th {
+    padding: 0 !important;
+  }
+
+  .user-management-page .sort-btn {
+    padding: 10px 12px !important;
+  }
+
+  .user-cell {
+    gap: 8px !important;
+  }
+
+  .user-avatar-initials {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 11px !important;
+  }
+
+  .action-btn-group {
+    gap: 4px !important;
+  }
+
+  .action-btn-group .icon-btn {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  /* View-user dialog: label above value, so long emails get the full width. */
+  .detail-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+  }
+
+  .view-header {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 10px !important;
+  }
+}
+
+/* ------------------------------- TABLET --------------------------------- */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .dashboard-page .metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Analytics panels need their full width to stay readable; one per row. */
+  .dashboard-page .analytics-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .user-management-page {
+    height: 100% !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Same reason as phone: the fixed px columns still outgrow a tablet, which
+     starves the percentage ones. Auto layout plus sideways scroll. */
+  .user-management-page .custom-table {
+    table-layout: auto !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
+
+  .user-management-page .custom-table th,
+  .user-management-page .custom-table td {
+    width: auto !important;
+    padding: 12px 14px !important;
+  }
+
+  .user-management-page .custom-table th.sortable-th {
+    padding: 0 !important;
+  }
+
+  .user-management-page .sort-btn {
+    padding: 12px 14px !important;
+  }
+}

@@ -1,6 +1,12 @@
 .app-layout {
   display: flex;
+  /* dvh is the visible viewport; vh is the *large* one, measured as if the
+     mobile browser's toolbars were collapsed. Sizing the shell with vh makes
+     it taller than the screen, which leaves a strip of bare background under
+     the page and lets the document scroll by that much. vh first as the
+     fallback for browsers without dvh; on desktop the two are identical. */
   min-height: 100vh;
+  min-height: 100dvh;
   background: #f8fafc;
 }
 
@@ -15,6 +21,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: visible;
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
