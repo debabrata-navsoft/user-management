@@ -18,6 +18,20 @@ export class AppValidators {
     };
   }
 
+  /**
+   * `Validators.required` accepts a value of only spaces, so a password of blanks reads as
+   * present and fails the strength rule instead — the field looks empty while the message
+   * talks about characters the user cannot see. Blank counts as missing here, and the error
+   * key stays `required` so every message stays as it was.
+   */
+  static required(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      const blank = value === null || value === undefined || String(value).trim() === '';
+      return blank ? { required: true } : null;
+    };
+  }
+
   static passwordStrength(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const val = control.value;

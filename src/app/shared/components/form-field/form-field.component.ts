@@ -28,6 +28,12 @@ export class FormFieldComponent {
   });
 
   message = computed(() => {
+    // Track the control's events here too, not just through `invalid()`. Swapping one
+    // error for another — `required` for `passwordStrength` as the user starts typing —
+    // leaves `invalid()` reading `true` throughout, so without this the memoised message
+    // never recomputes and the field keeps showing the error it first failed with.
+    this.controlEvent();
+
     if (!this.invalid()) return '';
     if (this.errorText()) return this.errorText();
 

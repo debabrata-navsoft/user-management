@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { SnackbarService } from '../../../core/services/snackbar.service';
@@ -35,8 +35,8 @@ export class ResetPasswordComponent implements OnInit {
 
   form: FormGroup = this.fb.group(
     {
-      newPassword: ['', [Validators.required, AppValidators.passwordStrength()]],
-      confirmPassword: ['', [Validators.required]],
+      newPassword: ['', [AppValidators.required(), AppValidators.passwordStrength()]],
+      confirmPassword: ['', [AppValidators.required()]],
     },
     {
       validators: [AppValidators.match('newPassword', 'confirmPassword')],

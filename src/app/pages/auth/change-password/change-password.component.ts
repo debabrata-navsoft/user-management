@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { SnackbarService } from '../../../core/services/snackbar.service';
 import { AppValidators } from '../../../core/utils/validators';
@@ -37,9 +37,9 @@ export class ChangePasswordComponent {
 
   form: FormGroup = this.fb.group(
     {
-      currentPassword: ['', [Validators.required]],
-      newPassword: ['', [Validators.required, AppValidators.passwordStrength()]],
-      confirmNewPassword: ['', [Validators.required]],
+      currentPassword: ['', [AppValidators.required()]],
+      newPassword: ['', [AppValidators.required(), AppValidators.passwordStrength()]],
+      confirmNewPassword: ['', [AppValidators.required()]],
     },
     {
       validators: [AppValidators.match('newPassword', 'confirmNewPassword')],
