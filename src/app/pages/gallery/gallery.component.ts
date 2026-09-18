@@ -7,6 +7,7 @@ import { ImageModalService } from '../../core/services/image-modal.service';
 import { ImageService } from '../../core/services/image.service';
 import { MediaUploadOutcome } from '../../core/services/media-upload.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
+import { UploaderService } from '../../core/services/uploader.service';
 import { formatBytes, formatDate } from '../../core/utils/formatters';
 import { PacedWriteOutcome, runPacedWrites } from '../../core/utils/write-pacing';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -40,6 +41,7 @@ export class GalleryComponent implements OnInit {
   private imageService = inject(ImageService);
   private authService = inject(AuthService);
   private snackbar = inject(SnackbarService);
+  uploaders = inject(UploaderService);
   modalService = inject(ImageModalService);
 
   isLoading = signal<boolean>(true);

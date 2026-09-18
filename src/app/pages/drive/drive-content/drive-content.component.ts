@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { DriveNode } from '../../../core/models/drive.model';
+import { UploaderService } from '../../../core/services/uploader.service';
 import { isImageType, isVideoType } from '../../../core/utils/file-types';
 import { formatBytes, formatDate, getInitials } from '../../../core/utils/formatters';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -26,6 +27,8 @@ import { DriveItemMenuComponent } from '../drive-item-menu/drive-item-menu.compo
   styleUrl: './drive-content.component.css',
 })
 export class DriveContentComponent {
+  uploaders = inject(UploaderService);
+
   isLoading = input<boolean>(false);
   currentFolders = input<DriveNode[]>([]);
   currentFiles = input<DriveNode[]>([]);

@@ -188,9 +188,10 @@
                     </div>
                   </td>
                   <td class="td-owner">
+                    @let folderOwner = uploaders.nameFor(folder.uploadedBy);
                     <div class="owner-cell">
-                      <div class="owner-avatar">{{ getInitials(folder.uploadedBy || 'me') }}</div>
-                      <span class="owner-text">{{ folder.uploadedBy || 'me' }}</span>
+                      <div class="owner-avatar">{{ getInitials(folderOwner) }}</div>
+                      <span class="owner-text">{{ folderOwner }}</span>
                     </div>
                   </td>
                   <td class="td-date">{{ formatDate(folder.createdAt) }}</td>
@@ -268,9 +269,10 @@
                     </div>
                   </td>
                   <td class="td-owner">
+                    @let fileOwner = uploaders.nameFor(file.uploadedBy);
                     <div class="owner-cell">
-                      <div class="owner-avatar">{{ getInitials(file.uploadedBy || 'me') }}</div>
-                      <span class="owner-text">{{ file.uploadedBy || 'me' }}</span>
+                      <div class="owner-avatar">{{ getInitials(fileOwner) }}</div>
+                      <span class="owner-text">{{ fileOwner }}</span>
                     </div>
                   </td>
                   <td class="td-date">{{ formatDate(file.createdAt) }}</td>

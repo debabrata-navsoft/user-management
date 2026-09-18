@@ -72,6 +72,9 @@
             <span class="prop-chip"><strong>Size:</strong> {{ formatBytes(active.size) }}</span>
             <span class="prop-chip"><strong>Type:</strong> {{ active.type }}</span>
             <span class="prop-chip"
+              ><strong>Uploaded by:</strong> {{ uploaders.nameFor(active.uploadedBy) }}</span
+            >
+            <span class="prop-chip"
               ><strong>Uploaded:</strong> {{ formatDate(active.createdAt) }}</span
             >
           </div>
