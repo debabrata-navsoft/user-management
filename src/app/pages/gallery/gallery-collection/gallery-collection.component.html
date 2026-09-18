@@ -1,0 +1,98 @@
+<div class="card gallery-card">
+  <div class="card-header flex-between">
+    <div>
+      <h3 class="card-title">Gallery Collection</h3>
+      <span class="card-subtitle"
+        >Click an image to inspect it with the magnifier above, double-click to open it
+        fullscreen</span
+      >
+    </div>
+    <div class="gallery-header-actions">
+      @if (selectedCount() > 0) {
+        <span class="selection-count">{{ selectedCount() }} selected</span>
+        <app-ui-button variant="ghost" size="sm" (click)="clearSelection.emit()"
+          >Clear Selection</app-ui-button
+        >
+        <app-ui-button
+          variant="danger"
+          size="sm"
+          [loading]="isDeleting()"
+          (click)="deleteSelected.emit()"
+        >
+          <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+          {{ selectedCount() === 1 ? 'Delete' : 'Delete Selected' }}
+        </app-ui-button>
+      }
+      <div class="gallery-search">
+        <app-search-input
+          placeholder="Search by name or owner..."
+          [value]="searchQuery()"
+          (searchChange)="searchChange.emit($event)"
+        ></app-search-input>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    @if (isLoading()) {
+      <app-loader message="Loading image collection..."></app-loader>
+    } @else if (images().length === 0) {
+      <app-empty-state
+        title="No images in gallery"
+        description="Upload your first photo to get started with the gallery and magnifier."
+        actionText="Upload Images"
+        (action)="upload.emit()"
+      ></app-empty-state>
+    } @else {
+      <label class="select-all-row">
+        <input
+          type="checkbox"
+          class="select-box"
+          [checked]="allSelected()"
+          (change)="toggleSelectAll.emit()"
+        />
+        <span>Select all {{ images().length }} image(s)</span>
+      </label>
+
+      <div class="gallery-grid" [class.selection-active]="selectedCount() > 0">
+        @for (img of images(); track img.id) {
+          <div
+            class="gallery-item"
+            [class.is-selected]="activeImageId() === img.id"
+            [class.is-checked]="isSelected(img.id)"
+            (click)="onCardClick(img)"
+            (dblclick)="onCardDoubleClick($index)"
+          >
+            <div class="gallery-img-wrap">
+              <label class="select-check" (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
+                  class="select-box"
+                  [checked]="isSelected(img.id)"
+                  (change)="toggleSelection.emit(img.id)"
+                  [attr.aria-label]="'Select ' + img.name"
+                />
+              </label>
+              <img [src]="img.url" [alt]="img.name" class="gallery-img" />
+            </div>
+
+            <div class="gallery-item-footer">
+              <span class="img-name truncate" [title]="img.name">{{ img.name }}</span>
+              <div class="img-info-row">
+                <span class="img-size">{{ formatBytes(img.size) }}</span>
+                <button
+                  type="button"
+                  class="trash-btn"
+                  (click)="deleteImage.emit(img); $event.stopPropagation()"
+                  title="Delete image"
+                >
+                  <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

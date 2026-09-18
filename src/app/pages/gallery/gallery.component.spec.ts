@@ -7,7 +7,9 @@ import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import {
   AlertCircle,
+  ArrowLeft,
   Download,
+  Grid,
   LucideAngularModule,
   Maximize2,
   Plus,
@@ -18,6 +20,7 @@ import {
   X,
 } from 'lucide-angular';
 import { ImageItem } from '../../core/models/image.model';
+import { ImageModalService } from '../../core/services/image-modal.service';
 import { ImageService } from '../../core/services/image.service';
 import { GalleryComponent } from './gallery.component';
 
@@ -58,7 +61,9 @@ describe('GalleryComponent selection', () => {
         importProvidersFrom(
           LucideAngularModule.pick({
             AlertCircle,
+            ArrowLeft,
             Download,
+            Grid,
             Maximize2,
             Plus,
             Search,
@@ -76,6 +81,74 @@ describe('GalleryComponent selection', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     await fixture.whenStable();
+  });
+
+  describe('card interaction', () => {
+    const cards = (): HTMLElement[] =>
+      Array.from(fixture.nativeElement.querySelectorAll('.gallery-item'));
+
+    const fire = (card: HTMLElement, type: 'click' | 'dblclick') => {
+      card.dispatchEvent(new MouseEvent(type, { bubbles: true }));
+      fixture.detectChanges();
+    };
+
+    /** Longer than the component's own double-click window. */
+    const settle = async () => {
+      await new Promise((r) => setTimeout(r, 320));
+      fixture.detectChanges();
+    };
+
+    afterEach(() => TestBed.inject(ImageModalService).close());
+
+    it('magnifies on a single click, once no second click follows', async () => {
+      fire(cards()[1], 'click');
+      await settle();
+
+      expect(component.activeImage()?.name).toBe('two.png');
+      expect(TestBed.inject(ImageModalService).isOpen()).toBe(false);
+    });
+
+    it('opens the lightbox on a double click, cancelling the pending magnify', async () => {
+      const card = cards()[1];
+      fire(card, 'click');
+      fire(card, 'click');
+      fire(card, 'dblclick');
+      await settle();
+
+      const modal = TestBed.inject(ImageModalService);
+      expect(modal.isOpen()).toBe(true);
+      expect(modal.currentImage()?.title).toBe('two.png');
+      // The studio must not have swallowed the grid on the way.
+      expect(component.activeImage()).toBeNull();
+    });
+
+    it('no longer paints Magnify and View pills over the thumbnail', () => {
+      expect(fixture.nativeElement.querySelector('.gallery-hover-overlay')).toBeNull();
+    });
+
+    it('opens the card that was double-clicked, not its position in the full collection', async () => {
+      component.searchQuery.set('three');
+      fixture.detectChanges();
+
+      fire(cards()[0], 'dblclick');
+      await settle();
+
+      expect(TestBed.inject(ImageModalService).currentImage()?.title).toBe('three.png');
+    });
+
+    it('swaps the collection for the studio, and the back button returns to it', async () => {
+      fire(cards()[0], 'click');
+      await settle();
+      expect(fixture.nativeElement.querySelector('app-gallery-collection')).toBeNull();
+
+      const back: HTMLButtonElement = fixture.nativeElement.querySelector('.studio-back-btn');
+      back.click();
+      await fixture.whenStable();
+
+      expect(component.activeImage()).toBeNull();
+      expect(fixture.nativeElement.querySelector('app-gallery-collection')).toBeTruthy();
+      expect(cards().length).toBe(mockImages.length);
+    });
   });
 
   it('searches the uploader as well as the image name', () => {

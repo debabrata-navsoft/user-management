@@ -28,12 +28,23 @@
   @if (activeImage(); as active) {
     <div class="card inspector-card">
       <div class="card-header flex-between">
-        <div>
-          <h3 class="card-title">Product Magnifier Studio</h3>
-          <span class="card-subtitle"
-            >Hover your cursor over the image to trigger the {{ magnifierZoom }}x high-definition
-            zoom lens</span
+        <div class="studio-heading">
+          <button
+            type="button"
+            class="studio-back-btn"
+            (click)="showAllImages()"
+            aria-label="Back to the gallery collection"
+            title="Back to the gallery collection"
           >
+            <lucide-icon name="arrow-left" [size]="18"></lucide-icon>
+          </button>
+          <div>
+            <h3 class="card-title">Product Magnifier Studio</h3>
+            <span class="card-subtitle"
+              >Hover your cursor over the image to trigger the {{ magnifierZoom }}x high-definition
+              zoom lens</span
+            >
+          </div>
         </div>
         <div class="inspector-controls">
           <app-ui-button variant="outline" size="sm" (click)="downloadImage(active)">
@@ -43,6 +54,15 @@
           <app-ui-button variant="danger" size="sm" (click)="confirmDeleteImage(active)">
             <lucide-icon name="trash-2" [size]="14"></lucide-icon>
             Delete
+          </app-ui-button>
+          <app-ui-button
+            variant="secondary"
+            size="sm"
+            (click)="showAllImages()"
+            title="Close the magnifier and show only the gallery collection"
+          >
+            <lucide-icon name="grid" [size]="14"></lucide-icon>
+            All Images
           </app-ui-button>
         </div>
       </div>
@@ -61,10 +81,10 @@
         <div class="active-image-details">
           <div class="details-top-row">
             <h4 class="details-heading">Asset Information</h4>
-            <app-ui-button variant="outline" size="sm" (click)="openLightbox(activeImageIndex())">
+            <!-- <app-ui-button variant="outline" size="sm" (click)="openLightbox(activeImageIndex())">
               <lucide-icon name="maximize-2" [size]="14"></lucide-icon>
               View Fullscreen
-            </app-ui-button>
+            </app-ui-button> -->
           </div>
 
           <div class="detail-badge-group">
@@ -83,7 +103,7 @@
           <div class="gallery-selector-wrap">
             <div class="selector-header">
               <span class="selector-title">Select from Gallery:</span>
-              <span class="selector-count">{{ images().length }} photos</span>
+              <span class="selector-count">{{ filteredImages().length }} photos</span>
             </div>
 
             <div class="thumbnail-cluster">
@@ -93,7 +113,7 @@
                     class="thumb-cluster-item overflow-item"
                     [class.active]="img.id === active.id"
                     (click)="openLightbox(idx)"
-                    title="View all {{ images().length }} images"
+                    title="View all {{ filteredImages().length }} images"
                   >
                     <img [src]="img.url" [alt]="img.name" />
                     <div class="overflow-badge">+{{ overflowThumbnailsCount() }}</div>
@@ -114,118 +134,27 @@
         </div>
       </div>
     </div>
+  } @else {
+    <!-- The studio and the collection are two views of the page, never both at once. -->
+    <app-gallery-collection
+      [images]="filteredImages()"
+      [isLoading]="isLoading()"
+      [isDeleting]="isDeleting()"
+      [searchQuery]="searchQuery()"
+      [activeImageId]="activeImage()?.id ?? null"
+      [selectedIds]="selectedIds()"
+      [allSelected]="allFilteredSelected()"
+      (searchChange)="onSearchChange($event)"
+      (upload)="openUploadModal()"
+      (setActive)="setActiveImage($event)"
+      (openLightbox)="openLightbox($event)"
+      (toggleSelection)="toggleSelection($event)"
+      (toggleSelectAll)="toggleSelectAll()"
+      (clearSelection)="clearSelection()"
+      (deleteSelected)="confirmDeleteSelected()"
+      (deleteImage)="confirmDeleteImage($event)"
+    ></app-gallery-collection>
   }
-
-  <!-- Image Gallery Grid -->
-  <div class="card gallery-card">
-    <div class="card-header flex-between">
-      <div>
-        <h3 class="card-title">Gallery Collection</h3>
-        <span class="card-subtitle">Click any image to inspect it with the magnifier above</span>
-      </div>
-      <div class="gallery-header-actions">
-        @if (selectedCount() > 0) {
-          <span class="selection-count">{{ selectedCount() }} selected</span>
-          <app-ui-button variant="ghost" size="sm" (click)="clearSelection()"
-            >Clear Selection</app-ui-button
-          >
-          <app-ui-button
-            variant="danger"
-            size="sm"
-            [loading]="isDeleting()"
-            (click)="confirmDeleteSelected()"
-          >
-            <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-            {{ selectedCount() === 1 ? 'Delete' : 'Delete Selected' }}
-          </app-ui-button>
-        }
-        <div class="gallery-search">
-          <app-search-input
-            placeholder="Search by name or owner..."
-            [value]="searchQuery()"
-            (searchChange)="onSearchChange($event)"
-          ></app-search-input>
-        </div>
-      </div>
-    </div>
-
-    <div class="card-body">
-      @if (isLoading()) {
-        <app-loader message="Loading image collection..."></app-loader>
-      } @else if (filteredImages().length === 0) {
-        <app-empty-state
-          title="No images in gallery"
-          description="Upload your first photo to get started with the gallery and magnifier."
-          actionText="Upload Images"
-          (action)="openUploadModal()"
-        ></app-empty-state>
-      } @else {
-        <label class="select-all-row">
-          <input
-            type="checkbox"
-            class="select-box"
-            [checked]="allFilteredSelected()"
-            (change)="toggleSelectAll()"
-          />
-          <span>Select all {{ filteredImages().length }} image(s)</span>
-        </label>
-
-        <div class="gallery-grid" [class.selection-active]="selectedCount() > 0">
-          @for (img of filteredImages(); track img.id) {
-            <div
-              class="gallery-item"
-              [class.is-selected]="activeImage()?.id === img.id"
-              [class.is-checked]="isSelected(img.id)"
-              (click)="setActiveImage(img)"
-            >
-              <div class="gallery-img-wrap">
-                <label class="select-check" (click)="$event.stopPropagation()">
-                  <input
-                    type="checkbox"
-                    class="select-box"
-                    [checked]="isSelected(img.id)"
-                    (change)="toggleSelection(img.id)"
-                    [attr.aria-label]="'Select ' + img.name"
-                  />
-                </label>
-                <img [src]="img.url" [alt]="img.name" class="gallery-img" />
-                <div class="gallery-hover-overlay">
-                  <span class="zoom-pill" (click)="setActiveImage(img)">
-                    <lucide-icon name="search" [size]="14"></lucide-icon>
-                    Magnify
-                  </span>
-                  <button
-                    type="button"
-                    class="lightbox-pill"
-                    (click)="openLightbox($index); $event.stopPropagation()"
-                    title="Fullscreen Lightbox"
-                  >
-                    <lucide-icon name="maximize-2" [size]="14"></lucide-icon>
-                    View
-                  </button>
-                </div>
-              </div>
-
-              <div class="gallery-item-footer">
-                <span class="img-name truncate" [title]="img.name">{{ img.name }}</span>
-                <div class="img-info-row">
-                  <span class="img-size">{{ formatBytes(img.size) }}</span>
-                  <button
-                    type="button"
-                    class="trash-btn"
-                    (click)="confirmDeleteImage(img); $event.stopPropagation()"
-                    title="Delete image"
-                  >
-                    <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-                  </button>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-      }
-    </div>
-  </div>
 
   <!-- Delete Confirm Dialog (single card action and bulk selection share this) -->
   <app-confirm-dialog
