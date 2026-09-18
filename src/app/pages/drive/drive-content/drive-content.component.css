@@ -11,7 +11,6 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-gutter: stable;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -20,21 +19,25 @@
   scrollbar-color: #cbd5e1 transparent;
 }
 
-.drive-scrollable-content::-webkit-scrollbar {
+.drive-scrollable-content::-webkit-scrollbar,
+.drive-list-card::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.drive-scrollable-content::-webkit-scrollbar-track {
+.drive-scrollable-content::-webkit-scrollbar-track,
+.drive-list-card::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.drive-scrollable-content::-webkit-scrollbar-thumb {
+.drive-scrollable-content::-webkit-scrollbar-thumb,
+.drive-list-card::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 999px;
 }
 
-.drive-scrollable-content::-webkit-scrollbar-thumb:hover {
+.drive-scrollable-content::-webkit-scrollbar-thumb:hover,
+.drive-list-card::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
@@ -238,10 +241,12 @@
 .drive-list-card {
   position: relative;
   flex: 1;
-  min-height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow-x: auto;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
   border-radius: var(--radius) var(--radius) 0 0;
   border: 1px solid #e2e8f0;
   border-bottom: none;
