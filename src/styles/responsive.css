@@ -534,6 +534,50 @@
     margin-left: auto !important;
     justify-content: flex-end !important;
   }
+
+  /* ---- User dashboard ---- */
+  /* The hero stacks at this width, so centre it deliberately rather than
+     leaving the alignment to however the flex children happen to wrap. */
+  .user-hero-card {
+    padding: 20px 18px !important;
+    text-align: center !important;
+  }
+
+  .user-hero-left {
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 12px !important;
+  }
+
+  .user-meta-chips {
+    justify-content: center !important;
+    gap: 10px !important;
+  }
+
+  /* Three KPIs on a wrapping flex row break 2-then-1 and leave the third
+     stranded under the gap. A fixed 3-up grid keeps the strip even. */
+  .user-hero-kpis {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .u-kpi-item {
+    min-width: 0 !important;
+    padding: 10px 6px !important;
+  }
+
+  .u-kpi-lbl {
+    font-size: 10.5px !important;
+  }
+
+  /* 190px thumbnails only fit one per row on a phone; halve them so the
+     four recent uploads read as a 2x2 block. */
+  .gallery-mini-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
 }
 
 /* ============================== TABLET ================================== */
@@ -697,6 +741,18 @@
 
   .gallery-grid {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  }
+
+  /* ---- User dashboard ----
+     Four metric cards and three shortcuts both land on a 3-up track count here,
+     which strands a single card alone on the last row. Pin the counts so each
+     section fills its rows: metrics 2x2, shortcuts one per row. */
+  .emp-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .emp-shortcuts-list {
+    grid-template-columns: 1fr !important;
   }
 }
 

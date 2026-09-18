@@ -10,13 +10,7 @@ import { DriveService } from '../../../core/services/drive.service';
 import { ImageModalService } from '../../../core/services/image-modal.service';
 import { ImageService } from '../../../core/services/image.service';
 import { UserService } from '../../../core/services/user.service';
-import {
-  formatBytes,
-  formatDate,
-  getInitials,
-  roleBadgeVariant,
-} from '../../../core/utils/formatters';
-import { BadgeComponent } from '../../../shared/components/badge/badge.component';
+import { formatBytes, getInitials } from '../../../core/utils/formatters';
 import { LoaderComponent } from '../../../shared/components/loader/loader.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { UiButtonComponent } from '../../../shared/components/ui-button/ui-button.component';
@@ -24,14 +18,7 @@ import { UiButtonComponent } from '../../../shared/components/ui-button/ui-butto
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    PageHeaderComponent,
-    UiButtonComponent,
-    BadgeComponent,
-    LoaderComponent,
-  ],
+  imports: [CommonModule, RouterLink, PageHeaderComponent, UiButtonComponent, LoaderComponent],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.css',
 })
@@ -50,12 +37,6 @@ export class UserDashboardComponent implements OnInit {
   images = signal<ImageItem[]>([]);
   allDriveNodes = signal<DriveNode[]>([]);
 
-  formatBytes = formatBytes;
-  formatDate = formatDate;
-  getInitials = getInitials;
-  getRoleBadge = roleBadgeVariant;
-
-  totalImages = computed(() => this.images().length);
   myImages = computed(() => this.images().filter((img) => this.isOwnedByUser(img.uploadedBy)));
   myImagesCount = computed(() => this.myImages().length);
   recentImages = computed(() => this.myImages().slice(0, 4));

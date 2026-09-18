@@ -225,14 +225,8 @@
 }
 
 /* =========================================================
-   3. Middle Section (Peers + Shortcuts)
+   3. Middle Section (Shortcuts)
    ========================================================= */
-.emp-center-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 18px;
-}
-
 .emp-card {
   background: #ffffff;
   border-radius: var(--radius);
@@ -259,111 +253,16 @@
   display: block;
 }
 
-.dept-count-pill {
-  font-size: 12px;
-  font-weight: 600;
-  color: #4f46e5;
-  background: #eef2ff;
-  padding: 3px 9px;
-  border-radius: 20px;
-}
-
 .emp-card-body {
   padding: 18px 20px;
 }
 
-/* Department Peers List */
-.peers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 320px;
-  overflow-y: auto;
-}
-
-.peer-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
-  transition: background 0.15s ease;
-}
-
-.peer-item:hover {
-  background: #f1f5f9;
-}
-
-.peer-item.is-self {
-  background: #eef2ff;
-  border-color: #c7d2fe;
-}
-
-.peer-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #e0e7ff;
-  color: #4338ca;
-  font-size: 12px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.peer-meta {
-  flex: 1;
-  min-width: 0;
-}
-
-.peer-name-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.peer-name {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.self-badge {
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #4338ca;
-  background: #e0e7ff;
-  padding: 1px 6px;
-  border-radius: 10px;
-}
-
-.peer-email {
-  font-size: 12px;
-  color: #64748b;
-  display: block;
-}
-
-.peer-badges {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.empty-peers {
-  text-align: center;
-  padding: 24px;
-  color: #64748b;
-  font-size: 13px;
-}
-
 /* Quick Shortcuts */
+/* The card spans the page, so lay the shortcuts out across it rather than
+   stacking three full-width rows. */
 .emp-shortcuts-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 12px;
 }
 
@@ -445,9 +344,11 @@
 /* =========================================================
    4. Gallery Highlights Preview
    ========================================================= */
+/* auto-fit, not auto-fill: only four thumbnails are ever rendered, and auto-fill
+   would keep the leftover tracks and strand them against the left edge. */
 .gallery-mini-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 14px;
 }
 

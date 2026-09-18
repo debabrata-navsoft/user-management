@@ -262,134 +262,88 @@
       </div>
     </div>
 
-    <!-- Middle Section: Department Peers + Quick Shortcuts -->
-    <div class="emp-center-grid">
-      <!-- Department Peers List -->
-      <div class="emp-card">
-        <div class="emp-card-header flex-between">
-          <div>
-            <h3 class="emp-card-title">
-              My Department Peers ({{ currentUser()?.department || 'General' }})
-            </h3>
-            <span class="emp-card-subtitle">Colleagues in your business unit</span>
-          </div>
-          <span class="dept-count-pill">{{ departmentPeers().length }} Members</span>
-        </div>
-
-        <div class="emp-card-body">
-          <div class="peers-list">
-            @for (peer of departmentPeers(); track peer.id) {
-              <div class="peer-item" [class.is-self]="peer.id === currentUser()?.id">
-                <div class="peer-avatar">{{ getInitials(peer.name) }}</div>
-                <div class="peer-meta">
-                  <div class="peer-name-row">
-                    <span class="peer-name">{{ peer.name }}</span>
-                    @if (peer.id === currentUser()?.id) {
-                      <span class="self-badge">You</span>
-                    }
-                  </div>
-                  <span class="peer-email">{{ peer.email }}</span>
-                </div>
-                <div class="peer-badges">
-                  <app-badge [variant]="getRoleBadge(peer.role)">{{ peer.role }}</app-badge>
-                  <app-badge
-                    [variant]="peer.status === 'active' ? 'success' : 'danger'"
-                    [dot]="true"
-                  >
-                    {{ peer.status }}
-                  </app-badge>
-                </div>
-              </div>
-            } @empty {
-              <div class="empty-peers">No other members in this department yet.</div>
-            }
-          </div>
-        </div>
+    <!-- Middle Section: Quick Shortcuts -->
+    <div class="emp-card">
+      <div class="emp-card-header">
+        <h3 class="emp-card-title">Quick Workspace Shortcuts</h3>
+        <span class="emp-card-subtitle">Direct shortcuts to your daily tools</span>
       </div>
 
-      <!-- Quick Shortcuts -->
-      <div class="emp-card">
-        <div class="emp-card-header">
-          <h3 class="emp-card-title">Quick Workspace Shortcuts</h3>
-          <span class="emp-card-subtitle">Direct shortcuts to your daily tools</span>
-        </div>
+      <div class="emp-card-body">
+        <div class="emp-shortcuts-list">
+          <a routerLink="/gallery" class="shortcut-box">
+            <div class="sc-icon purple">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+            </div>
+            <div class="sc-meta">
+              <span class="sc-title">Image Gallery & Magnifier</span>
+              <span class="sc-desc">Upload photos and examine details with zoom</span>
+            </div>
+            <span class="sc-arrow">→</span>
+          </a>
 
-        <div class="emp-card-body">
-          <div class="emp-shortcuts-list">
-            <a routerLink="/gallery" class="shortcut-box">
-              <div class="sc-icon purple">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                  <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-              </div>
-              <div class="sc-meta">
-                <span class="sc-title">Image Gallery & Magnifier</span>
-                <span class="sc-desc">Upload photos and examine details with zoom</span>
-              </div>
-              <span class="sc-arrow">→</span>
-            </a>
+          <a routerLink="/drive" class="shortcut-box">
+            <div class="sc-icon indigo">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                ></path>
+              </svg>
+            </div>
+            <div class="sc-meta">
+              <span class="sc-title">Cloud Drive Explorer</span>
+              <span class="sc-desc">Organize workplace documents, folders & files</span>
+            </div>
+            <span class="sc-arrow">→</span>
+          </a>
 
-            <a routerLink="/drive" class="shortcut-box">
-              <div class="sc-icon indigo">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path
-                    d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-                  ></path>
-                </svg>
-              </div>
-              <div class="sc-meta">
-                <span class="sc-title">Cloud Drive Explorer</span>
-                <span class="sc-desc">Organize workplace documents, folders & files</span>
-              </div>
-              <span class="sc-arrow">→</span>
-            </a>
-
-            <a routerLink="/profile" class="shortcut-box">
-              <div class="sc-icon success">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-              </div>
-              <div class="sc-meta">
-                <span class="sc-title">Security & Password</span>
-                <span class="sc-desc">Update profile password and security settings</span>
-              </div>
-              <span class="sc-arrow">→</span>
-            </a>
-          </div>
+          <a routerLink="/profile" class="shortcut-box">
+            <div class="sc-icon success">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <div class="sc-meta">
+              <span class="sc-title">Security & Password</span>
+              <span class="sc-desc">Update profile password and security settings</span>
+            </div>
+            <span class="sc-arrow">→</span>
+          </a>
         </div>
       </div>
     </div>
