@@ -20,23 +20,20 @@
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
       <!-- Username / Email Field -->
-      <app-form-field label="Username / Email Address" [control]="form.controls['identifier']">
+      <app-form-field label="Email Address" [control]="form.controls['identifier']">
         <div class="input-wrapper">
           <lucide-icon name="mail" [size]="16" class="input-icon"></lucide-icon>
           <input
             id="identifier"
             type="text"
             formControlName="identifier"
-            placeholder="Enter username or email"
+            placeholder="Enter your email"
             class="form-control"
             autocomplete="username"
           />
         </div>
       </app-form-field>
 
-      <!-- Password Field. The forgot-password link sits outside app-form-field:
-           projected content renders above the validation message, so keeping the
-           link inside pushed "Password is required." below it. -->
       <div class="password-field">
         <app-form-field label="Password" [control]="form.controls['password']">
           <div class="input-wrapper">
