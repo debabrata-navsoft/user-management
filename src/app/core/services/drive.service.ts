@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BreadcrumbItem, DriveNode, DriveStats } from '../models/drive.model';
-import { runPacedWrites } from '../utils/write-pacing';
+import { batchedWrite, runPacedWrites } from '../utils/write-pacing';
 
 export const DRIVE_ROOT = 'root';
 
@@ -83,7 +83,7 @@ export class DriveService {
       switchMap(async (allNodes) => {
         const ids = [...this.getDescendantIds(id, allNodes), id];
         const { done } = await runPacedWrites(ids, (nodeId) =>
-          this.http.delete<void>(`${this.baseUrl}/${nodeId}`),
+          this.http.delete<void>(`${this.baseUrl}/${nodeId}`, { context: batchedWrite() }),
         );
 
         if (done.length < ids.length) {

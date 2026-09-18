@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-angular';
 import { environment } from '../../../environments/environment';
+import { WRITE_RETRIES } from '../utils/write-pacing';
 import { LoadingService } from './loading.service';
 import { MediaUploadItem, MediaUploadService } from './media-upload.service';
 
@@ -142,6 +143,42 @@ describe('MediaUploadService', () => {
       expect(outcome.uploaded).toEqual(['fox.jpg']);
       expect(outcome.failed).toEqual(['dog.jpg']);
     });
+
+    it('retries a dropped write instead of losing the file', async () => {
+      const pending = service.uploadToGallery([item('cat.png', 'image/png')], {
+        uploadedBy: 'Tester',
+      });
+
+      // json-server drops the connection while it rewrites db.json — status 0.
+      const dropped = await waitForRequest(httpMock, `${environment.apiUrl}/images`);
+      dropped.error(new ProgressEvent('error'), { status: 0, statusText: 'Unknown Error' });
+
+      const retry = await waitForRequest(httpMock, `${environment.apiUrl}/images`, 2000);
+      retry.flush({ id: 7, ...retry.request.body });
+
+      const outcome = await pending;
+      expect(outcome.uploaded).toEqual(['cat.png']);
+      expect(outcome.failed).toEqual([]);
+      expect(outcome.connectionLost).toBeFalsy();
+    });
+
+    it('marks the batch as connection-lost once the retries run out', async () => {
+      const pending = service.uploadToGallery(
+        [item('cat.png', 'image/png'), item('dog.png', 'image/png')],
+        { uploadedBy: 'Tester' },
+      );
+
+      for (let attempt = 0; attempt < WRITE_RETRIES + 1; attempt++) {
+        const req = await waitForRequest(httpMock, `${environment.apiUrl}/images`, 3000);
+        req.error(new ProgressEvent('error'), { status: 0, statusText: 'Unknown Error' });
+      }
+
+      const outcome = await pending;
+      expect(outcome.uploaded).toEqual([]);
+      // The second file is reported too — it was never attempted.
+      expect(outcome.failed).toEqual(['cat.png', 'dog.png']);
+      expect(outcome.connectionLost).toBe(true);
+    });
   });
 
   describe('global loader', () => {
@@ -191,8 +228,8 @@ describe('MediaUploadService', () => {
 });
 
 /** Polls the mock backend until the expected request has been issued. */
-async function waitForRequest(httpMock: HttpTestingController, url: string) {
-  for (let i = 0; i < 50; i++) {
+async function waitForRequest(httpMock: HttpTestingController, url: string, waitMs = 250) {
+  for (let i = 0; i < waitMs / 5; i++) {
     const matches = httpMock.match(url);
     if (matches.length > 0) return matches[0];
     await new Promise((r) => setTimeout(r, 5));

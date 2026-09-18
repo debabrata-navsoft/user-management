@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { SnackbarService } from '../services/snackbar.service';
+import { BATCHED_WRITE } from '../utils/write-pacing';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -18,7 +19,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       } else if (error.status === 0) {
         errorMessage =
           'Unable to connect to mock API server. Please ensure `npm run api` is running on port 3000.';
-        snackbar.error(errorMessage, 'Network Connection Error');
+        // A paced batch retries the drop itself and sums up the result once, so a toast
+        // here would fire per attempt for a run that may well recover.
+        if (!req.context.get(BATCHED_WRITE)) {
+          snackbar.error(errorMessage, 'Network Connection Error');
+        }
       } else if (error.status === 401) {
         authService.logout(true);
         errorMessage = 'Your session has expired. Please log in again.';
