@@ -75,7 +75,7 @@ export class UserService {
   }
 
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.baseUrl);
+    return this.http.get<User[]>(`${this.baseUrl}?_sort=createdAt&_order=desc`);
   }
 
   getUserById(id: string | number): Observable<User> {
