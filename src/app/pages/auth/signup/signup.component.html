@@ -42,7 +42,7 @@
 
       <app-form-field label="Role" [control]="form.controls['role']" [required]="true">
         <select id="role" formControlName="role" class="form-control">
-          <option value="">Please Select</option>
+          <option value="" disabled hidden>Please Select</option>
           <option value="employee">Employee</option>
           <option value="manager">Manager</option>
           <option value="admin">Admin</option>
@@ -51,7 +51,7 @@
 
       <app-form-field label="Department" [control]="form.controls['department']" [required]="true">
         <select id="department" formControlName="department" class="form-control">
-          <option value="">
+          <option value="" disabled hidden>
             {{ departmentOptions().length ? 'Please Select' : 'Select a role first' }}
           </option>
           @for (department of departmentOptions(); track department) {

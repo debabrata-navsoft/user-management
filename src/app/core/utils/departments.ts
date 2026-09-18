@@ -24,6 +24,7 @@ export function linkDepartmentToRole(form: FormGroup): {
 } {
   const role = signal<string>('');
   const kept = signal<string>('');
+  const department = form.controls['department'];
 
   const options = computed<readonly string[]>(() => {
     const list = departmentsForRole(role());
@@ -31,13 +32,20 @@ export function linkDepartmentToRole(form: FormGroup): {
     return extra && !list.includes(extra) ? [...list, extra] : list;
   });
 
+  const syncAvailability = (nextRole: string): void => {
+    if (nextRole) department.enable({ emitEvent: false });
+    else department.disable({ emitEvent: false });
+  };
+
+  syncAvailability('');
+
   form.controls['role'].valueChanges.subscribe((next: string) => {
     role.set(next || '');
     kept.set('');
-    const department = form.controls['department'];
     if (department.value && !options().includes(department.value)) {
       department.setValue('');
     }
+    syncAvailability(next || '');
   });
 
   return {
@@ -45,6 +53,7 @@ export function linkDepartmentToRole(form: FormGroup): {
     seed: (nextRole, nextDepartment) => {
       role.set(nextRole);
       kept.set(nextDepartment);
+      syncAvailability(nextRole);
     },
   };
 }

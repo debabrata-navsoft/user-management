@@ -31,7 +31,10 @@
       >
         <select id="userRole" formControlName="role" class="form-control">
           @for (option of roleOptions; track option.value) {
-            <option [value]="option.value">{{ option.label }}</option>
+            <!-- The empty prompt stays as the closed-state label, but out of the open list. -->
+            <option [value]="option.value" [disabled]="!option.value" [hidden]="!option.value">
+              {{ option.label }}
+            </option>
           }
         </select>
       </app-form-field>
@@ -51,7 +54,7 @@
 
     <app-form-field label="Department" [control]="form.controls['department']" [required]="true">
       <select id="userDept" formControlName="department" class="form-control">
-        <option value="">
+        <option value="" disabled hidden>
           {{ departmentOptions().length ? 'Please Select' : 'Select a role first' }}
         </option>
         @for (department of departmentOptions(); track department) {

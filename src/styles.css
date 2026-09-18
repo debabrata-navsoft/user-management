@@ -196,6 +196,15 @@ select.form-control {
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
+/* A disabled field has to read as unavailable, not merely unfocused. `background-color`,
+   not the `background` shorthand: that would reset the select chevron painted above. */
+.form-control:disabled {
+  background-color: var(--surface-muted);
+  color: var(--text-dim);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
 /* Invalid fields keep the red outline, including while focused. The class sits
    on <app-form-field>, which owns the control it projects. */
 .form-control.is-invalid,
