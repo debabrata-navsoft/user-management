@@ -7,7 +7,8 @@ import {
   MediaUploadOutcome,
   MediaUploadService,
 } from '../../../core/services/media-upload.service';
-import { isImageType, isVideoType } from '../../../core/utils/file-types';
+import { SnackbarService } from '../../../core/services/snackbar.service';
+import { describeFileType, isImageType, isVideoType } from '../../../core/utils/file-types';
 import { formatBytes } from '../../../core/utils/formatters';
 import { FileDropZoneComponent } from '../file-drop-zone/file-drop-zone.component';
 import { FileTypeIconComponent } from '../file-type-icon/file-type-icon.component';
@@ -41,6 +42,7 @@ export interface FileUploadPreviewItem {
 export class UploadModalComponent {
   private mediaUpload = inject(MediaUploadService);
   private authService = inject(AuthService);
+  private snackbar = inject(SnackbarService);
 
   isOpen = input<boolean>(false);
   title = input<string>('Upload Files');
@@ -91,7 +93,14 @@ export class UploadModalComponent {
     const existingSet = this.normalizedExistingNames();
     const maxBytes = this.maxSizeMb() * 1024 * 1024;
 
+    const rejected: string[] = [];
+
     for (const file of files) {
+      if (!this.isAccepted(file)) {
+        rejected.push(file.name);
+        continue;
+      }
+
       const normalizedName = file.name.toLowerCase().trim();
       const preview: FileUploadPreviewItem = {
         file,
@@ -101,7 +110,6 @@ export class UploadModalComponent {
         dataUrl: '',
       };
 
-      // Check size limit
       if (file.size > maxBytes) {
         preview.error = `File size exceeds ${this.maxSizeMb()}MB limit.`;
       } else if (existingSet.has(normalizedName)) {
@@ -112,17 +120,16 @@ export class UploadModalComponent {
 
       currentQueueNames.add(normalizedName);
 
-      // Read DataURL for preview (or upload)
-      try {
-        preview.dataUrl = await this.readAsDataUrl(file);
-        if (this.isImage(preview)) {
-          const dims = await this.getImageDimensions(preview.dataUrl);
-          if (dims) {
-            preview.dimensions = dims;
+      if (!preview.error) {
+        try {
+          preview.dataUrl = await this.readAsDataUrl(file);
+          if (this.isImage(preview)) {
+            const dims = await this.getImageDimensions(preview.dataUrl);
+            if (dims) {
+              preview.dimensions = dims;
+            }
           }
-        }
-      } catch {
-        if (!preview.error) {
+        } catch {
           preview.error = 'Failed to read file content.';
         }
       }
@@ -131,6 +138,13 @@ export class UploadModalComponent {
     }
 
     this.selectedPreviews.update((curr) => [...curr, ...previews]);
+
+    if (rejected.length > 0) {
+      this.snackbar.error(
+        `${rejected.length} file(s) skipped — ${this.computedHint()}: ${rejected.join(', ')}`,
+        'Unsupported File Type',
+      );
+    }
   }
 
   removePreview(index: number): void {
@@ -187,6 +201,25 @@ export class UploadModalComponent {
         this.close.emit();
       }
     }
+  }
+
+  private isAccepted(file: File): boolean {
+    const rules = this.accept()
+      .split(',')
+      .map((rule) => rule.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (rules.length === 0 || rules.includes('*/*')) return true;
+
+    const name = file.name.toLowerCase();
+    const type = file.type.toLowerCase();
+
+    return rules.some((rule) => {
+      if (rule.startsWith('.')) return name.endsWith(rule);
+      if (rule.endsWith('/*')) return type.startsWith(rule.slice(0, -1));
+      if (type) return type === rule;
+      return describeFileType(name).kind === rule.split('/')[0];
+    });
   }
 
   private readAsDataUrl(file: File): Promise<string> {
