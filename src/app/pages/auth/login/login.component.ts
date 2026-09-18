@@ -67,8 +67,11 @@ export class LoginComponent {
           this.isLoading.set(false);
           this.snackbar.success(`Welcome back, ${user.name}!`, 'Logged in');
 
-          const returnUrl = this.route.snapshot.queryParams['returnUrl'];
-          if (returnUrl && returnUrl !== '/' && returnUrl !== '') {
+          // A bookmarked or stale returnUrl can name another role's dashboard, which
+          // roleGuard would bounce with an "Access Denied" toast. Every dashboard is
+          // role-owned, so let redirectAfterLogin pick the right one instead.
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] as string | undefined;
+          if (returnUrl && returnUrl !== '/' && !returnUrl.endsWith('/dashboard')) {
             this.router.navigateByUrl(returnUrl, { replaceUrl: true });
           } else {
             this.authService.redirectAfterLogin(user.role);

@@ -50,6 +50,17 @@ describe('AuthService', () => {
     expect(service.currentUser()).toBeNull();
   });
 
+  it('sends each role to its own dashboard, and a session-less visitor to login', () => {
+    expect(service.homeUrl('admin')).toBe('/admin/dashboard');
+    expect(service.homeUrl('manager')).toBe('/manager/dashboard');
+    expect(service.homeUrl('employee')).toBe('/user/dashboard');
+
+    // Guessing a dashboard here is what used to leak `/user/dashboard` into the
+    // login returnUrl for signed out visitors, whatever role they then signed in as.
+    expect(service.homeUrl(null)).toBe('/login');
+    expect(service.homeUrl()).toBe('/login');
+  });
+
   it('should authenticate user and store session on valid login without requiring role input', () => {
     const mockUsers = [
       {

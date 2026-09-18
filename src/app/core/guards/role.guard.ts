@@ -19,18 +19,10 @@ export const roleGuard: CanActivateFn = (route) => {
     return true;
   }
 
-  const userRole = authService.currentRole();
-  const ownDashboard =
-    userRole === 'admin'
-      ? '/admin/dashboard'
-      : userRole === 'manager'
-        ? '/manager/dashboard'
-        : '/user/dashboard';
-
   snackbar.error(
     `You do not have permission to view this page. Required: ${allowedRoles.join(', ')}`,
     'Access Denied',
   );
 
-  return router.createUrlTree([ownDashboard]);
+  return router.createUrlTree([authService.homeUrl()]);
 };

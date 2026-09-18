@@ -6,15 +6,10 @@ export const guestGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.isAuthenticated()) {
-    const role = authService.currentRole();
-    const dest =
-      role === 'admin'
-        ? '/admin/dashboard'
-        : role === 'manager'
-          ? '/manager/dashboard'
-          : '/user/dashboard';
-    return router.createUrlTree([dest]);
+  // The role is what names a dashboard. A session without one has nowhere to be sent —
+  // bouncing it to `homeUrl()` would land back on this page and loop.
+  if (authService.isAuthenticated() && authService.currentRole()) {
+    return router.createUrlTree([authService.homeUrl()]);
   }
 
   return true;

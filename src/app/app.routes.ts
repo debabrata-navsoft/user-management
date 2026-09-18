@@ -44,13 +44,9 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: () => {
-          const authService = inject(AuthService);
-          const role = authService.currentRole();
-          if (role === 'admin') return 'admin/dashboard';
-          if (role === 'manager') return 'manager/dashboard';
-          return 'user/dashboard';
-        },
+        // Resolved before `authGuard` runs, so it must not name a dashboard for a signed
+        // out visitor — that URL would end up as the login `returnUrl`.
+        redirectTo: () => inject(AuthService).homeUrl(),
       },
       // Admin Routes
       {

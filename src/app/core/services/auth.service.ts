@@ -194,15 +194,20 @@ export class AuthService {
     return !!current && roles.includes(current);
   }
 
+  /**
+   * Where a role belongs when no specific page was asked for. Without a role there is no
+   * dashboard to pick, so the answer is the login page — guessing one would hand a signed
+   * out visitor another role's URL, which `roleGuard` then has to bounce.
+   */
+  homeUrl(role: Role | null = this.currentRole()): string {
+    if (role === 'admin') return '/admin/dashboard';
+    if (role === 'manager') return '/manager/dashboard';
+    if (role === 'employee') return '/user/dashboard';
+    return '/login';
+  }
+
   redirectAfterLogin(role?: Role): void {
-    const target = role || this.currentRole();
-    const dest =
-      target === 'admin'
-        ? '/admin/dashboard'
-        : target === 'manager'
-          ? '/manager/dashboard'
-          : '/user/dashboard';
-    this.router.navigate([dest], { replaceUrl: true });
+    this.router.navigate([this.homeUrl(role ?? this.currentRole())], { replaceUrl: true });
   }
 
   getToken(): string | null {
