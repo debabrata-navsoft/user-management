@@ -135,9 +135,16 @@
   background: #fef2f2;
 }
 
-/* Phone-only duplicate of the page-header action, projected into the table
-   toolbar so it can share a row with the record count. Revealed by the phone
-   rules in src/styles/responsive.css, which hide the header one in exchange. */
+.icon-btn:disabled,
+.icon-btn:disabled:hover {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--surface);
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+
 .toolbar-add-phone {
   display: none;
 }

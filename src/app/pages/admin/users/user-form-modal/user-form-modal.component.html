@@ -23,7 +23,12 @@
     </app-form-field>
 
     <div class="form-row">
-      <app-form-field label="Role" [control]="form.controls['role']" [required]="true">
+      <app-form-field
+        label="Role"
+        [control]="form.controls['role']"
+        [required]="true"
+        [hint]="isEditingSelf() ? 'You cannot change your own role.' : ''"
+      >
         <select id="userRole" formControlName="role" class="form-control">
           @for (option of roleOptions; track option.value) {
             <option [value]="option.value">{{ option.label }}</option>
@@ -31,7 +36,12 @@
         </select>
       </app-form-field>
 
-      <app-form-field label="Status" [control]="form.controls['status']" [required]="true">
+      <app-form-field
+        label="Status"
+        [control]="form.controls['status']"
+        [required]="true"
+        [hint]="isEditingSelf() ? 'You cannot deactivate your own account.' : ''"
+      >
         <select id="userStatus" formControlName="status" class="form-control">
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>

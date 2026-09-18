@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, output, signal } from '@ang
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { User } from '../../../../core/models/user.model';
+import { AuthService } from '../../../../core/services/auth.service';
 import { linkDepartmentToRole } from '../../../../core/utils/departments';
 import { AppValidators } from '../../../../core/utils/validators';
 import { FormFieldComponent } from '../../../../shared/components/form-field/form-field.component';
@@ -38,6 +39,7 @@ const BLANK_USER = {
 })
 export class UserFormModalComponent {
   private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
 
   mode = input<UserFormMode>('add');
   isOpen = input<boolean>(false);
@@ -51,6 +53,8 @@ export class UserFormModalComponent {
   isEdit = computed(() => this.mode() === 'edit');
   title = computed(() => (this.isEdit() ? 'Edit User Profile' : 'Create New User'));
   submitLabel = computed(() => (this.isEdit() ? 'Save Changes' : 'Create User'));
+
+  isEditingSelf = computed(() => this.isEdit() && this.auth.isCurrentUser(this.user()?.id));
 
   readonly roleOptions = [
     { value: '', label: 'Please Select' },
@@ -102,6 +106,11 @@ export class UserFormModalComponent {
       this.showPassword.set(false);
       this.setEnabled('password', !editing);
       this.setEnabled('id', editing);
+
+      // Disabled controls are dropped from form.value, and updateUser PATCHes,
+      // so leaving them out means the server keeps the existing role/status.
+      this.setEnabled('role', !this.isEditingSelf());
+      this.setEnabled('status', !this.isEditingSelf());
     });
   }
 

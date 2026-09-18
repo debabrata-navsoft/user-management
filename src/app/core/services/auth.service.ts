@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, catchError, map, of, switchMap, tap, throwError } from 'rxjs';
+import { EMPTY, Observable, catchError, map, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AuthSession,
@@ -29,6 +29,11 @@ export class AuthService {
   isAuthenticated = computed(() => !!this.sessionSignal() && !this.isSessionExpired());
   currentRole = computed<Role | null>(() => this.sessionSignal()?.user?.role ?? null);
 
+  isCurrentUser(id: string | number | undefined): boolean {
+    const me = this.currentUser();
+    return !!me && id !== undefined && String(id) === String(me.id);
+  }
+
   constructor() {
     if (this.sessionSignal() && this.isSessionExpired()) {
       this.clearSession();
@@ -42,11 +47,15 @@ export class AuthService {
     if (!currentId) return;
     this.http
       .get<User>(`${environment.apiUrl}/users/${currentId}`)
-      .pipe(catchError(() => of(null)))
+      .pipe(catchError((err: HttpErrorResponse) => (err.status === 404 ? of(null) : EMPTY)))
       .subscribe((latestUser) => {
-        if (latestUser) {
-          this.setSession(latestUser);
+        if (!latestUser || latestUser.status === 'inactive') {
+          this.clearSession();
+          this.snackbar.warning('Your account is no longer active. Please sign in again.');
+          this.router.navigate(['/login']);
+          return;
         }
+        this.setSession(latestUser);
       });
   }
 
@@ -174,7 +183,7 @@ export class AuthService {
 
   logout(redirect: boolean = true): void {
     this.clearSession();
-    this.snackbar.info('You have been logged out.');
+    this.snackbar.info('You have been logged out.', 'Logout');
     if (redirect) {
       this.router.navigate(['/login']);
     }

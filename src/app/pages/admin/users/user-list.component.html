@@ -95,12 +95,14 @@
               <lucide-icon name="pencil" [size]="16"></lucide-icon>
             </button>
 
-            <!-- Delete Button -->
+            <!-- Delete Button. Disabled on your own row — deleting the account
+                 you are signed in as leaves no way back into the app. -->
             <button
               type="button"
               class="icon-btn delete"
               (click)="confirmDeleteUser(row)"
-              title="Delete User"
+              [disabled]="isSelf(row)"
+              [title]="isSelf(row) ? 'You cannot delete your own account' : 'Delete User'"
             >
               <lucide-icon name="trash-2" [size]="16"></lucide-icon>
             </button>
