@@ -86,6 +86,7 @@ Every request in such a batch must carry `context: batchedWrite()`. That sets th
 **Forms: what is shared and what bites.**
 
 - `AppValidators` in [validators.ts](src/app/core/utils/validators.ts) carries `phoneNumber()`, `passwordStrength()`, `match()` and a blank-aware **`required()`** — Angular's own `Validators.required` accepts a value of only spaces, which then fails the strength rule while the field still looks empty. Password fields use `AppValidators.required()`.
+- Password length lives in `PASSWORD_MIN_LENGTH` / `PASSWORD_MAX_LENGTH` (6 / 15), exported from the same file. The validator, the message in `FormFieldComponent`, the modal's `Validators.minLength/maxLength` and the `[maxlength]` on every password input all read those constants — change the rule in one place or the message starts lying about it.
 - Placeholder options are `<option value="" disabled hidden>`: the prompt stays as the closed-state label but never appears as a pickable row, where choosing it would only clear the field.
 - Department is driven by `linkDepartmentToRole` ([departments.ts](src/app/core/utils/departments.ts)) in both the signup form and the user modal: it owns the option list, clears a department the new role cannot have, and **disables the control until a role is picked**.
 - Error text is centralised in `FormFieldComponent.message()`. Add new messages there rather than in a page.

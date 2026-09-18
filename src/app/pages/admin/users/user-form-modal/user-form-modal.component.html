@@ -80,6 +80,7 @@
             id="userPassword"
             [type]="showPassword() ? 'text' : 'password'"
             formControlName="password"
+            [maxlength]="passwordMaxLength"
             placeholder="••••••••"
             class="form-control"
             autocomplete="new-password"

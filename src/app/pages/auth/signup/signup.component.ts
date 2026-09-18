@@ -6,7 +6,7 @@ import { debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { SnackbarService } from '../../../core/services/snackbar.service';
 import { linkDepartmentToRole } from '../../../core/utils/departments';
-import { AppValidators } from '../../../core/utils/validators';
+import { AppValidators, PASSWORD_MAX_LENGTH } from '../../../core/utils/validators';
 import { LucideAngularModule } from 'lucide-angular';
 import { FormFieldComponent } from '../../../shared/components/form-field/form-field.component';
 import { PhoneInputComponent } from '../../../shared/components/phone-input/phone-input.component';
@@ -32,6 +32,9 @@ export class SignupComponent {
   private authService = inject(AuthService);
   private snackbar = inject(SnackbarService);
   private router = inject(Router);
+
+  /** Caps typing in the password boxes at the same bound the validator enforces. */
+  passwordMaxLength = PASSWORD_MAX_LENGTH;
 
   form: FormGroup = this.fb.group(
     {

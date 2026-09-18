@@ -3,7 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { SnackbarService } from '../../../core/services/snackbar.service';
-import { AppValidators } from '../../../core/utils/validators';
+import { AppValidators, PASSWORD_MAX_LENGTH } from '../../../core/utils/validators';
 import { LucideAngularModule } from 'lucide-angular';
 import { FormFieldComponent } from '../../../shared/components/form-field/form-field.component';
 import { UiButtonComponent } from '../../../shared/components/ui-button/ui-button.component';
@@ -34,6 +34,9 @@ export class ChangePasswordComponent {
   showCurrentPassword = signal<boolean>(false);
   showNewPassword = signal<boolean>(false);
   showConfirmPassword = signal<boolean>(false);
+
+  /** Caps typing in the password boxes at the same bound the validator enforces. */
+  passwordMaxLength = PASSWORD_MAX_LENGTH;
 
   form: FormGroup = this.fb.group(
     {

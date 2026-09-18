@@ -4,7 +4,11 @@ import { LucideAngularModule } from 'lucide-angular';
 import { User } from '../../../../core/models/user.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { linkDepartmentToRole } from '../../../../core/utils/departments';
-import { AppValidators } from '../../../../core/utils/validators';
+import {
+  AppValidators,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+} from '../../../../core/utils/validators';
 import { FormFieldComponent } from '../../../../shared/components/form-field/form-field.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { PhoneInputComponent } from '../../../../shared/components/phone-input/phone-input.component';
@@ -65,6 +69,9 @@ export class UserFormModalComponent {
 
   showPassword = signal<boolean>(false);
 
+  /** Caps typing in the password boxes at the same bound the validator enforces. */
+  passwordMaxLength = PASSWORD_MAX_LENGTH;
+
   form: FormGroup = this.fb.group({
     id: [''],
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -73,7 +80,14 @@ export class UserFormModalComponent {
     department: ['', [Validators.required]],
     phone: ['', [AppValidators.phoneNumber()]],
     status: ['active', [Validators.required]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(PASSWORD_MIN_LENGTH),
+        Validators.maxLength(PASSWORD_MAX_LENGTH),
+      ],
+    ],
   });
 
   private department = linkDepartmentToRole(this.form);

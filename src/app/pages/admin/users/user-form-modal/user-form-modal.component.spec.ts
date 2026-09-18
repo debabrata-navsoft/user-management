@@ -13,6 +13,7 @@ import {
   TriangleAlert,
   X,
 } from 'lucide-angular';
+import { PASSWORD_MAX_LENGTH } from '../../../../core/utils/validators';
 import { UserFormModalComponent } from './user-form-modal.component';
 
 describe('UserFormModalComponent', () => {
@@ -60,6 +61,12 @@ describe('UserFormModalComponent', () => {
     choose('userRole', 'admin');
 
     expect(component.form.controls['role'].value).toBe('admin');
+  });
+
+  it('caps the password box at the same length the validator enforces', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('#userPassword');
+
+    expect(input.getAttribute('maxlength')).toBe(String(PASSWORD_MAX_LENGTH));
   });
 
   it('opens the department list once a role is chosen', () => {

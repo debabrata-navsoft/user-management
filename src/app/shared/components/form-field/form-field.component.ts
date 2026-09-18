@@ -2,6 +2,7 @@ import { Component, computed, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl } from '@angular/forms';
 import { EMPTY, switchMap } from 'rxjs';
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../../../core/utils/validators';
 
 @Component({
   selector: 'app-form-field',
@@ -46,7 +47,10 @@ export class FormFieldComponent {
     if (errors['required']) return `${label} is required.`;
     if (errors['email']) return 'Please enter a valid email address.';
     if (errors['passwordStrength']) {
-      return 'Password must be at least 6 characters with uppercase, lowercase, and numbers.';
+      return (
+        `Password must be ${PASSWORD_MIN_LENGTH}-${PASSWORD_MAX_LENGTH} characters ` +
+        'with uppercase, lowercase, and numbers.'
+      );
     }
     if (errors['mismatch']) return 'Passwords do not match.';
     if (errors['minlength']) {

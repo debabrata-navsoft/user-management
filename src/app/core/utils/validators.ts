@@ -2,6 +2,10 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { isValidPhoneNumber, validatePhoneNumberLength } from 'libphonenumber-js';
 import { phoneRulesForDial, splitPhone } from './countries';
 
+/** Exported so the rule and the message it produces cannot drift apart. */
+export const PASSWORD_MIN_LENGTH = 6;
+export const PASSWORD_MAX_LENGTH = 15;
+
 export class AppValidators {
   static phoneNumber(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -37,17 +41,19 @@ export class AppValidators {
       const val = control.value;
       if (!val) return null;
 
-      const hasMinLength = val.length >= 6;
+      const hasMinLength = val.length >= PASSWORD_MIN_LENGTH;
+      const hasMaxLength = val.length <= PASSWORD_MAX_LENGTH;
       const hasUpper = /[A-Z]/.test(val);
       const hasLower = /[a-z]/.test(val);
       const hasNumber = /[0-9]/.test(val);
 
-      const isValid = hasMinLength && hasUpper && hasLower && hasNumber;
+      const isValid = hasMinLength && hasMaxLength && hasUpper && hasLower && hasNumber;
       return isValid
         ? null
         : {
             passwordStrength: {
               hasMinLength,
+              hasMaxLength,
               hasUpper,
               hasLower,
               hasNumber,

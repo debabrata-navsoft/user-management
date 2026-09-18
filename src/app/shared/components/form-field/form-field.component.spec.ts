@@ -78,11 +78,17 @@ describe('FormFieldComponent', () => {
     fixture.detectChanges();
     expect(errorText()).toBe('Password is required.');
 
+    const strengthMessage =
+      'Password must be 6-15 characters with uppercase, lowercase, and numbers.';
+
     control.setValue('abc');
     fixture.detectChanges();
-    expect(errorText()).toBe(
-      'Password must be at least 6 characters with uppercase, lowercase, and numbers.',
-    );
+    expect(errorText()).toBe(strengthMessage);
+
+    // Too long is the same rule, so it must read the same way rather than silently failing.
+    control.setValue('Abcdefghij123456789');
+    fixture.detectChanges();
+    expect(errorText()).toBe(strengthMessage);
 
     control.setValue('Abc123');
     fixture.detectChanges();
