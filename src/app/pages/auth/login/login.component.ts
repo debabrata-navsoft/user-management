@@ -76,7 +76,7 @@ export class LoginComponent {
         },
         error: (err) => {
           this.isLoading.set(false);
-          this.errorMessage.set(err.message || 'Invalid username/email or password.');
+          this.errorMessage.set(err.message || 'Unable to sign in. Please try again.');
         },
       });
   }

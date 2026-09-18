@@ -93,7 +93,7 @@ describe('AuthService', () => {
 
     httpMock.expectOne(`${environment.apiUrl}/users`).flush(mockUsers);
 
-    expect(error?.message).toBe('Invalid username/email or password.');
+    expect(error?.message).toBe('Incorrect password. Please try again.');
     expect(service.isAuthenticated()).toBe(false);
   });
 

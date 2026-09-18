@@ -71,11 +71,15 @@ export class AuthService {
           return true;
         });
 
+        // The login form sends no role, so this branch only ever means the
+        // identifier itself is unknown — say so, and point at signup.
         if (!user) {
-          throw new Error('No account found matching the provided credentials.');
+          throw new Error(
+            'No account found for that username or email. Please check it, or create a new account.',
+          );
         }
         if (user.password !== credentials.password) {
-          throw new Error('Invalid username/email or password.');
+          throw new Error('Incorrect password. Please try again.');
         }
         if (user.status === 'inactive') {
           throw new Error('Your account has been deactivated. Please contact an administrator.');
@@ -141,7 +145,7 @@ export class AuthService {
         map((users) => {
           const user = users.find((u) => u.email.toLowerCase() === cleanEmail);
           if (!user) {
-            throw new Error('No account found associated with this email address.');
+            throw new Error('No account found for that email address.');
           }
           return user;
         }),
