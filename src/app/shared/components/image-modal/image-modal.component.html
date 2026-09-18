@@ -14,6 +14,43 @@
       </div>
 
       <div class="topbar-right">
+        @if (!isVideo(current)) {
+          <div class="zoom-controls">
+            <button
+              type="button"
+              class="zoom-btn"
+              [disabled]="!canZoomOut()"
+              (click)="zoomOut()"
+              aria-label="Zoom out"
+              title="Zoom out (-)"
+            >
+              <lucide-icon name="zoom-out" [size]="18"></lucide-icon>
+            </button>
+
+            <button
+              type="button"
+              class="zoom-level"
+              [disabled]="!isZoomed()"
+              (click)="resetZoom()"
+              aria-label="Reset zoom"
+              title="Reset zoom (0)"
+            >
+              {{ zoomPercent() }}%
+            </button>
+
+            <button
+              type="button"
+              class="zoom-btn"
+              [disabled]="!canZoomIn()"
+              (click)="zoomIn()"
+              aria-label="Zoom in"
+              title="Zoom in (+)"
+            >
+              <lucide-icon name="zoom-in" [size]="18"></lucide-icon>
+            </button>
+          </div>
+        }
+
         <button
           type="button"
           class="modal-close-btn"
@@ -43,11 +80,27 @@
         @if (isVideo(current)) {
           <video [src]="current.url" class="modal-main-video" controls autoplay playsinline></video>
         } @else {
-          <img
-            [src]="current.url"
-            [alt]="current.title || 'Image Preview'"
-            class="modal-main-image"
-          />
+          <div
+            #imageFrame
+            class="image-zoom-frame"
+            [class.is-zoomed]="isZoomed()"
+            [class.is-panning]="isPanning()"
+            (wheel)="onWheel($event)"
+            (dblclick)="toggleZoom($event)"
+            (pointerdown)="onPointerDown($event)"
+            (pointermove)="onPointerMove($event)"
+            (pointerup)="onPointerUp($event)"
+            (pointercancel)="onPointerUp($event)"
+          >
+            <img
+              [src]="current.url"
+              [alt]="current.title || 'Image Preview'"
+              class="modal-main-image"
+              [class.no-transition]="!smoothZoom()"
+              [style.transform]="imageTransform()"
+              draggable="false"
+            />
+          </div>
         }
       </div>
 

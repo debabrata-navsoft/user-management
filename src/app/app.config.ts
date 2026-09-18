@@ -97,6 +97,8 @@ import {
   User,
   Users,
   X,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -207,6 +209,8 @@ export const appConfig: ApplicationConfig = {
         FileSpreadsheet,
         Music,
         Presentation,
+        ZoomIn,
+        ZoomOut,
       }),
     ),
   ],

@@ -57,6 +57,60 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 12px;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.zoom-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zoom-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.zoom-level {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  min-width: 52px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zoom-level:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.zoom-btn:disabled,
+.zoom-level:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .modal-close-btn {
@@ -88,6 +142,7 @@
   justify-content: center;
   padding: 20px 80px;
   cursor: zoom-out;
+  overflow: hidden;
 }
 
 .image-viewer-container {
@@ -97,6 +152,22 @@
   align-items: center;
   justify-content: center;
   cursor: default;
+  animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tight, untransformed wrapper — the zoom math measures this box. */
+.image-zoom-frame {
+  display: inline-flex;
+  touch-action: none;
+  cursor: zoom-in;
+}
+
+.image-zoom-frame.is-zoomed {
+  cursor: grab;
+}
+
+.image-zoom-frame.is-panning {
+  cursor: grabbing;
 }
 
 .modal-main-image,
@@ -108,7 +179,18 @@
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-  animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-main-image {
+  transform-origin: center center;
+  transition: transform 0.18s ease-out;
+  will-change: transform;
+  -webkit-user-drag: none;
+}
+
+/* Wheel zoom and drag-pan must follow the pointer with no easing. */
+.modal-main-image.no-transition {
+  transition: none;
 }
 
 .nav-arrow-btn {
@@ -183,5 +265,20 @@
 
   .image-title-text {
     display: none;
+  }
+
+  .zoom-controls {
+    gap: 0;
+    padding: 3px;
+  }
+
+  .zoom-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .zoom-level {
+    min-width: 44px;
+    font-size: 12px;
   }
 }
