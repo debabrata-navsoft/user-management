@@ -35,8 +35,12 @@ export class DriveContentComponent {
   viewMode = input<'grid' | 'list'>('grid');
   activeMenuNode = input<DriveNode | null>(null);
   menuDropUp = input<boolean>(false);
+  /** Drives the empty state: nothing to show because of a search reads very differently
+   *  from a folder that really is empty. */
+  searchQuery = input<string>('');
 
   createFolder = output<void>();
+  clearSearch = output<void>();
   navigateToFolder = output<string>();
   toggleMenu = output<{ node: DriveNode; event: MouseEvent }>();
   closeMenu = output<void>();

@@ -141,7 +141,8 @@
         }
         <div class="gallery-search">
           <app-search-input
-            placeholder="Filter images..."
+            placeholder="Search by name or owner..."
+            [value]="searchQuery()"
             (searchChange)="onSearchChange($event)"
           ></app-search-input>
         </div>

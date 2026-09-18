@@ -78,7 +78,8 @@
       <div class="toolbar-right">
         <div class="drive-search">
           <app-search-input
-            placeholder="Search folder contents..."
+            placeholder="Search by name or owner..."
+            [value]="searchQuery()"
             (searchChange)="onSearch($event)"
           ></app-search-input>
         </div>
@@ -148,7 +149,9 @@
     [viewMode]="viewMode()"
     [activeMenuNode]="activeMenuNode()"
     [menuDropUp]="menuDropUp()"
+    [searchQuery]="searchQuery()"
     (createFolder)="openCreateFolderModal()"
+    (clearSearch)="onSearch('')"
     (navigateToFolder)="navigateToFolder($event)"
     (toggleMenu)="toggleMenu($event.node, $event.event)"
     (closeMenu)="closeMenu()"

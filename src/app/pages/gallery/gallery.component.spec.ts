@@ -78,6 +78,23 @@ describe('GalleryComponent selection', () => {
     await fixture.whenStable();
   });
 
+  it('searches the uploader as well as the image name', () => {
+    component.images.set([
+      { ...mockImage(1, 'sunset.png'), uploadedBy: 'Smith Josh' },
+      { ...mockImage(2, 'budget.png'), uploadedBy: 'debabrata@demo.com' },
+    ]);
+
+    component.searchQuery.set('smith');
+    expect(component.filteredImages().map((i) => i.name)).toEqual(['sunset.png']);
+
+    // An uploader stored as an email is searchable by that email too.
+    component.searchQuery.set('debabrata');
+    expect(component.filteredImages().map((i) => i.name)).toEqual(['budget.png']);
+
+    component.searchQuery.set('sunset');
+    expect(component.filteredImages().map((i) => i.name)).toEqual(['sunset.png']);
+  });
+
   it('renders a checkbox per image, all unchecked initially', () => {
     expect(cardCheckboxes().length).toBe(mockImages.length);
     expect(cardCheckboxes().every((box) => box.checked)).toBe(false);

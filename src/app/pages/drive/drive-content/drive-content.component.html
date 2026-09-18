@@ -3,15 +3,28 @@
   @if (isLoading()) {
     <app-loader message="Loading drive contents..."></app-loader>
   } @else {
-    <!-- If folder is completely empty -->
+    <!-- Nothing to show: either the search hid it all, or the folder really is empty -->
     @if (currentFolders().length === 0 && currentFiles().length === 0) {
       <div class="card empty-card">
-        <app-empty-state
-          title="This folder is empty"
-          description="Create a subfolder or upload files to organize content in this directory."
-          actionText="Create Folder"
-          (action)="createFolder.emit()"
-        ></app-empty-state>
+        @if (searchQuery()) {
+          <app-empty-state
+            title="No matches in this folder"
+            [description]="
+              'Nothing here matches &quot;' +
+              searchQuery() +
+              '&quot;. Clear the search to see everything in this folder.'
+            "
+            actionText="Clear Search"
+            (action)="clearSearch.emit()"
+          ></app-empty-state>
+        } @else {
+          <app-empty-state
+            title="This folder is empty"
+            description="Create a subfolder or upload files to organize content in this directory."
+            actionText="Create Folder"
+            (action)="createFolder.emit()"
+          ></app-empty-state>
+        }
       </div>
     } @else {
       <!-- GRID VIEW -->

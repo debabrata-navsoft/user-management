@@ -68,7 +68,15 @@ export class GalleryComponent implements OnInit {
   filteredImages = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.images();
-    return this.images().filter((img) => img.name.toLowerCase().includes(q));
+
+    // Same rule as Drive: `uploadedBy` holds an email on newer rows, so match the display
+    // name shown with the image as well as the raw stored value.
+    return this.images().filter(
+      (img) =>
+        img.name.toLowerCase().includes(q) ||
+        this.uploaders.nameFor(img.uploadedBy).toLowerCase().includes(q) ||
+        (img.uploadedBy || '').toLowerCase().includes(q),
+    );
   });
 
   galleryModalItems = computed(() => {
