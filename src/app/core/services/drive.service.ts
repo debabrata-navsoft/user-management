@@ -4,6 +4,7 @@ import { Observable, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BreadcrumbItem, DriveNode, DriveStats } from '../models/drive.model';
 import { batchedWrite, runPacedWrites } from '../utils/write-pacing';
+import { AuthService } from './auth.service';
 
 export const DRIVE_ROOT = 'root';
 
@@ -12,14 +13,25 @@ export const DRIVE_ROOT = 'root';
 })
 export class DriveService {
   private http = inject(HttpClient);
+  private auth = inject(AuthService);
   private baseUrl = `${environment.apiUrl}/nodes`;
 
   getNodes(parentId: string = DRIVE_ROOT): Observable<DriveNode[]> {
-    return this.http.get<DriveNode[]>(`${this.baseUrl}?parentId=${parentId}`);
+    return this.http.get<DriveNode[]>(this.baseUrl, { params: this.auth.ownedScope({ parentId }) });
   }
 
+  /**
+   * Deliberately unscoped: breadcrumbs and `deleteNode` walk the tree, and skipping a
+   * node owned by someone else would break a path or orphan a descendant. Anything that
+   * *displays* a list wants {@link getVisibleNodes} instead.
+   */
   getAllNodes(): Observable<DriveNode[]> {
     return this.http.get<DriveNode[]>(this.baseUrl);
+  }
+
+  /** Every node the signed in user may see at any depth — all of them for admin/manager. */
+  getVisibleNodes(): Observable<DriveNode[]> {
+    return this.http.get<DriveNode[]>(this.baseUrl, { params: this.auth.ownedScope() });
   }
 
   getNodeById(id: string): Observable<DriveNode> {
@@ -122,7 +134,7 @@ export class DriveService {
   }
 
   getStats(): Observable<DriveStats> {
-    return this.getAllNodes().pipe(
+    return this.getVisibleNodes().pipe(
       map((nodes) => {
         let totalFolders = 0;
         let totalFiles = 0;

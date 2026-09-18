@@ -4,16 +4,20 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ImageItem, ImageUploadPreview } from '../models/image.model';
 import { batchedWrite } from '../utils/write-pacing';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ImageService {
   private http = inject(HttpClient);
+  private auth = inject(AuthService);
   private baseUrl = `${environment.apiUrl}/images`;
 
   getImages(): Observable<ImageItem[]> {
-    return this.http.get<ImageItem[]>(`${this.baseUrl}?_sort=createdAt&_order=desc`);
+    return this.http.get<ImageItem[]>(this.baseUrl, {
+      params: this.auth.ownedScope({ _sort: 'createdAt', _order: 'desc' }),
+    });
   }
 
   getImageById(id: string | number): Observable<ImageItem> {

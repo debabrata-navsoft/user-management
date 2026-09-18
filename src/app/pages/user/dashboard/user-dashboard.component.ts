@@ -88,7 +88,7 @@ export class UserDashboardComponent implements OnInit {
     forkJoin({
       users: this.userService.getAllUsers(),
       images: this.imageService.getImages(),
-      driveNodes: this.driveService.getAllNodes(),
+      driveNodes: this.driveService.getVisibleNodes(),
     }).subscribe({
       next: (res) => {
         this.allUsers.set(res.users);

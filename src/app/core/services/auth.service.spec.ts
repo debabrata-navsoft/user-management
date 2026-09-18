@@ -84,6 +84,33 @@ describe('AuthService', () => {
     req.flush(mockUsers);
   });
 
+  describe('ownedScope', () => {
+    /** Signs a role in through the normal login path, so the session is the real thing. */
+    const signIn = (role: string, name: string, email: string) => {
+      service.login({ identifier: email, password: 'Password123' }).subscribe();
+      httpMock
+        .expectOne(`${environment.apiUrl}/users`)
+        .flush([{ id: 9, name, email, password: 'Password123', role, status: 'active' }]);
+    };
+
+    it('limits an employee to their own rows, by email or display name', () => {
+      signIn('employee', 'Emma Employee', 'emma@demo.com');
+
+      const params = service.ownedScope({ _sort: 'createdAt', _order: 'desc' });
+      // Older rows stored the display name, newer ones the email — json-server ORs them.
+      expect(params.getAll('uploadedBy')).toEqual(['emma@demo.com', 'Emma Employee']);
+      expect(params.get('_sort')).toBe('createdAt');
+      expect(service.seesAllUploads()).toBe(false);
+    });
+
+    it('leaves the query untouched for admin and manager', () => {
+      signIn('admin', 'System Admin', 'admin@demo.com');
+
+      expect(service.seesAllUploads()).toBe(true);
+      expect(service.ownedScope({ parentId: 'root' }).has('uploadedBy')).toBe(false);
+    });
+  });
+
   it('should reject login when user is not found or password is wrong', () => {
     const mockUsers = [
       {

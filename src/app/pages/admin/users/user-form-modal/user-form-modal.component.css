@@ -10,33 +10,8 @@
   gap: 14px;
 }
 
-.form-control {
-  width: 100%;
-  height: 42px;
-  padding: 8px 14px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  color: var(--text);
-  background: var(--surface);
-  transition: all 0.2s ease;
-}
-
-.form-control:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-}
-
-/* Invalid fields keep the red outline, including while focused. */
-.form-control.is-invalid {
-  border-color: var(--danger);
-}
-
-.form-control.is-invalid:focus {
-  border-color: var(--danger);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
-}
+/* `.form-control`, its focus ring and its invalid state all come from styles.css. A local
+   copy would re-declare `background` and wipe the select chevron that rule paints. */
 
 @media (max-width: 600px) {
   .form-row {

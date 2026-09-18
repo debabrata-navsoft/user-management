@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { EMPTY, Observable, catchError, map, of, switchMap, tap, throwError } from 'rxjs';
@@ -192,6 +192,27 @@ export class AuthService {
   hasRole(...roles: Role[]): boolean {
     const current = this.currentRole();
     return !!current && roles.includes(current);
+  }
+
+  /** Admins and managers review every user's uploads; anyone else sees only their own. */
+  seesAllUploads(): boolean {
+    return this.hasRole('admin', 'manager');
+  }
+
+  /**
+   * Narrows a Gallery/Drive query to the signed in user's own rows, and leaves it untouched
+   * for admins and managers. `uploadedBy` holds the email on newer rows and the display name
+   * on older ones, so both are sent — json-server reads a repeated param as OR.
+   */
+  ownedScope(base: Record<string, string | number> = {}): HttpParams {
+    let params = new HttpParams({ fromObject: base });
+    if (this.seesAllUploads()) return params;
+
+    const me = this.currentUser();
+    for (const identity of [me?.email, me?.name]) {
+      if (identity) params = params.append('uploadedBy', identity);
+    }
+    return params;
   }
 
   /**
