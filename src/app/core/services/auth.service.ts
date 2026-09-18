@@ -71,8 +71,6 @@ export class AuthService {
           return true;
         });
 
-        // The login form sends no role, so this branch only ever means the
-        // identifier itself is unknown — say so, and point at signup.
         if (!user) {
           throw new Error(
             'No account found for that username or email. Please check it, or create a new account.',
