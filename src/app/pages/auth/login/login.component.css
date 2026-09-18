@@ -96,10 +96,17 @@
   color: #334155;
 }
 
+/* Matches app-form-field's own 6px host gap, so the link sits under the field
+   at the same rhythm it did when it was projected inside it. */
+.password-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .forgot-password-row {
   display: flex;
   justify-content: flex-end;
-  margin-top: 4px;
 }
 
 .forgot-link {

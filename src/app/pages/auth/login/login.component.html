@@ -34,31 +34,35 @@
         </div>
       </app-form-field>
 
-      <!-- Password Field -->
-      <app-form-field label="Password" [control]="form.controls['password']">
-        <div class="input-wrapper">
-          <lucide-icon name="lock" [size]="16" class="input-icon"></lucide-icon>
-          <input
-            id="password"
-            [type]="showPassword() ? 'text' : 'password'"
-            formControlName="password"
-            placeholder="••••••••"
-            class="form-control"
-            autocomplete="current-password"
-          />
-          <button
-            type="button"
-            class="toggle-pwd-btn"
-            (click)="toggleShowPassword()"
-            aria-label="Toggle password visibility"
-          >
-            <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
-          </button>
-        </div>
+      <!-- Password Field. The forgot-password link sits outside app-form-field:
+           projected content renders above the validation message, so keeping the
+           link inside pushed "Password is required." below it. -->
+      <div class="password-field">
+        <app-form-field label="Password" [control]="form.controls['password']">
+          <div class="input-wrapper">
+            <lucide-icon name="lock" [size]="16" class="input-icon"></lucide-icon>
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              class="form-control"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="toggle-pwd-btn"
+              (click)="toggleShowPassword()"
+              aria-label="Toggle password visibility"
+            >
+              <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
+            </button>
+          </div>
+        </app-form-field>
         <div class="forgot-password-row">
           <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
         </div>
-      </app-form-field>
+      </div>
 
       <div class="form-action">
         <app-ui-button
