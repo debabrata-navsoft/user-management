@@ -41,12 +41,12 @@
 
     <app-form-field label="Department" [control]="form.controls['department']" [required]="true">
       <select id="userDept" formControlName="department" class="form-control">
-        <option value="">Please Select</option>
-        <option value="Engineering">Engineering</option>
-        <option value="Sales">Sales</option>
-        <option value="Design">Design</option>
-        <option value="Support">Support</option>
-        <option value="Finance">Finance</option>
+        <option value="">
+          {{ departmentOptions().length ? 'Please Select' : 'Select a role first' }}
+        </option>
+        @for (department of departmentOptions(); track department) {
+          <option [value]="department">{{ department }}</option>
+        }
       </select>
     </app-form-field>
 

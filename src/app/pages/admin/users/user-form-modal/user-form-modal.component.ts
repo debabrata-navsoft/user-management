@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, output, signal } from '@ang
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { User } from '../../../../core/models/user.model';
+import { linkDepartmentToRole } from '../../../../core/utils/departments';
 import { AppValidators } from '../../../../core/utils/validators';
 import { FormFieldComponent } from '../../../../shared/components/form-field/form-field.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
@@ -71,27 +72,33 @@ export class UserFormModalComponent {
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
+  private department = linkDepartmentToRole(this.form);
+  departmentOptions = this.department.options;
+
   constructor() {
     effect(() => {
       if (!this.isOpen()) return;
 
       const editing = this.isEdit();
       const u = this.user();
+      const record = editing && u ? u : null;
 
       this.form.reset(
-        editing && u
+        record
           ? {
-              id: u.id,
-              name: u.name,
-              email: u.email,
-              role: u.role,
-              department: u.department || 'Engineering',
-              phone: u.phone || '',
-              status: u.status,
+              id: record.id,
+              name: record.name,
+              email: record.email,
+              role: record.role,
+              department: record.department || '',
+              phone: record.phone || '',
+              status: record.status,
               password: '',
             }
           : BLANK_USER,
+        { emitEvent: false },
       );
+      this.department.seed(record?.role ?? '', record?.department ?? '');
       this.showPassword.set(false);
       this.setEnabled('password', !editing);
       this.setEnabled('id', editing);

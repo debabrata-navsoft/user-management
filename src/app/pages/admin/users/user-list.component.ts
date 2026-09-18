@@ -5,6 +5,7 @@ import { TableColumn } from '../../../core/models/table.model';
 import { User } from '../../../core/models/user.model';
 import { SnackbarService } from '../../../core/services/snackbar.service';
 import { UserService } from '../../../core/services/user.service';
+import { ALL_DEPARTMENTS } from '../../../core/utils/departments';
 import { formatDate, getInitials, roleBadgeVariant } from '../../../core/utils/formatters';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -28,7 +29,7 @@ const FILTER_DEFS: FilterDef[] = [
     id: 'department',
     title: 'Department',
     searchable: true,
-    values: ['Engineering', 'Sales', 'Design', 'Support', 'Finance'],
+    values: [...ALL_DEPARTMENTS],
   },
   {
     id: 'status',

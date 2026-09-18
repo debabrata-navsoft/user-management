@@ -73,7 +73,6 @@ export class MediaUploadService {
     return result;
   }
 
-  /** Drive and Gallery are separate stores: this writes `nodes` only. */
   uploadToDrive(items: MediaUploadItem[], opts: MediaUploadOptions): Promise<MediaUploadOutcome> {
     const parentId = opts.driveParentId || DRIVE_ROOT;
     return this.runUploads(items, (item) =>
@@ -89,9 +88,6 @@ export class MediaUploadService {
   }
 
   async readAndUploadToDrive(files: File[], opts: MediaUploadOptions): Promise<MediaUploadOutcome> {
-    // Reading a batch of base64 blobs is slow but issues no request, so without
-    // this the overlay only appears once the first POST goes out. Nesting is
-    // safe: LoadingService counts holds.
     this.loading.show();
     try {
       const read = await this.readFiles(files, opts.maxMb ?? this.maxUploadMb);
@@ -139,12 +135,6 @@ export class MediaUploadService {
   ): Promise<MediaUploadOutcome> {
     const outcome: MediaUploadOutcome = { uploaded: [], tooLarge: [], duplicates: [], failed: [] };
 
-    // One loader for the whole batch. The interceptor raises and drops the
-    // global loader per request, so across a paced batch the request count hits
-    // zero in every gap: the overlay unmounts, the page's own inline loader
-    // (which only hides while the overlay is up) takes its place, and the next
-    // file swaps them back — two loaders flickering, once per file. Holding the
-    // count above zero for the batch keeps it to a single, steady overlay.
     this.loading.show();
     try {
       for (const [index, item] of items.entries()) {
@@ -155,8 +145,6 @@ export class MediaUploadService {
         } catch (error) {
           outcome.failed.push(item.name);
 
-          // Once the connection is gone the rest cannot land either, and each
-          // attempt would raise its own error toast. Record them and stop.
           if (isConnectionLost(error)) {
             outcome.failed.push(...items.slice(index + 1).map((rest) => rest.name));
             break;

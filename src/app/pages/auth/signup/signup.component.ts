@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { SnackbarService } from '../../../core/services/snackbar.service';
+import { linkDepartmentToRole } from '../../../core/utils/departments';
 import { AppValidators } from '../../../core/utils/validators';
 import { LucideAngularModule } from 'lucide-angular';
 import { FormFieldComponent } from '../../../shared/components/form-field/form-field.component';
@@ -51,6 +52,8 @@ export class SignupComponent {
   errorMessage = signal<string>('');
   showPassword = signal<boolean>(false);
   showConfirmPassword = signal<boolean>(false);
+
+  departmentOptions = linkDepartmentToRole(this.form).options;
 
   constructor() {
     this.form

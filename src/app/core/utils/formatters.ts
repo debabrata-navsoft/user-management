@@ -46,10 +46,6 @@ export function formatDateTime(dateStr?: string): string {
   }
 }
 
-/**
- * Badge colour for a role. Shared so the user table and the user detail dialog
- * cannot drift apart on what an admin or a manager looks like.
- */
 export function roleBadgeVariant(role: Role): 'primary' | 'purple' | 'indigo' {
   switch (role) {
     case 'admin':
