@@ -104,7 +104,7 @@ export class ManagerDashboardComponent implements OnInit {
     if (dept !== 'All') {
       list = list.filter((u) => (u.department || 'General') === dept);
     }
-    return list.slice(0, 7);
+    return list.slice(0, 4);
   });
 
   formattedDriveSize = computed(() => formatBytes(this.driveSizeBytes()));
