@@ -73,7 +73,15 @@ export class PhoneInputComponent implements ControlValueAccessor {
   }
 
   onNumberChange(event: Event): void {
-    const cleaned = (event.target as HTMLInputElement).value.replace(/[^\d\s-]/g, '');
+    const el = event.target as HTMLInputElement;
+    const cleaned = el.value.replace(/\D/g, '');
+
+    if (el.value !== cleaned) {
+      const caret = (el.selectionStart ?? cleaned.length) - (el.value.length - cleaned.length);
+      el.value = cleaned;
+      el.setSelectionRange(caret, caret);
+    }
+
     this.number.set(cleaned);
     this.emit();
   }
