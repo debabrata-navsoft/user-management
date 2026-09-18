@@ -230,6 +230,23 @@ describe('DriveComponent multi-file upload', () => {
     fixture.componentInstance.closeCreateFolderModal();
     expect(fixture.componentInstance.isCreateFolderOpen()).toBe(false);
   });
+
+  it('still reports a sibling name the search box is hiding, so duplicates stay blocked', () => {
+    const component = fixture.componentInstance;
+    const createdAt = new Date().toISOString();
+    component.nodes.set([
+      { id: 'folder-1', name: 'Reports', type: 'folder', parentId: 'root', createdAt },
+      { id: 'file-1', name: 'notes.pdf', type: 'file', parentId: 'root', createdAt },
+    ]);
+
+    component.searchQuery.set('notes');
+
+    // The grid only shows the match...
+    expect(component.currentFolders()).toEqual([]);
+    // ...but "Reports" is still taken, and the duplicate check has to know that.
+    expect(component.existingFolderNames()).toEqual(['Reports']);
+    expect(component.existingFileNames()).toEqual(['notes.pdf']);
+  });
 });
 
 async function waitForPost(httpMock: HttpTestingController, url: string) {

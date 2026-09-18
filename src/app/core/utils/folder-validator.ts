@@ -9,12 +9,12 @@ export function isValidFolderName(name: string): { valid: boolean; error?: strin
     return { valid: false, error: 'Folder name cannot exceed 100 characters.' };
   }
 
-  const onlyLettersNumbersEmojiSpaces = /^[\p{L}\p{N}\p{M}\p{Extended_Pictographic}\s]+$/u;
+  const onlyLettersNumbersEmojiSpaces = /^[\p{L}\p{N}\p{M}\p{Extended_Pictographic}\s_]+$/u;
   if (!onlyLettersNumbersEmojiSpaces.test(trimmed)) {
     return {
       valid: false,
       error:
-        'Special characters are not allowed in folder names (only letters, numbers, spaces, and emojis).',
+        'Special characters are not allowed in folder names (only letters, numbers, spaces, underscores, and emojis).',
     };
   }
 

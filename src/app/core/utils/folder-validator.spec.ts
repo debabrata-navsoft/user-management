@@ -14,6 +14,14 @@ describe('isValidFolderName', () => {
     expect(res.error).toBe('Folder name cannot exceed 100 characters.');
   });
 
+  it('rejects a name made only of underscores and spaces', () => {
+    const res = isValidFolderName('_ __');
+    expect(res.valid).toBe(false);
+    expect(res.error).toBe(
+      'Folder name must contain at least one letter, number, or emoji character.',
+    );
+  });
+
   it('rejects all special characters including symbols, punctuation, quotes, tildes, backticks', () => {
     const invalidNames = [
       'Test````',
@@ -45,12 +53,12 @@ describe('isValidFolderName', () => {
       const res = isValidFolderName(name);
       expect(res.valid).toBe(false);
       expect(res.error).toBe(
-        'Special characters are not allowed in folder names (only letters, numbers, spaces, and emojis).',
+        'Special characters are not allowed in folder names (only letters, numbers, spaces, underscores, and emojis).',
       );
     }
   });
 
-  it('accepts clean alphanumeric names and spaces', () => {
+  it('accepts clean alphanumeric names, spaces and underscores', () => {
     const validNames = [
       'Invoices 2026',
       'Debu',
@@ -59,6 +67,10 @@ describe('isValidFolderName', () => {
       'Project Alpha',
       'Quarter 1 Reports',
       'Engineering Team Docs',
+      'New_Folder',
+      '_drafts',
+      'Q1_2026 Reports',
+      '📁 Photos_2026',
     ];
     for (const name of validNames) {
       const res = isValidFolderName(name);

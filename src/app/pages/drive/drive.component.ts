@@ -96,18 +96,19 @@ export class DriveComponent implements OnInit {
     return this.filteredNodes().filter((n) => n.type === 'file');
   });
 
-  existingFolderNames = computed(() => {
-    return this.currentFolders().map((f) => f.name);
-  });
+  private siblingsOfType(type: DriveNode['type']): DriveNode[] {
+    return this.nodes().filter((n) => n.type === type);
+  }
 
-  existingFileNames = computed(() => {
-    return this.currentFiles().map((f) => f.name);
-  });
+  // Duplicate checks run against every sibling, never `filteredNodes()` — a name hidden
+  // by the search box is still taken, and matching on the visible list let it through.
+  existingFolderNames = computed(() => this.siblingsOfType('folder').map((f) => f.name));
+
+  existingFileNames = computed(() => this.siblingsOfType('file').map((f) => f.name));
 
   siblingNodesForRename = computed(() => {
     const node = this.nodeToRename();
-    if (!node) return [];
-    return node.type === 'folder' ? this.currentFolders() : this.currentFiles();
+    return node ? this.siblingsOfType(node.type) : [];
   });
 
   ngOnInit(): void {
