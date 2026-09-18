@@ -25,7 +25,7 @@
     <div class="form-row">
       <app-form-field label="Role" [control]="form.controls['role']" [required]="true">
         <select id="userRole" formControlName="role" class="form-control">
-          @for (option of roleOptions(); track option.value) {
+          @for (option of roleOptions; track option.value) {
             <option [value]="option.value">{{ option.label }}</option>
           }
         </select>
@@ -39,8 +39,9 @@
       </app-form-field>
     </div>
 
-    <app-form-field label="Department" [control]="form.controls['department']">
+    <app-form-field label="Department" [control]="form.controls['department']" [required]="true">
       <select id="userDept" formControlName="department" class="form-control">
+        <option value="">Please Select</option>
         <option value="Engineering">Engineering</option>
         <option value="Sales">Sales</option>
         <option value="Design">Design</option>

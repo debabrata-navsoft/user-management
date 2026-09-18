@@ -1,72 +1,72 @@
 <div class="data-table-wrapper">
   <!-- Table Header & Toolbar (All in single row / toolbar card) -->
   <div class="data-table-toolbar">
-    <div class="toolbar-left">
-      @if (showTotalCount()) {
-        <div class="table-total-count">
-          Total <strong>{{ total() }}</strong> {{ entityLabel() }} found
-        </div>
-      }
-
-      <!-- Active Filter Chips in the SAME toolbar row -->
-      @if (activeFilterChips().length > 0) {
-        <div class="toolbar-chips-inline">
-          <div class="chips-divider"></div>
-          <span class="chips-label">Active:</span>
-          <div class="chips-list">
-            @for (chip of activeFilterChips(); track chip.groupId + chip.value) {
-              <div class="filter-chip">
-                <span class="chip-group">{{ chip.groupTitle }}:</span>
-                <span class="chip-value">{{ chip.label }}</span>
-                <button
-                  type="button"
-                  class="chip-remove-btn"
-                  (click)="removeChip(chip)"
-                  aria-label="Remove filter"
-                >
-                  <lucide-icon name="x" [size]="12"></lucide-icon>
-                </button>
-              </div>
-            }
-            <button type="button" class="btn-clear-all-chips" (click)="onClearAllFilters()">
-              Clear all
-            </button>
+    <div class="toolbar-top-row">
+      <div class="toolbar-left">
+        @if (showTotalCount()) {
+          <div class="table-total-count">
+            Total <strong>{{ total() }}</strong> {{ entityLabel() }} found
           </div>
-        </div>
-      }
-
-      <ng-content select="[toolbarLeft], [toolbar-left]"></ng-content>
-    </div>
-
-    <!-- Right Side Toolbar: Search, Filter Trigger, and Custom Actions -->
-    <div class="toolbar-right">
-      <!-- Global Search -->
-      <div class="search-container">
-        <app-search-input
-          [placeholder]="searchPlaceholder()"
-          (searchChange)="searchChange.emit($event)"
-        ></app-search-input>
+        }
+        <ng-content select="[toolbarLeft], [toolbar-left]"></ng-content>
       </div>
 
-      <!-- Filter Drawer Trigger Button with Lucide Icon -->
-      @if (filterGroups().length > 0) {
-        <button
-          type="button"
-          class="btn-filter-trigger"
-          [class.has-active-filters]="totalActiveFiltersCount() > 0"
-          (click)="openFilterDrawer()"
-          aria-label="Open filter drawer"
-        >
-          <lucide-icon name="list-filter" [size]="16"></lucide-icon>
-          <span class="filter-btn-text">Filters</span>
-          @if (totalActiveFiltersCount() > 0) {
-            <span class="filter-badge">{{ totalActiveFiltersCount() }}</span>
-          }
-        </button>
-      }
+      <!-- Right Side Toolbar: Search, Filter Trigger, and Custom Actions -->
+      <div class="toolbar-right">
+        <!-- Global Search -->
+        <div class="search-container">
+          <app-search-input
+            [placeholder]="searchPlaceholder()"
+            (searchChange)="searchChange.emit($event)"
+          ></app-search-input>
+        </div>
 
-      <ng-content select="[toolbarActions], [toolbar-actions]"></ng-content>
+        <!-- Filter Drawer Trigger Button with Lucide Icon -->
+        @if (filterGroups().length > 0) {
+          <button
+            type="button"
+            class="btn-filter-trigger"
+            [class.has-active-filters]="totalActiveFiltersCount() > 0"
+            (click)="openFilterDrawer()"
+            aria-label="Open filter drawer"
+          >
+            <lucide-icon name="list-filter" [size]="16"></lucide-icon>
+            <span class="filter-btn-label">Filters</span>
+            @if (totalActiveFiltersCount() > 0) {
+              <span class="filter-badge">{{ totalActiveFiltersCount() }}</span>
+            }
+          </button>
+        }
+
+        <ng-content select="[toolbarRight], [toolbar-right]"></ng-content>
+      </div>
     </div>
+
+    <!-- Active Filter Chips Row -->
+    @if (activeFilterChips().length > 0) {
+      <div class="toolbar-chips-inline">
+        <span class="chips-label">Active:</span>
+        <div class="chips-list">
+          @for (chip of activeFilterChips(); track chip.groupId + chip.value) {
+            <div class="filter-chip">
+              <span class="chip-group">{{ chip.groupTitle }}:</span>
+              <span class="chip-value">{{ chip.label }}</span>
+              <button
+                type="button"
+                class="chip-remove-btn"
+                (click)="removeChip(chip)"
+                aria-label="Remove filter"
+              >
+                <lucide-icon name="x" [size]="12"></lucide-icon>
+              </button>
+            </div>
+          }
+          <button type="button" class="btn-clear-all-chips" (click)="onClearAllFilters()">
+            Clear all
+          </button>
+        </div>
+      </div>
+    }
   </div>
 
   <!-- Main Table Container -->
@@ -105,13 +105,18 @@
                       <button
                         type="button"
                         class="sort-btn"
+                        [class.is-sorted]="sort() === col.key"
                         [title]="'Sort by ' + col.header"
                         (click)="toggleSort(col.key)"
                       >
-                        <span>{{ col.header }}</span>
+                        <span class="header-label">{{ col.header }}</span>
                         <lucide-icon
                           class="sort-icon"
-                          [name]="sortIcon(col.key)"
+                          [class.is-active]="sort() === col.key"
+                          [class.is-neutral]="sort() !== col.key"
+                          [name]="
+                            sort() === col.key && order() === 'asc' ? 'arrow-up' : 'arrow-down'
+                          "
                           [size]="14"
                         ></lucide-icon>
                       </button>

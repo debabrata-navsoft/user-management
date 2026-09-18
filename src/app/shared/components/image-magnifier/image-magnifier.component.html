@@ -5,10 +5,14 @@
     (mouseenter)="onMouseEnter()"
     (mouseleave)="onMouseLeave()"
     (mousemove)="onMouseMove($event)"
+    (touchstart)="onTouchStart($event)"
+    (touchmove)="onTouchMove($event)"
+    (touchend)="onTouchEnd()"
     (click)="onImageClick()"
     title="Click to view fullscreen lightbox"
   >
     <img
+      #mainImg
       [src]="imageUrl()"
       [alt]="alt()"
       class="main-img"
@@ -43,20 +47,20 @@
         class="magnifier-lens"
         [style.left.px]="lensPosition().x"
         [style.top.px]="lensPosition().y"
-        [style.width.px]="lensSize"
-        [style.height.px]="lensSize"
+        [style.width.px]="lensWidth()"
+        [style.height.px]="lensHeight()"
       ></div>
     }
   </div>
 
-  <!-- Zoomed Preview Window (Big Magnifier on Right) -->
+  <!-- Zoomed Preview Window -->
   @if (isHovering() && !hasError() && !isLoading()) {
-    <div class="zoom-result-window">
+    <div #zoomWindow class="zoom-result-window">
       <div
         class="zoom-result-image"
         [style.background-image]="'url(' + imageUrl() + ')'"
         [style.background-position]="bgPosition()"
-        [style.background-size]="zoomLevel() * 100 + '%'"
+        [style.background-size]="bgSize()"
       ></div>
       <div class="zoom-badge">
         <span>{{ zoomLevel() }}x HD Zoom</span>

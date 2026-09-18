@@ -1,8 +1,8 @@
-<div class="dashboard-page">
+<div class="user-dashboard-page">
   <app-page-header
     [title]="'Welcome, ' + (currentUser()?.name || 'User')"
-    subtitle="Your personal workspace, storage overview and quick shortcuts"
-    badgeText="Personal Portal"
+    subtitle="Personal workspace, team directory, drive storage & personal media"
+    badgeText="User Portal"
   >
     <div actions>
       <app-ui-button variant="secondary" size="md" routerLink="/profile">
@@ -22,6 +22,24 @@
         </svg>
         Edit Profile
       </app-ui-button>
+      <app-ui-button variant="secondary" size="md" routerLink="/drive">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+          ></path>
+        </svg>
+        Drive Files
+      </app-ui-button>
       <app-ui-button variant="primary" size="md" routerLink="/gallery">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -38,162 +56,418 @@
           <circle cx="8.5" cy="8.5" r="1.5"></circle>
           <polyline points="21 15 16 10 5 21"></polyline>
         </svg>
-        Upload Images
+        Upload Photos
       </app-ui-button>
     </div>
   </app-page-header>
 
-  <!-- User Profile Banner Card -->
-  @if (currentUser(); as user) {
-    <div class="profile-banner-card">
-      <div class="banner-avatar">
-        {{ userInitials() }}
-      </div>
-      <div class="banner-info">
-        <div class="banner-name-row">
-          <h2 class="banner-name">{{ user.name }}</h2>
-          <app-badge [variant]="'primary'" [dot]="true">{{ user.role }}</app-badge>
+  @if (isLoading()) {
+    <app-loader message="Loading employee workspace..."></app-loader>
+  } @else {
+    <!-- User Profile Hero Card -->
+    @if (currentUser(); as user) {
+      <div class="user-hero-card">
+        <div class="user-hero-left">
+          <div class="user-hero-avatar">
+            {{ userInitials() }}
+          </div>
+          <div class="user-hero-details">
+            <div class="user-name-badge-row">
+              <h2 class="user-display-name">{{ user.name }}</h2>
+              <span class="status-pill active">
+                <span class="pulse-dot"></span>
+                Active Account
+              </span>
+            </div>
+            <div class="user-meta-chips">
+              <span class="meta-chip">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                  ></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                {{ user.email }}
+              </span>
+              <span class="meta-chip">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+                {{ user.department || 'General' }}
+              </span>
+              @if (user.phone) {
+                <span class="meta-chip">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                    ></path>
+                  </svg>
+                  {{ user.phone }}
+                </span>
+              }
+            </div>
+          </div>
         </div>
-        <div class="banner-meta-items">
-          <span class="meta-item">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-              ></path>
-              <polyline points="22,6 12,13 2,6"></polyline>
-            </svg>
-            {{ user.email }}
-          </span>
-          <span class="meta-item">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-            </svg>
-            {{ user.department || 'General Member' }}
-          </span>
-          @if (user.phone) {
-            <span class="meta-item">
+
+        <div class="user-hero-kpis">
+          <div class="u-kpi-item">
+            <span class="u-kpi-val">{{ departmentPeers().length }}</span>
+            <span class="u-kpi-lbl">Team Peers</span>
+          </div>
+          <div class="u-kpi-item">
+            <span class="u-kpi-val">{{ myDriveNodesCount() }}</span>
+            <span class="u-kpi-lbl">My Drive Files</span>
+          </div>
+          <div class="u-kpi-item">
+            <span class="u-kpi-val">{{ myImagesCount() }}</span>
+            <span class="u-kpi-lbl">My Photos</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Employee 4 Metrics Row -->
+    <div class="emp-metrics-grid">
+      <div class="emp-metric-card">
+        <div class="emp-metric-icon indigo">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="emp-metric-body">
+          <span class="emp-metric-label">Department Colleagues</span>
+          <div class="emp-metric-val">{{ departmentPeers().length }}</div>
+          <span class="emp-metric-sub"
+            >{{ currentUser()?.department || 'General' }} department</span
+          >
+        </div>
+      </div>
+
+      <div class="emp-metric-card">
+        <div class="emp-metric-icon emerald">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+            ></path>
+          </svg>
+        </div>
+        <div class="emp-metric-body">
+          <span class="emp-metric-label">My Cloud Storage</span>
+          <div class="emp-metric-val">{{ formattedMyDriveSize() }}</div>
+          <span class="emp-metric-sub">{{ myDriveNodesCount() }} files & folders</span>
+        </div>
+      </div>
+
+      <div class="emp-metric-card">
+        <div class="emp-metric-icon purple">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>
+        <div class="emp-metric-body">
+          <span class="emp-metric-label">My Uploaded Photos</span>
+          <div class="emp-metric-val">{{ myImagesCount() }}</div>
+          <span class="emp-metric-sub">Uploaded by you</span>
+        </div>
+      </div>
+
+      <div class="emp-metric-card">
+        <div class="emp-metric-icon amber">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <div class="emp-metric-body">
+          <span class="emp-metric-label">Security & Role</span>
+          <div class="emp-metric-val">Employee</div>
+          <span class="emp-metric-sub positive">Account Protected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Section: Department Peers + Quick Shortcuts -->
+    <div class="emp-center-grid">
+      <!-- Department Peers List -->
+      <div class="emp-card">
+        <div class="emp-card-header flex-between">
+          <div>
+            <h3 class="emp-card-title">
+              My Department Peers ({{ currentUser()?.department || 'General' }})
+            </h3>
+            <span class="emp-card-subtitle">Colleagues in your business unit</span>
+          </div>
+          <span class="dept-count-pill">{{ departmentPeers().length }} Members</span>
+        </div>
+
+        <div class="emp-card-body">
+          <div class="peers-list">
+            @for (peer of departmentPeers(); track peer.id) {
+              <div class="peer-item" [class.is-self]="peer.id === currentUser()?.id">
+                <div class="peer-avatar">{{ getInitials(peer.name) }}</div>
+                <div class="peer-meta">
+                  <div class="peer-name-row">
+                    <span class="peer-name">{{ peer.name }}</span>
+                    @if (peer.id === currentUser()?.id) {
+                      <span class="self-badge">You</span>
+                    }
+                  </div>
+                  <span class="peer-email">{{ peer.email }}</span>
+                </div>
+                <div class="peer-badges">
+                  <app-badge [variant]="getRoleBadge(peer.role)">{{ peer.role }}</app-badge>
+                  <app-badge
+                    [variant]="peer.status === 'active' ? 'success' : 'danger'"
+                    [dot]="true"
+                  >
+                    {{ peer.status }}
+                  </app-badge>
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-peers">No other members in this department yet.</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Shortcuts -->
+      <div class="emp-card">
+        <div class="emp-card-header">
+          <h3 class="emp-card-title">Quick Workspace Shortcuts</h3>
+          <span class="emp-card-subtitle">Direct shortcuts to your daily tools</span>
+        </div>
+
+        <div class="emp-card-body">
+          <div class="emp-shortcuts-list">
+            <a routerLink="/gallery" class="shortcut-box">
+              <div class="sc-icon purple">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <div class="sc-meta">
+                <span class="sc-title">Image Gallery & Magnifier</span>
+                <span class="sc-desc">Upload photos and examine details with zoom</span>
+              </div>
+              <span class="sc-arrow">→</span>
+            </a>
+
+            <a routerLink="/drive" class="shortcut-box">
+              <div class="sc-icon indigo">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                  ></path>
+                </svg>
+              </div>
+              <div class="sc-meta">
+                <span class="sc-title">Cloud Drive Explorer</span>
+                <span class="sc-desc">Organize workplace documents, folders & files</span>
+              </div>
+              <span class="sc-arrow">→</span>
+            </a>
+
+            <a routerLink="/profile" class="shortcut-box">
+              <div class="sc-icon success">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <div class="sc-meta">
+                <span class="sc-title">Security & Password</span>
+                <span class="sc-desc">Update profile password and security settings</span>
+              </div>
+              <span class="sc-arrow">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Section: My Uploaded Media Gallery Highlights -->
+    <div class="emp-card gallery-preview-card">
+      <div class="emp-card-header flex-between">
+        <div>
+          <h3 class="emp-card-title">My Uploaded Media</h3>
+          <span class="emp-card-subtitle"
+            >Photos uploaded to gallery from your account — click any to inspect</span
+          >
+        </div>
+        <app-ui-button variant="outline" size="sm" routerLink="/gallery">
+          Open Gallery
+        </app-ui-button>
+      </div>
+
+      <div class="emp-card-body">
+        @if (myImages().length > 0) {
+          <div class="gallery-mini-grid">
+            @for (img of recentImages(); track img.id) {
+              <div class="mini-gallery-item" (click)="openImagePreview(img)">
+                <div class="mini-img-wrap">
+                  <img [src]="img.url" [alt]="img.name" loading="lazy" />
+                  <div class="mini-img-overlay">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="11" y1="8" x2="11" y2="14"></line>
+                      <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="mini-img-meta">
+                  <span class="mini-img-title truncate">{{ img.name }}</span>
+                  <span class="mini-img-category">{{ img.type || 'Image' }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="emp-empty-gallery">
+            <div class="emp-empty-icon-wrap">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
+                width="32"
+                height="32"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <path
-                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
-                ></path>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
               </svg>
-              {{ user.phone }}
-            </span>
-          }
-        </div>
+            </div>
+            <p class="empty-title">No Photos Uploaded Yet</p>
+            <p class="empty-subtitle">You haven't uploaded any images from your account yet.</p>
+            <app-ui-button variant="primary" size="sm" routerLink="/gallery">
+              Upload Photos Now
+            </app-ui-button>
+          </div>
+        }
       </div>
     </div>
   }
-
-  <!-- Shortcuts & Quick Cards -->
-  <div class="quick-cards-grid">
-    <div class="card action-box" routerLink="/gallery">
-      <div class="action-icon purple">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <circle cx="8.5" cy="8.5" r="1.5"></circle>
-          <polyline points="21 15 16 10 5 21"></polyline>
-        </svg>
-      </div>
-      <div class="action-meta">
-        <h3 class="action-title">Image Gallery & Magnifier</h3>
-        <p class="action-desc">
-          Upload photos and examine fine details with the product zoom magnifier
-        </p>
-      </div>
-      <span class="action-arrow">→</span>
-    </div>
-
-    <div class="card action-box" routerLink="/drive">
-      <div class="action-icon indigo">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-          ></path>
-        </svg>
-      </div>
-      <div class="action-meta">
-        <h3 class="action-title">Google Drive Explorer</h3>
-        <p class="action-desc">
-          Organize files, create custom folders, and upload workplace documents
-        </p>
-      </div>
-      <span class="action-arrow">→</span>
-    </div>
-
-    <div class="card action-box" routerLink="/profile">
-      <div class="action-icon success">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-      </div>
-      <div class="action-meta">
-        <h3 class="action-title">Security & Password</h3>
-        <p class="action-desc">Change password and keep your credentials protected</p>
-      </div>
-      <span class="action-arrow">→</span>
-    </div>
-  </div>
 </div>

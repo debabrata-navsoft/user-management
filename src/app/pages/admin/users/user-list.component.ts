@@ -18,6 +18,7 @@ interface FilterDef {
   id: 'role' | 'department' | 'status';
   title: string;
   searchable: boolean;
+  singleSelect?: boolean;
   values: string[];
 }
 
@@ -29,7 +30,13 @@ const FILTER_DEFS: FilterDef[] = [
     searchable: true,
     values: ['Engineering', 'Sales', 'Design', 'Support', 'Finance'],
   },
-  { id: 'status', title: 'Status', searchable: false, values: ['active', 'inactive'] },
+  {
+    id: 'status',
+    title: 'Status',
+    searchable: false,
+    singleSelect: true,
+    values: ['active', 'inactive'],
+  },
 ];
 
 const fieldValue = (user: User, id: FilterDef['id']): string => (user[id] || '').toLowerCase();
@@ -104,27 +111,76 @@ export class UserListComponent implements OnInit {
       }
     }
 
-    return FILTER_DEFS.map(({ id, title, searchable, values }) => ({
-      id,
-      title,
-      searchable,
-      options: values.map((value) => ({
-        label: titleCase(value),
-        value,
-        count: counts.get(`${id}:${value.toLowerCase()}`) ?? 0,
-      })),
-    }));
+    const groups: FilterGroup[] = FILTER_DEFS.map(
+      ({ id, title, searchable, singleSelect, values }) => ({
+        id,
+        title,
+        type: 'checkbox' as const,
+        searchable,
+        singleSelect,
+        options: values.map((value) => ({
+          label: titleCase(value),
+          value,
+          count: counts.get(`${id}:${value.toLowerCase()}`) ?? 0,
+        })),
+      }),
+    );
+
+    // Append Created Date filter group
+    groups.push({
+      id: 'createdAt',
+      title: 'Created Date',
+      type: 'date',
+      options: [],
+    });
+
+    return groups;
   });
 
+  private isDateInRange(dateStr: string | undefined, filterVal: string): boolean {
+    if (!dateStr || !filterVal) return true;
+    const itemDate = new Date(dateStr).getTime();
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    if (filterVal === 'today') {
+      const todayStart = new Date().setHours(0, 0, 0, 0);
+      return itemDate >= todayStart;
+    }
+    if (filterVal === '7days') {
+      return itemDate >= now - 7 * oneDay;
+    }
+    if (filterVal === '30days') {
+      return itemDate >= now - 30 * oneDay;
+    }
+    if (filterVal.startsWith('custom:')) {
+      const parts = filterVal.replace('custom:', '').split('_to_');
+      const from = parts[0] ? new Date(parts[0]).setHours(0, 0, 0, 0) : null;
+      const to = parts[1] ? new Date(parts[1]).setHours(23, 59, 59, 999) : null;
+
+      if (from && itemDate < from) return false;
+      if (to && itemDate > to) return false;
+      return true;
+    }
+    return true;
+  }
+
   calculateMatchingCount = (filters: ActiveFilterState): number =>
-    this.allUsers().filter((user) =>
-      FILTER_DEFS.every(({ id }) => {
+    this.allUsers().filter((user) => {
+      const matchesStandard = FILTER_DEFS.every(({ id }) => {
         const selected = filters[id] ?? [];
         return (
           selected.length === 0 || selected.some((v) => v.toLowerCase() === fieldValue(user, id))
         );
-      }),
-    ).length;
+      });
+      if (!matchesStandard) return false;
+
+      const dateFilter = filters['createdAt']?.[0];
+      if (dateFilter && dateFilter !== 'all') {
+        return this.isDateInRange(user.createdAt, dateFilter);
+      }
+      return true;
+    }).length;
 
   ngOnInit(): void {
     this.refresh();
@@ -139,6 +195,24 @@ export class UserListComponent implements OnInit {
   fetchUsers(): void {
     this.isLoading.set(true);
     const filters = this.activeFilters();
+    let startDate: string | undefined;
+    let endDate: string | undefined;
+
+    const dateFilter = filters['createdAt']?.[0];
+    if (dateFilter && dateFilter !== 'all') {
+      if (dateFilter === 'today') {
+        startDate = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+      } else if (dateFilter === '7days') {
+        startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (dateFilter === '30days') {
+        startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (dateFilter.startsWith('custom:')) {
+        const parts = dateFilter.replace('custom:', '').split('_to_');
+        if (parts[0]) startDate = new Date(parts[0]).toISOString();
+        if (parts[1])
+          endDate = new Date(new Date(parts[1]).setHours(23, 59, 59, 999)).toISOString();
+      }
+    }
 
     this.userService
       .getUsers({
@@ -150,6 +224,8 @@ export class UserListComponent implements OnInit {
         role: filters['role'],
         status: filters['status'],
         department: filters['department'],
+        startDate,
+        endDate,
       })
       .subscribe({
         next: (res) => {

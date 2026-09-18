@@ -7,6 +7,8 @@ export interface PaginationParams {
   role?: string | string[];
   status?: string | string[];
   department?: string | string[];
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface PagedResult<T> {

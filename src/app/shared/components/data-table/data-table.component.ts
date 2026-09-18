@@ -78,8 +78,8 @@ export class DataTableComponent {
   }
 
   sortIcon(key: string): string {
-    if (this.sort() !== key) return 'arrow-up';
-    return this.order() === 'asc' ? 'arrow-up' : 'arrow-down';
+    if (this.sort() === key && this.order() === 'asc') return 'arrow-up';
+    return 'arrow-down';
   }
 
   ariaSort(key: string): 'ascending' | 'descending' | 'none' {
@@ -114,9 +114,23 @@ export class DataTableComponent {
       const groupTitle = group ? group.title : groupId;
 
       for (const val of values) {
-        const opt = group?.options.find((o) => o.value === val);
-        const label = opt ? opt.label : val;
-        chips.push({ groupId, groupTitle, value: val, label });
+        if (group?.type === 'date') {
+          let label = val;
+          if (val === 'today') label = 'Today';
+          else if (val === '7days') label = 'Last 7 days';
+          else if (val === '30days') label = 'Last 30 days';
+          else if (val.startsWith('custom:')) {
+            const parts = val.replace('custom:', '').split('_to_');
+            if (parts[0] && parts[1]) label = `${parts[0]} - ${parts[1]}`;
+            else if (parts[0]) label = `From ${parts[0]}`;
+            else if (parts[1]) label = `Up to ${parts[1]}`;
+          }
+          chips.push({ groupId, groupTitle, value: val, label });
+        } else {
+          const opt = group?.options.find((o) => o.value === val);
+          const label = opt ? opt.label : val;
+          chips.push({ groupId, groupTitle, value: val, label });
+        }
       }
     }
     return chips;

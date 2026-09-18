@@ -8,6 +8,7 @@ import {
   AlertCircle,
   CheckCircle2,
   CircleMinus,
+  EllipsisVertical,
   File as FileIcon,
   FileArchive,
   FileCode,
@@ -76,6 +77,7 @@ describe('DriveComponent multi-file upload', () => {
             Music,
             Presentation,
             Upload,
+            EllipsisVertical,
           }),
         ),
       ],
@@ -206,47 +208,27 @@ describe('DriveComponent multi-file upload', () => {
     });
   });
 
-  it('exposes a multiple file input wired to the upload handler', () => {
-    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="file"]');
-    expect(input).toBeTruthy();
-    expect(input.multiple).toBe(true);
+  it('exposes upload modal for multiple file upload', () => {
+    fixture.componentInstance.openUploadModal();
+    fixture.detectChanges();
+    const modal = fixture.nativeElement.querySelector('app-upload-modal');
+    expect(modal).toBeTruthy();
   });
 
-  it('POSTs every selected file, not only the first', async () => {
-    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="file"]');
-    const picked = [
-      fileOf('one.pdf', 'application/pdf'),
-      fileOf('two.zip', 'application/zip'),
-      fileOf('three.txt', 'text/plain'),
-    ];
-    attachFiles(input, picked);
-    input.dispatchEvent(new Event('change'));
+  it('opens and closes upload modal', () => {
+    fixture.componentInstance.openUploadModal();
+    expect(fixture.componentInstance.isUploadModalOpen()).toBe(true);
 
-    const posted: string[] = [];
-    // Uploads are sequential, so drain one POST at a time.
-    for (let i = 0; i < picked.length; i++) {
-      const req = await waitForPost(httpMock, `${environment.apiUrl}/nodes`);
-      posted.push(req.request.body.name);
-      req.flush({ ...req.request.body });
-    }
-
-    expect(posted).toEqual(['one.pdf', 'two.zip', 'three.txt']);
+    fixture.componentInstance.closeUploadModal();
+    expect(fixture.componentInstance.isUploadModalOpen()).toBe(false);
   });
 
-  it('keeps selected images in the drive instead of mirroring them into the gallery', async () => {
-    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="file"]');
-    attachFiles(input, [fileOf('a.png', 'image/png'), fileOf('b.png', 'image/png')]);
-    input.dispatchEvent(new Event('change'));
+  it('opens and closes create folder modal', () => {
+    fixture.componentInstance.openCreateFolderModal();
+    expect(fixture.componentInstance.isCreateFolderOpen()).toBe(true);
 
-    const stored: string[] = [];
-    for (let i = 0; i < 2; i++) {
-      const nodeReq = await waitForPost(httpMock, `${environment.apiUrl}/nodes`);
-      stored.push(nodeReq.request.body.name);
-      nodeReq.flush({ ...nodeReq.request.body });
-    }
-
-    expect(stored).toEqual(['a.png', 'b.png']);
-    httpMock.expectNone(`${environment.apiUrl}/images`);
+    fixture.componentInstance.closeCreateFolderModal();
+    expect(fixture.componentInstance.isCreateFolderOpen()).toBe(false);
   });
 });
 

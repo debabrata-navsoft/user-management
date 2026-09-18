@@ -35,8 +35,14 @@ export class FormFieldComponent {
     if (!errors) return '';
     const label = this.label() || 'This field';
 
+    if (errors['emailExists']) return 'An account with this email already exists.';
+    if (errors['notFound']) return 'No registered account found with this email.';
     if (errors['required']) return `${label} is required.`;
-    if (errors['email']) return 'Enter a valid email address.';
+    if (errors['email']) return 'Please enter a valid email address.';
+    if (errors['passwordStrength']) {
+      return 'Password must be at least 6 characters with uppercase, lowercase, and numbers.';
+    }
+    if (errors['mismatch']) return 'Passwords do not match.';
     if (errors['minlength']) {
       return `${label} must be at least ${errors['minlength'].requiredLength} characters.`;
     }

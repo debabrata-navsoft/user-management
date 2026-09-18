@@ -5,102 +5,24 @@
     [badgeText]="images().length + ' Images Stored'"
   >
     <div actions>
-      <app-ui-button
-        [variant]="showUploader() ? 'secondary' : 'primary'"
-        size="md"
-        (click)="toggleUploader()"
-      >
-        @if (showUploader()) {
-          <lucide-icon name="x" [size]="14"></lucide-icon>
-          Close Uploader
-        } @else {
-          <lucide-icon name="plus" [size]="14"></lucide-icon>
-          Upload Images
-        }
+      <app-ui-button variant="primary" size="md" (click)="openUploadModal()">
+        <lucide-icon name="plus" [size]="14"></lucide-icon>
+        Upload Images
       </app-ui-button>
     </div>
   </app-page-header>
 
-  <!-- Upload Section (Accordion or Toggle) -->
-  @if (showUploader()) {
-    <div class="card upload-card">
-      <div class="card-header">
-        <h3 class="card-title">Multiple Image Upload</h3>
-        <span class="card-subtitle">Select multiple images to preview and batch upload</span>
-      </div>
-
-      <div class="card-body">
-        <app-file-drop-zone
-          accept="image/png, image/jpeg, image/webp, image/gif, image/svg+xml"
-          [multiple]="true"
-          [maxSizeMb]="2"
-          hint="Supports PNG, JPG, WEBP, GIF, SVG up to 2MB each"
-          (filesSelected)="onFilesSelected($event)"
-        ></app-file-drop-zone>
-
-        <!-- Preview Queue -->
-        @if (selectedPreviews().length > 0) {
-          <div class="preview-queue-section">
-            <div class="queue-header">
-              <h4>Ready to Upload ({{ validPreviewsCount() }} valid images)</h4>
-              <div class="queue-actions">
-                <app-ui-button variant="ghost" size="sm" (click)="clearPreviews()"
-                  >Clear All</app-ui-button
-                >
-                <app-ui-button
-                  variant="primary"
-                  size="md"
-                  [disabled]="validPreviewsCount() === 0"
-                  [loading]="isUploading()"
-                  (click)="uploadAll()"
-                >
-                  <lucide-icon name="upload" [size]="14"></lucide-icon>
-                  Upload {{ validPreviewsCount() }} Images
-                </app-ui-button>
-              </div>
-            </div>
-
-            <div class="preview-grid">
-              @for (item of selectedPreviews(); track item.name + $index) {
-                <div class="preview-card" [class.has-error]="item.error">
-                  <div class="preview-thumb-wrap">
-                    @if (item.dataUrl) {
-                      <img [src]="item.dataUrl" [alt]="item.name" class="preview-thumb" />
-                    } @else {
-                      <div class="error-thumb">
-                        <lucide-icon name="alert-circle" [size]="24"></lucide-icon>
-                      </div>
-                    }
-                    <button
-                      type="button"
-                      class="remove-preview-btn"
-                      (click)="removePreview($index)"
-                      aria-label="Remove preview"
-                    >
-                      <lucide-icon name="x" [size]="14"></lucide-icon>
-                    </button>
-                  </div>
-
-                  <div class="preview-meta">
-                    <span class="preview-name truncate" [title]="item.name">{{ item.name }}</span>
-                    <span class="preview-size">{{ formatBytes(item.size) }}</span>
-                    @if (item.dimensions) {
-                      <span class="preview-dims"
-                        >{{ item.dimensions.width }}x{{ item.dimensions.height }}px</span
-                      >
-                    }
-                    @if (item.error) {
-                      <span class="preview-err-text">{{ item.error }}</span>
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-  }
+  <!-- Global Image Upload Modal Dialog -->
+  <app-upload-modal
+    [isOpen]="showUploadModal()"
+    [existingNames]="existingImageNames()"
+    target="gallery"
+    accept="image/png, image/jpeg, image/webp, image/gif, image/svg+xml"
+    [maxSizeMb]="2"
+    title="Upload Images"
+    (close)="closeUploadModal()"
+    (uploaded)="onImagesUploaded($event)"
+  ></app-upload-modal>
 
   <!-- Active Magnifier Inspector Section -->
   @if (activeImage(); as active) {
@@ -231,7 +153,7 @@
           title="No images in gallery"
           description="Upload your first photo to get started with the gallery and magnifier."
           actionText="Upload Images"
-          (action)="openUploader()"
+          (action)="openUploadModal()"
         ></app-empty-state>
       } @else {
         <label class="select-all-row">

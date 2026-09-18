@@ -54,11 +54,6 @@ export class AuthService {
     const input = (credentials.identifier || credentials.username || credentials.email || '')
       .trim()
       .toLowerCase();
-    const role = (credentials.role || '').trim().toLowerCase();
-
-    if (!role) {
-      return throwError(() => new Error('Please select a role to continue.'));
-    }
 
     return this.http.get<User[]>(`${environment.apiUrl}/users`).pipe(
       map((users) => {
@@ -70,7 +65,9 @@ export class AuthService {
             (input === 'manager' && u.role === 'manager');
 
           if (!matchId) return false;
-          if (u.role?.toLowerCase() !== role) return false;
+          if (credentials.role && u.role?.toLowerCase() !== credentials.role.trim().toLowerCase()) {
+            return false;
+          }
           return true;
         });
 
@@ -90,6 +87,21 @@ export class AuthService {
     );
   }
 
+  checkEmailExists(email: string): Observable<boolean> {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      return of(false);
+    }
+    return this.http
+      .get<User[]>(`${environment.apiUrl}/users`, {
+        params: { email: cleanEmail },
+      })
+      .pipe(
+        map((users) => users && users.some((u) => u.email.toLowerCase() === cleanEmail)),
+        catchError(() => of(false)),
+      );
+  }
+
   signUp(payload: SignUpPayload): Observable<User> {
     const email = payload.email.trim().toLowerCase();
 
@@ -107,7 +119,7 @@ export class AuthService {
             name: payload.name.trim(),
             email,
             password: payload.password,
-            role: 'employee',
+            role: payload.role || 'employee',
             phone: payload.phone || '',
             department: payload.department || 'General',
             status: 'active',
@@ -179,7 +191,7 @@ export class AuthService {
         : target === 'manager'
           ? '/manager/dashboard'
           : '/user/dashboard';
-    this.router.navigate([dest]);
+    this.router.navigate([dest], { replaceUrl: true });
   }
 
   getToken(): string | null {

@@ -11,6 +11,7 @@ export interface Country {
   name: string;
   dial: string;
   flag: string;
+  flagSvg: string;
 }
 
 const PREFERRED = ['IN', 'AE', 'SA', 'US', 'GB'];
@@ -30,6 +31,7 @@ export const COUNTRIES: Country[] = (() => {
       name: regionNames.of(code) ?? code,
       dial: `+${getCountryCallingCode(code)}`,
       flag: flagOf(code),
+      flagSvg: `https://flagcdn.com/${(code as string).toLowerCase()}.svg`,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 

@@ -1,22 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
-import { ImageItem, ImageUploadPreview } from '../../core/models/image.model';
+import { ImageItem } from '../../core/models/image.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ImageModalService } from '../../core/services/image-modal.service';
 import { ImageService } from '../../core/services/image.service';
-import { MediaUploadService } from '../../core/services/media-upload.service';
+import { MediaUploadOutcome } from '../../core/services/media-upload.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
 import { formatBytes, formatDate } from '../../core/utils/formatters';
 import { PacedWriteOutcome, runPacedWrites } from '../../core/utils/write-pacing';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
-import { FileDropZoneComponent } from '../../shared/components/file-drop-zone/file-drop-zone.component';
 import { ImageMagnifierComponent } from '../../shared/components/image-magnifier/image-magnifier.component';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SearchInputComponent } from '../../shared/components/search-input/search-input.component';
 import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.component';
+import { UploadModalComponent } from '../../shared/components/upload-modal/upload-modal.component';
 
 @Component({
   selector: 'app-gallery',
@@ -25,7 +25,7 @@ import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.c
     CommonModule,
     PageHeaderComponent,
     UiButtonComponent,
-    FileDropZoneComponent,
+    UploadModalComponent,
     ImageMagnifierComponent,
     SearchInputComponent,
     ConfirmDialogComponent,
@@ -38,19 +38,16 @@ import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.c
 })
 export class GalleryComponent implements OnInit {
   private imageService = inject(ImageService);
-  private mediaUpload = inject(MediaUploadService);
   private authService = inject(AuthService);
   private snackbar = inject(SnackbarService);
   modalService = inject(ImageModalService);
 
   isLoading = signal<boolean>(true);
-  isUploading = signal<boolean>(false);
   isDeleting = signal<boolean>(false);
-  showUploader = signal<boolean>(false);
+  showUploadModal = signal<boolean>(false);
 
   images = signal<ImageItem[]>([]);
   searchQuery = signal<string>('');
-  selectedPreviews = signal<ImageUploadPreview[]>([]);
   activeImage = signal<ImageItem | null>(null);
 
   selectedIds = signal<Set<string | number>>(new Set());
@@ -61,13 +58,10 @@ export class GalleryComponent implements OnInit {
   formatBytes = formatBytes;
   formatDate = formatDate;
 
+  existingImageNames = computed(() => this.images().map((img) => img.name));
+
   maxVisibleThumbnails = 8;
-
-  magnifierZoom = 6;
-
-  validPreviewsCount = computed(() => {
-    return this.selectedPreviews().filter((p) => !p.error && p.dataUrl).length;
-  });
+  magnifierZoom = 3;
 
   filteredImages = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -142,49 +136,16 @@ export class GalleryComponent implements OnInit {
     });
   }
 
-  toggleUploader(): void {
-    this.showUploader.update((v) => !v);
+  openUploadModal(): void {
+    this.showUploadModal.set(true);
   }
 
-  openUploader(): void {
-    this.showUploader.set(true);
+  closeUploadModal(): void {
+    this.showUploadModal.set(false);
   }
 
-  async onFilesSelected(files: File[]): Promise<void> {
-    const previews: ImageUploadPreview[] = [];
-    for (const file of files) {
-      const p = await this.imageService.processFileForPreview(file);
-      previews.push(p);
-    }
-    this.selectedPreviews.update((curr) => [...curr, ...previews]);
-  }
-
-  removePreview(index: number): void {
-    this.selectedPreviews.update((curr) => curr.filter((_, i) => i !== index));
-  }
-
-  clearPreviews(): void {
-    this.selectedPreviews.set([]);
-  }
-
-  async uploadAll(): Promise<void> {
-    const valid = this.selectedPreviews().filter((p) => !p.error && p.dataUrl);
-    if (valid.length === 0) return;
-
-    this.isUploading.set(true);
-
-    const outcome = await this.mediaUpload.uploadToGallery(
-      valid.map((p) => ({ name: p.name, size: p.size, type: p.type, dataUrl: p.dataUrl })),
-      { uploadedBy: this.authService.currentUser()?.name || 'User' },
-    );
-    this.mediaUpload.report(outcome, 'Gallery');
-    this.isUploading.set(false);
-
-    const landed = new Set(outcome.uploaded);
-    this.selectedPreviews.update((curr) => curr.filter((p) => !landed.has(p.name)));
-
+  onImagesUploaded(outcome: MediaUploadOutcome): void {
     if (outcome.uploaded.length > 0) {
-      this.showUploader.set(false);
       this.activeImage.set(null);
       this.fetchImages();
     }

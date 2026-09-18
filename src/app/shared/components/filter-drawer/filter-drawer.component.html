@@ -36,41 +36,193 @@
           <!-- Group Content -->
           @if (isGroupExpanded(group.id)) {
             <div class="group-content">
-              @if (group.searchable !== false && group.options.length > 3) {
-                <div class="group-search-box">
-                  <lucide-icon name="search" [size]="14" class="group-search-icon"></lucide-icon>
-                  <input
-                    type="text"
-                    [placeholder]="'Search ' + group.title + '...'"
-                    class="group-search-input"
-                    (input)="onGroupSearch(group.id, $any($event.target).value)"
-                  />
+              @if (group.type === 'date') {
+                <!-- Date Filter Presets & Custom Pickers -->
+                <div class="date-filter-container">
+                  <!-- Preset Buttons (Today, Last 7 days, Last 30 days, All) -->
+                  <div class="date-presets-grid">
+                    <button
+                      type="button"
+                      class="date-preset-btn"
+                      [class.active]="(datePresets()[group.id] || 'all') === 'today'"
+                      (click)="selectDatePreset(group.id, 'today')"
+                    >
+                      Today
+                    </button>
+                    <button
+                      type="button"
+                      class="date-preset-btn"
+                      [class.active]="datePresets()[group.id] === '7days'"
+                      (click)="selectDatePreset(group.id, '7days')"
+                    >
+                      Last 7 days
+                    </button>
+                    <button
+                      type="button"
+                      class="date-preset-btn"
+                      [class.active]="datePresets()[group.id] === '30days'"
+                      (click)="selectDatePreset(group.id, '30days')"
+                    >
+                      Last 30 days
+                    </button>
+                    <button
+                      type="button"
+                      class="date-preset-btn"
+                      [class.active]="(datePresets()[group.id] || 'all') === 'all'"
+                      (click)="selectDatePreset(group.id, 'all')"
+                    >
+                      All
+                    </button>
+                  </div>
+
+                  <!-- From & To Date Inputs -->
+                  <div class="date-inputs-stack">
+                    @for (field of ['from', 'to']; track field) {
+                      <div class="date-field-container">
+                        <div
+                          class="date-input-box"
+                          [class.active]="
+                            activeDatePicker()?.groupId === group.id &&
+                            activeDatePicker()?.field === field
+                          "
+                          (click)="toggleCalendar(group.id, $any(field), $event)"
+                        >
+                          <span
+                            class="date-input-value"
+                            [class.is-placeholder]="!getDateVal(group.id, $any(field))"
+                          >
+                            {{
+                              getDateVal(group.id, $any(field)) ||
+                                (field === 'from' ? 'From Date' : 'To Date')
+                            }}
+                          </span>
+                          <lucide-icon
+                            name="calendar"
+                            [size]="16"
+                            class="date-input-icon"
+                          ></lucide-icon>
+                        </div>
+
+                        <!-- Floating Calendar Popover -->
+                        @if (
+                          activeDatePicker()?.groupId === group.id &&
+                          activeDatePicker()?.field === field
+                        ) {
+                          <div
+                            class="custom-calendar-dropdown"
+                            [class.pos-down]="field === 'from'"
+                            [class.pos-up]="field === 'to'"
+                            (click)="$event.stopPropagation()"
+                          >
+                            <div class="calendar-header">
+                              <button
+                                type="button"
+                                class="cal-nav-btn"
+                                (click)="prevMonth($event)"
+                                aria-label="Previous month"
+                              >
+                                <lucide-icon name="chevron-left" [size]="16"></lucide-icon>
+                              </button>
+                              <span class="cal-month-title">{{ currentMonthYearLabel() }}</span>
+                              <button
+                                type="button"
+                                class="cal-nav-btn"
+                                (click)="nextMonth($event)"
+                                aria-label="Next month"
+                              >
+                                <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
+                              </button>
+                            </div>
+
+                            <div class="calendar-weekdays">
+                              <span>Su</span><span>Mo</span><span>Tu</span><span>We</span
+                              ><span>Th</span><span>Fr</span><span>Sa</span>
+                            </div>
+
+                            <div class="calendar-grid">
+                              @for (
+                                day of getCalendarDays(group.id, $any(field));
+                                track day.dateString + day.isCurrentMonth
+                              ) {
+                                <button
+                                  type="button"
+                                  class="cal-day-cell"
+                                  [class.other-month]="!day.isCurrentMonth"
+                                  [class.today]="day.isToday"
+                                  [class.selected]="day.isSelected"
+                                  (click)="
+                                    selectCalendarDate(
+                                      group.id,
+                                      $any(field),
+                                      day.dateString,
+                                      $event
+                                    )
+                                  "
+                                >
+                                  {{ day.dayNumber }}
+                                </button>
+                              }
+                            </div>
+
+                            <div class="calendar-footer">
+                              <button
+                                type="button"
+                                class="cal-footer-btn clear"
+                                (click)="selectCalendarDate(group.id, $any(field), '', $event)"
+                              >
+                                Clear
+                              </button>
+                              <button
+                                type="button"
+                                class="cal-footer-btn today"
+                                (click)="selectCalendarToday(group.id, $any(field), $event)"
+                              >
+                                Today
+                              </button>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              } @else {
+                @if (group.searchable !== false && group.options.length > 3) {
+                  <div class="group-search-box">
+                    <lucide-icon name="search" [size]="14" class="group-search-icon"></lucide-icon>
+                    <input
+                      type="text"
+                      [placeholder]="'Search ' + group.title + '...'"
+                      class="group-search-input"
+                      (input)="onGroupSearch(group.id, $any($event.target).value)"
+                    />
+                  </div>
+                }
+
+                <div class="options-list">
+                  @for (opt of getFilteredOptions(group); track opt.value) {
+                    <label
+                      class="option-item"
+                      [class.option-checked]="isOptionSelected(group.id, opt.value)"
+                    >
+                      <div class="checkbox-wrapper">
+                        <input
+                          type="checkbox"
+                          [checked]="isOptionSelected(group.id, opt.value)"
+                          (change)="toggleOption(group, opt.value)"
+                        />
+                        <span class="custom-checkbox"></span>
+                      </div>
+                      <span class="option-label truncate">{{ opt.label }}</span>
+                      @if (opt.count !== undefined) {
+                        <span class="option-count">{{ opt.count }}</span>
+                      }
+                    </label>
+                  } @empty {
+                    <div class="no-options-text">No matching options</div>
+                  }
                 </div>
               }
-
-              <div class="options-list">
-                @for (opt of getFilteredOptions(group); track opt.value) {
-                  <label
-                    class="option-item"
-                    [class.option-checked]="isOptionSelected(group.id, opt.value)"
-                  >
-                    <div class="checkbox-wrapper">
-                      <input
-                        type="checkbox"
-                        [checked]="isOptionSelected(group.id, opt.value)"
-                        (change)="toggleOption(group.id, opt.value)"
-                      />
-                      <span class="custom-checkbox"></span>
-                    </div>
-                    <span class="option-label truncate">{{ opt.label }}</span>
-                    @if (opt.count !== undefined) {
-                      <span class="option-count">{{ opt.count }}</span>
-                    }
-                  </label>
-                } @empty {
-                  <div class="no-options-text">No matching options</div>
-                }
-              </div>
             </div>
           }
         </div>

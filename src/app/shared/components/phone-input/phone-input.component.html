@@ -10,7 +10,13 @@
       aria-label="Country dial code"
     >
       <mat-select-trigger>
-        <span class="trigger-flag">{{ selectedFlag() }}</span>
+        <img
+          class="trigger-flag-img"
+          [src]="selectedCountry()?.flagSvg ?? 'https://flagcdn.com/in.svg'"
+          [alt]="selectedCountry()?.name || 'Country flag'"
+          width="20"
+          height="15"
+        />
         <span class="trigger-dial">{{ dial() }}</span>
       </mat-select-trigger>
 
@@ -30,7 +36,14 @@
 
       @for (country of filteredCountries(); track country.code) {
         <mat-option [value]="country.dial">
-          <span class="opt-flag">{{ country.flag }}</span>
+          <img
+            class="opt-flag-img"
+            [src]="country.flagSvg"
+            [alt]="country.name"
+            width="20"
+            height="15"
+            loading="lazy"
+          />
           <span class="opt-dial">{{ country.dial }}</span>
           <span class="opt-sep">-</span>
           <span class="opt-name">{{ country.name }}</span>

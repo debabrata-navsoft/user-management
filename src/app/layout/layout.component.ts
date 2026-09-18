@@ -69,7 +69,7 @@ export class LayoutComponent {
     {
       label: 'User Management',
       route: '/admin/users',
-      roles: ['admin'],
+      roles: ['admin', 'manager'],
       iconName: 'users',
     },
     {

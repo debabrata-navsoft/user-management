@@ -8,15 +8,7 @@
     >
       <div actions>
         <!-- Upload File Button -->
-        <input
-          #fileInput
-          type="file"
-          multiple
-          class="hidden-file-input"
-          (click)="fileInput.value = ''"
-          (change)="onUploadFileInput($event)"
-        />
-        <app-ui-button variant="secondary" size="md" (click)="fileInput.click()">
+        <app-ui-button variant="secondary" size="md" (click)="openUploadModal()">
           <lucide-icon name="upload" [size]="16"></lucide-icon>
           Upload Files
         </app-ui-button>
@@ -149,474 +141,61 @@
   </div>
 
   <!-- Scrollable Data Area (Only items scroll, header and toolbar stay fixed) -->
-  <div class="drive-scrollable-content">
-    @if (isLoading()) {
-      <app-loader message="Loading drive contents..."></app-loader>
-    } @else {
-      <!-- If folder is completely empty -->
-      @if (currentFolders().length === 0 && currentFiles().length === 0) {
-        <div class="card empty-card">
-          <app-empty-state
-            title="This folder is empty"
-            description="Create a subfolder or upload files to organize content in this directory."
-            actionText="Create Folder"
-            (action)="openCreateFolderModal()"
-          ></app-empty-state>
-        </div>
-      } @else {
-        <!-- GRID VIEW -->
-        @if (viewMode() === 'grid') {
-          <!-- FOLDERS SECTION -->
-          @if (currentFolders().length > 0) {
-            <div class="drive-section">
-              <h3 class="section-title">Folders ({{ currentFolders().length }})</h3>
-              <div class="folders-grid">
-                @for (folder of currentFolders(); track folder.id) {
-                  <div
-                    class="folder-card"
-                    [class.menu-open]="activeMenuNode()?.id === folder.id"
-                    (dblclick)="navigateToFolder(folder.id)"
-                  >
-                    <div class="folder-main">
-                      <div class="folder-icon">
-                        <app-file-type-icon [folder]="true" [size]="22"></app-file-type-icon>
-                      </div>
-                      <span class="folder-name truncate" [title]="folder.name">{{
-                        folder.name
-                      }}</span>
-                    </div>
+  <app-drive-content
+    [isLoading]="isLoading()"
+    [currentFolders]="currentFolders()"
+    [currentFiles]="currentFiles()"
+    [viewMode]="viewMode()"
+    [activeMenuNode]="activeMenuNode()"
+    [menuDropUp]="menuDropUp()"
+    (createFolder)="openCreateFolderModal()"
+    (navigateToFolder)="navigateToFolder($event)"
+    (toggleMenu)="toggleMenu($event.node, $event.event)"
+    (closeMenu)="closeMenu()"
+    (preview)="openPreview($event)"
+    (download)="downloadFile($event)"
+    (rename)="openRenameModal($event)"
+    (delete)="confirmDelete($event)"
+  ></app-drive-content>
 
-                    <!-- Folder Card Actions (Three-dot button & Context Menu) -->
-                    <div
-                      class="card-action-wrap"
-                      [class.is-menu-open]="activeMenuNode()?.id === folder.id"
-                      (click)="$event.stopPropagation()"
-                    >
-                      <button
-                        appIconButton
-                        class="more-dots-btn"
-                        icon="ellipsis-vertical"
-                        [size]="16"
-                        label="More actions"
-                        [class.active]="activeMenuNode()?.id === folder.id"
-                        (click)="toggleMenu(folder, $event)"
-                      ></button>
-
-                      <!-- Context Dropdown Menu -->
-                      @if (activeMenuNode()?.id === folder.id) {
-                        <app-drive-item-menu
-                          [node]="folder"
-                          [dropUp]="menuDropUp()"
-                          (preview)="openPreview(folder)"
-                          (download)="downloadFile(folder)"
-                          (rename)="openRenameModal(folder)"
-                          (remove)="confirmDelete(folder)"
-                          (closed)="closeMenu()"
-                        ></app-drive-item-menu>
-                      }
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-
-          <!-- FILES SECTION -->
-          @if (currentFiles().length > 0) {
-            <div class="drive-section">
-              <h3 class="section-title">Files ({{ currentFiles().length }})</h3>
-              <div class="files-grid">
-                @for (file of currentFiles(); track file.id) {
-                  <div
-                    class="file-card"
-                    [class.menu-open]="activeMenuNode()?.id === file.id"
-                    (click)="openPreview(file)"
-                  >
-                    <div class="file-preview-area">
-                      @if (isImageFile(file) && file.dataUrl) {
-                        <img [src]="file.dataUrl" [alt]="file.name" class="file-img-thumb" />
-                      } @else if (isVideoFile(file) && file.dataUrl) {
-                        <video
-                          [src]="file.dataUrl"
-                          class="file-img-thumb"
-                          muted
-                          preload="metadata"
-                        ></video>
-                        <span class="video-play-badge" aria-hidden="true">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <polygon points="6 4 20 12 6 20"></polygon>
-                          </svg>
-                        </span>
-                      } @else {
-                        <div class="file-generic-icon">
-                          <app-file-type-icon
-                            [fileName]="file.name"
-                            [mimeType]="file.mimeType || ''"
-                            [size]="36"
-                          ></app-file-type-icon>
-                        </div>
-                      }
-                    </div>
-
-                    <div class="file-card-info">
-                      <div class="file-info-left">
-                        <span class="file-name truncate" [title]="file.name">{{ file.name }}</span>
-                        <span class="file-size">{{ formatBytes(file.size) }}</span>
-                      </div>
-
-                      <!-- File Card Actions (Three-dot button & Context Menu) -->
-                      <div
-                        class="card-action-wrap"
-                        [class.is-menu-open]="activeMenuNode()?.id === file.id"
-                        (click)="$event.stopPropagation()"
-                      >
-                        <button
-                          appIconButton
-                          class="more-dots-btn"
-                          icon="ellipsis-vertical"
-                          [size]="16"
-                          label="More actions"
-                          [class.active]="activeMenuNode()?.id === file.id"
-                          (click)="toggleMenu(file, $event)"
-                        ></button>
-
-                        <!-- Context Dropdown Menu -->
-                        @if (activeMenuNode()?.id === file.id) {
-                          <app-drive-item-menu
-                            [node]="file"
-                            [dropUp]="menuDropUp()"
-                            (preview)="openPreview(file)"
-                            (download)="downloadFile(file)"
-                            (rename)="openRenameModal(file)"
-                            (remove)="confirmDelete(file)"
-                            (closed)="closeMenu()"
-                          ></app-drive-item-menu>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-        } @else {
-          <!-- UNIFIED GOOGLE DRIVE-STYLE LIST VIEW TABLE -->
-          <div class="card drive-list-card">
-            <table class="drive-table">
-              <thead>
-                <tr>
-                  <th class="th-name">
-                    Name
-                    <!-- <div class="th-sort-wrapper">
-                      <span>Name</span>
-                    </div> -->
-                  </th>
-                  <th class="th-owner">Owner</th>
-                  <th class="th-date">Date modified</th>
-                  <th class="th-size">File size</th>
-                  <th class="actions-th">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Folders First in List -->
-                @for (folder of currentFolders(); track folder.id) {
-                  <tr
-                    class="drive-row folder-row"
-                    [class.menu-open]="activeMenuNode()?.id === folder.id"
-                    (dblclick)="navigateToFolder(folder.id)"
-                  >
-                    <td class="td-name">
-                      <div class="item-name-cell">
-                        <div class="folder-table-icon">
-                          <app-file-type-icon [folder]="true" [size]="20"></app-file-type-icon>
-                        </div>
-                        <span class="row-name-text">{{ folder.name }}</span>
-                      </div>
-                    </td>
-                    <td class="td-owner">
-                      <div class="owner-cell">
-                        <div class="owner-avatar">{{ getInitials(folder.uploadedBy || 'me') }}</div>
-                        <span class="owner-text">{{ folder.uploadedBy || 'me' }}</span>
-                      </div>
-                    </td>
-                    <td class="td-date">{{ formatDate(folder.createdAt) }}</td>
-                    <td class="td-size">—</td>
-                    <td class="actions-cell" (click)="$event.stopPropagation()">
-                      <div
-                        class="row-actions-wrapper"
-                        [class.menu-open]="activeMenuNode()?.id === folder.id"
-                      >
-                        <!-- Hover Quick Actions (visible on row hover) -->
-                        <div class="hover-quick-actions">
-                          <button
-                            appIconButton
-                            icon="square-pen"
-                            [size]="14"
-                            label="Rename"
-                            (click)="openRenameModal(folder)"
-                          ></button>
-                          <button
-                            appIconButton
-                            icon="trash-2"
-                            [size]="14"
-                            label="Delete"
-                            variant="danger"
-                            (click)="confirmDelete(folder)"
-                          ></button>
-                        </div>
-
-                        <!-- Three Dots Button (Always visible) -->
-                        <button
-                          appIconButton
-                          class="more-dots-btn"
-                          icon="ellipsis-vertical"
-                          [size]="16"
-                          label="More actions"
-                          [class.active]="activeMenuNode()?.id === folder.id"
-                          (click)="toggleMenu(folder, $event)"
-                        ></button>
-
-                        <!-- Context Dropdown Menu -->
-                        @if (activeMenuNode()?.id === folder.id) {
-                          <app-drive-item-menu
-                            [node]="folder"
-                            [dropUp]="menuDropUp()"
-                            (preview)="openPreview(folder)"
-                            (download)="downloadFile(folder)"
-                            (rename)="openRenameModal(folder)"
-                            (remove)="confirmDelete(folder)"
-                            (closed)="closeMenu()"
-                          ></app-drive-item-menu>
-                        }
-                      </div>
-                    </td>
-                  </tr>
-                }
-
-                <!-- Files in List -->
-                @for (file of currentFiles(); track file.id) {
-                  <tr
-                    class="drive-row file-row"
-                    [class.menu-open]="activeMenuNode()?.id === file.id"
-                    (click)="openPreview(file)"
-                  >
-                    <td class="td-name">
-                      <div class="item-name-cell">
-                        <div class="file-table-icon" [class.is-img]="isImageFile(file)">
-                          <app-file-type-icon
-                            [fileName]="file.name"
-                            [mimeType]="file.mimeType || ''"
-                            [size]="20"
-                          ></app-file-type-icon>
-                        </div>
-                        <span class="row-name-text">{{ file.name }}</span>
-                      </div>
-                    </td>
-                    <td class="td-owner">
-                      <div class="owner-cell">
-                        <div class="owner-avatar">{{ getInitials(file.uploadedBy || 'me') }}</div>
-                        <span class="owner-text">{{ file.uploadedBy || 'me' }}</span>
-                      </div>
-                    </td>
-                    <td class="td-date">{{ formatDate(file.createdAt) }}</td>
-                    <td class="td-size">{{ formatBytes(file.size) }}</td>
-                    <td class="actions-cell" (click)="$event.stopPropagation()">
-                      <div
-                        class="row-actions-wrapper"
-                        [class.menu-open]="activeMenuNode()?.id === file.id"
-                      >
-                        <!-- Hover Quick Actions (visible on row hover) -->
-                        <div class="hover-quick-actions">
-                          <button
-                            appIconButton
-                            icon="download"
-                            [size]="14"
-                            label="Download"
-                            (click)="downloadFile(file)"
-                          ></button>
-                          <button
-                            appIconButton
-                            icon="square-pen"
-                            [size]="14"
-                            label="Rename"
-                            (click)="openRenameModal(file)"
-                          ></button>
-                          <button
-                            appIconButton
-                            icon="trash-2"
-                            [size]="14"
-                            label="Delete"
-                            variant="danger"
-                            (click)="confirmDelete(file)"
-                          ></button>
-                        </div>
-
-                        <!-- Three Dots Button (Always visible) -->
-                        <button
-                          appIconButton
-                          class="more-dots-btn"
-                          icon="ellipsis-vertical"
-                          [size]="16"
-                          label="More actions"
-                          [class.active]="activeMenuNode()?.id === file.id"
-                          (click)="toggleMenu(file, $event)"
-                        ></button>
-
-                        <!-- Context Dropdown Menu -->
-                        @if (activeMenuNode()?.id === file.id) {
-                          <app-drive-item-menu
-                            [node]="file"
-                            [dropUp]="menuDropUp()"
-                            (preview)="openPreview(file)"
-                            (download)="downloadFile(file)"
-                            (rename)="openRenameModal(file)"
-                            (remove)="confirmDelete(file)"
-                            (closed)="closeMenu()"
-                          ></app-drive-item-menu>
-                        }
-                      </div>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
-      }
-    }
-  </div>
+  <!-- Upload Modal -->
+  <app-upload-modal
+    [isOpen]="isUploadModalOpen()"
+    title="Upload Files"
+    accept="*/*"
+    [maxSizeMb]="50"
+    target="drive"
+    [driveParentId]="currentFolderId()"
+    [existingNames]="existingFileNames()"
+    (close)="closeUploadModal()"
+    (uploaded)="onFilesUploaded()"
+  ></app-upload-modal>
 
   <!-- Create Folder Modal -->
-  <app-modal
+  <app-create-folder-modal
     [isOpen]="isCreateFolderOpen()"
-    title="Create New Folder"
-    size="sm"
+    [parentId]="currentFolderId()"
+    [existingFolderNames]="existingFolderNames()"
     (close)="closeCreateFolderModal()"
-  >
-    <div class="modal-form-body">
-      <div class="form-group">
-        <label for="newFolderName">Folder Name</label>
-        <input
-          id="newFolderName"
-          type="text"
-          class="form-control"
-          placeholder="e.g. Invoices 2026"
-          [value]="newFolderName()"
-          (input)="onNewFolderNameInput($event)"
-          (keydown.enter)="submitCreateFolder()"
-        />
-      </div>
-    </div>
-
-    <div footer>
-      <app-ui-button variant="secondary" size="md" (click)="closeCreateFolderModal()"
-        >Cancel</app-ui-button
-      >
-      <app-ui-button
-        variant="primary"
-        size="md"
-        [loading]="isActionSubmitting()"
-        (click)="submitCreateFolder()"
-      >
-        Create Folder
-      </app-ui-button>
-    </div>
-  </app-modal>
+    (created)="onFolderCreated()"
+  ></app-create-folder-modal>
 
   <!-- Rename Node Modal -->
-  <app-modal [isOpen]="isRenameOpen()" title="Rename Item" size="sm" (close)="closeRenameModal()">
-    <div class="modal-form-body">
-      <div class="form-group">
-        <label for="renameInput">New Name</label>
-        <input
-          id="renameInput"
-          type="text"
-          class="form-control"
-          [value]="renameValue()"
-          (input)="onRenameInput($event)"
-          (keydown.enter)="submitRename()"
-        />
-      </div>
-    </div>
-
-    <div footer>
-      <app-ui-button variant="secondary" size="md" (click)="closeRenameModal()"
-        >Cancel</app-ui-button
-      >
-      <app-ui-button
-        variant="primary"
-        size="md"
-        [loading]="isActionSubmitting()"
-        (click)="submitRename()"
-      >
-        Save Name
-      </app-ui-button>
-    </div>
-  </app-modal>
+  <app-rename-modal
+    [isOpen]="isRenameOpen()"
+    [node]="nodeToRename()"
+    [siblingNodes]="siblingNodesForRename()"
+    (close)="closeRenameModal()"
+    (renamed)="onNodeRenamed()"
+  ></app-rename-modal>
 
   <!-- File Preview Modal -->
-  <app-modal
+  <app-file-preview-modal
     [isOpen]="isPreviewOpen()"
-    [title]="previewNode()?.name || 'File Preview'"
-    size="lg"
+    [node]="previewNode()"
     (close)="closePreview()"
-  >
-    @if (previewNode(); as node) {
-      <div class="preview-content-box">
-        @if (isImageFile(node) && node.dataUrl) {
-          <div class="img-preview-wrap">
-            <img [src]="node.dataUrl" [alt]="node.name" class="img-full-preview" />
-          </div>
-        } @else if (isVideoFile(node) && node.dataUrl) {
-          <div class="img-preview-wrap">
-            <video [src]="node.dataUrl" class="img-full-preview" controls playsinline></video>
-          </div>
-        } @else {
-          <div class="doc-preview-placeholder">
-            <app-file-type-icon
-              [fileName]="node.name"
-              [mimeType]="node.mimeType || ''"
-              [size]="64"
-            ></app-file-type-icon>
-            <span class="doc-name">{{ node.name }}</span>
-            <span class="doc-size"
-              >{{ formatBytes(node.size) }} ({{ node.mimeType || 'Document' }})</span
-            >
-          </div>
-        }
-      </div>
-    }
-
-    <div footer>
-      <app-ui-button variant="secondary" size="md" (click)="closePreview()">Close</app-ui-button>
-      @if (previewNode()?.dataUrl) {
-        <app-ui-button variant="primary" size="md" (click)="downloadFile(previewNode()!)">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          Download File
-        </app-ui-button>
-      }
-    </div>
-  </app-modal>
+    (download)="downloadFile($event)"
+  ></app-file-preview-modal>
 
   <!-- Delete Confirmation Dialog -->
   <app-confirm-dialog

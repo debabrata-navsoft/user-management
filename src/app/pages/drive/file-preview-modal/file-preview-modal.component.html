@@ -1,0 +1,56 @@
+<app-modal
+  [isOpen]="isOpen()"
+  [title]="node()?.name || 'File Preview'"
+  size="lg"
+  (close)="onClose()"
+>
+  @if (node(); as current) {
+    <div class="preview-content-box">
+      @if (isImageFile(current) && current.dataUrl) {
+        <div class="img-preview-wrap">
+          <img [src]="current.dataUrl" [alt]="current.name" class="img-full-preview" />
+        </div>
+      } @else if (isVideoFile(current) && current.dataUrl) {
+        <div class="img-preview-wrap">
+          <video [src]="current.dataUrl" class="img-full-preview" controls playsinline></video>
+        </div>
+      } @else {
+        <div class="doc-preview-placeholder">
+          <app-file-type-icon
+            [fileName]="current.name"
+            [mimeType]="current.mimeType || ''"
+            [size]="64"
+          ></app-file-type-icon>
+          <span class="doc-name">{{ current.name }}</span>
+          <span class="doc-size"
+            >{{ formatBytes(current.size) }} ({{ current.mimeType || 'Document' }})</span
+          >
+        </div>
+      }
+    </div>
+  }
+
+  <div footer>
+    <app-ui-button variant="secondary" size="md" (click)="onClose()">Close</app-ui-button>
+    @if (node()?.dataUrl) {
+      <app-ui-button variant="primary" size="md" (click)="onDownload(node()!)">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Download File
+      </app-ui-button>
+    }
+  </div>
+</app-modal>

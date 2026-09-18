@@ -1,13 +1,13 @@
 <div class="custom-snackbar" [ngClass]="'snackbar-' + data.type">
   <div class="snackbar-accent-bar"></div>
   <div class="snackbar-icon-wrapper">
-    <lucide-icon [name]="iconName()" [size]="20"></lucide-icon>
+    <lucide-icon [name]="iconName()" [size]="18"></lucide-icon>
   </div>
   <div class="snackbar-text-content">
     <div class="snackbar-title">{{ defaultTitle() }}</div>
     <div class="snackbar-message">{{ data.message }}</div>
   </div>
   <button type="button" class="snackbar-close-btn" (click)="dismiss()" aria-label="Close">
-    <lucide-icon name="x" [size]="15"></lucide-icon>
+    <lucide-icon name="x" [size]="14"></lucide-icon>
   </button>
 </div>

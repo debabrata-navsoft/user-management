@@ -11,10 +11,11 @@ describe('COUNTRIES', () => {
     expect(COUNTRIES.slice(0, 5).map((c) => c.code)).toEqual(['IN', 'AE', 'SA', 'US', 'GB']);
   });
 
-  it('carries a name, flag and well-formed dial code for each', () => {
+  it('carries a name, flag, flagSvg and well-formed dial code for each', () => {
     expect(COUNTRIES.every((c) => /^\+\d{1,4}$/.test(c.dial))).toBe(true);
     expect(COUNTRIES.every((c) => c.name.length > 0)).toBe(true);
     expect(COUNTRIES.every((c) => c.flag.length > 0)).toBe(true);
+    expect(COUNTRIES.every((c) => c.flagSvg.startsWith('https://flagcdn.com/'))).toBe(true);
   });
 
   it('resolves recognisable names and flags', () => {
@@ -22,10 +23,12 @@ describe('COUNTRIES', () => {
     expect(india.name).toBe('India');
     expect(india.dial).toBe('+91');
     expect(india.flag).toBe('🇮🇳');
+    expect(india.flagSvg).toBe('https://flagcdn.com/in.svg');
 
     const uae = COUNTRIES.find((c) => c.code === 'AE')!;
     expect(uae.name).toBe('United Arab Emirates');
     expect(uae.dial).toBe('+971');
+    expect(uae.flagSvg).toBe('https://flagcdn.com/ae.svg');
   });
 
   it('lists no country twice', () => {

@@ -14,8 +14,8 @@ const BLANK_USER = {
   id: '',
   name: '',
   email: '',
-  role: 'employee',
-  department: 'Engineering',
+  role: '',
+  department: '',
   phone: '',
   status: 'active',
   password: '',
@@ -51,11 +51,12 @@ export class UserFormModalComponent {
   title = computed(() => (this.isEdit() ? 'Edit User Profile' : 'Create New User'));
   submitLabel = computed(() => (this.isEdit() ? 'Save Changes' : 'Create User'));
 
-  roleOptions = computed(() => {
-    const current = this.isEdit() ? this.user()?.role : undefined;
-    const roles = current && current !== 'employee' ? [current, 'employee'] : ['employee'];
-    return roles.map((role) => ({ value: role, label: role[0].toUpperCase() + role.slice(1) }));
-  });
+  readonly roleOptions = [
+    { value: '', label: 'Please Select' },
+    { value: 'employee', label: 'Employee' },
+    { value: 'manager', label: 'Manager' },
+    { value: 'admin', label: 'Admin' },
+  ];
 
   showPassword = signal<boolean>(false);
 
@@ -63,8 +64,8 @@ export class UserFormModalComponent {
     id: [''],
     name: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
-    role: ['employee', [Validators.required]],
-    department: ['Engineering'],
+    role: ['', [Validators.required]],
+    department: ['', [Validators.required]],
     phone: ['', [AppValidators.phoneNumber()]],
     status: ['active', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(6)]],

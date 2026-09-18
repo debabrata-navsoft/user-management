@@ -1,0 +1,98 @@
+<app-modal
+  [isOpen]="isOpen()"
+  [title]="title()"
+  size="lg"
+  [closable]="!isUploading()"
+  [hasFooter]="true"
+  (close)="onClose()"
+>
+  <div class="upload-modal-content">
+    <app-file-drop-zone
+      [accept]="accept()"
+      [multiple]="true"
+      [maxSizeMb]="maxSizeMb()"
+      [hint]="computedHint()"
+      (filesSelected)="onFilesSelected($event)"
+    ></app-file-drop-zone>
+
+    <!-- Preview Queue -->
+    @if (selectedPreviews().length > 0) {
+      <div class="preview-queue-section">
+        <div class="queue-header">
+          <h4>
+            Selected {{ target() === 'gallery' ? 'Images' : 'Files' }} ({{ validPreviewsCount() }}
+            valid)
+          </h4>
+          @if (!isUploading()) {
+            <app-ui-button variant="ghost" size="sm" (click)="clearPreviews()">
+              Clear All
+            </app-ui-button>
+          }
+        </div>
+
+        <div class="preview-grid">
+          @for (item of selectedPreviews(); track item.name + $index) {
+            <div class="preview-card" [class.has-error]="item.error">
+              <div class="preview-thumb-wrap">
+                @if (item.dataUrl && isImage(item)) {
+                  <img [src]="item.dataUrl" [alt]="item.name" class="preview-thumb" />
+                } @else if (item.dataUrl && isVideo(item)) {
+                  <video [src]="item.dataUrl" class="preview-thumb" muted></video>
+                } @else {
+                  <div class="file-icon-thumb">
+                    <app-file-type-icon
+                      [fileName]="item.name"
+                      [mimeType]="item.type"
+                      [size]="34"
+                    ></app-file-type-icon>
+                  </div>
+                }
+
+                @if (!isUploading()) {
+                  <button
+                    type="button"
+                    class="remove-preview-btn"
+                    (click)="removePreview($index)"
+                    aria-label="Remove preview"
+                  >
+                    <lucide-icon name="x" [size]="14"></lucide-icon>
+                  </button>
+                }
+              </div>
+
+              <div class="preview-meta">
+                <span class="preview-name truncate" [title]="item.name">{{ item.name }}</span>
+                <span class="preview-size">{{ formatBytes(item.size) }}</span>
+                @if (item.dimensions) {
+                  <span class="preview-dims"
+                    >{{ item.dimensions.width }}x{{ item.dimensions.height }}px</span
+                  >
+                }
+                @if (item.error) {
+                  <span class="preview-err-text">{{ item.error }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <div footer class="upload-modal-footer">
+    <app-ui-button variant="outline" size="md" [disabled]="isUploading()" (click)="onClose()">
+      Cancel
+    </app-ui-button>
+    <app-ui-button
+      variant="primary"
+      size="md"
+      [disabled]="validPreviewsCount() === 0"
+      [loading]="isUploading()"
+      (click)="uploadAll()"
+    >
+      <lucide-icon name="upload" [size]="14"></lucide-icon>
+      Upload {{ validPreviewsCount() > 0 ? validPreviewsCount() : '' }}
+      {{ target() === 'gallery' ? 'Images' : 'Files' }}
+    </app-ui-button>
+  </div>
+</app-modal>

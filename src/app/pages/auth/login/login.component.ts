@@ -5,12 +5,20 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { SnackbarService } from '../../../core/services/snackbar.service';
 import { LucideAngularModule } from 'lucide-angular';
+import { FormFieldComponent } from '../../../shared/components/form-field/form-field.component';
 import { UiButtonComponent } from '../../../shared/components/ui-button/ui-button.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, UiButtonComponent, LucideAngularModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    UiButtonComponent,
+    FormFieldComponent,
+    LucideAngularModule,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
@@ -21,14 +29,7 @@ export class LoginComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  readonly roleOptions = [
-    { label: 'Admin', value: 'admin' },
-    { label: 'Manager', value: 'manager' },
-    { label: 'Employee', value: 'employee' },
-  ];
-
   form = this.fb.group({
-    role: ['', Validators.required],
     identifier: ['', Validators.required],
     password: ['', Validators.required],
   });
@@ -36,35 +37,6 @@ export class LoginComponent {
   isLoading = signal(false);
   showPassword = signal(false);
   errorMessage = signal('');
-  selectedRole = signal('');
-
-  roleConfig = computed(() => {
-    const role = this.selectedRole().toLowerCase();
-    const isUserRole = role === 'admin' || role === 'manager';
-    return {
-      label: isUserRole
-        ? 'Username'
-        : role === 'employee'
-          ? 'Email Address'
-          : 'Username / Email Address',
-      placeholder:
-        role === 'admin'
-          ? 'admin'
-          : role === 'manager'
-            ? 'manager'
-            : role === 'employee'
-              ? 'employee@gmail.com'
-              : 'Enter username or email',
-      icon: isUserRole ? 'user' : 'mail',
-    };
-  });
-
-  canResetPassword = computed(() => this.selectedRole().toLowerCase() === 'employee');
-
-  onRoleChange(): void {
-    this.selectedRole.set(this.form.get('role')?.value || '');
-    this.errorMessage.set('');
-  }
 
   toggleShowPassword(): void {
     this.showPassword.update((v) => !v);
@@ -88,7 +60,6 @@ export class LoginComponent {
     this.authService
       .login({
         identifier: val.identifier || undefined,
-        role: val.role || undefined,
         password: val.password || '',
       })
       .subscribe({
@@ -98,7 +69,7 @@ export class LoginComponent {
 
           const returnUrl = this.route.snapshot.queryParams['returnUrl'];
           if (returnUrl && returnUrl !== '/' && returnUrl !== '') {
-            this.router.navigateByUrl(returnUrl);
+            this.router.navigateByUrl(returnUrl, { replaceUrl: true });
           } else {
             this.authService.redirectAfterLogin(user.role);
           }

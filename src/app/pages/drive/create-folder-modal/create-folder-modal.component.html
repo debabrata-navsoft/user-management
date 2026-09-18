@@ -1,0 +1,27 @@
+<app-modal [isOpen]="isOpen()" title="Create New Folder" size="sm" (close)="onClose()">
+  <div class="modal-form-body">
+    <div class="form-group">
+      <label for="newFolderName">Folder Name</label>
+      <input
+        id="newFolderName"
+        type="text"
+        class="form-control"
+        [class.is-invalid]="!!folderNameError()"
+        placeholder="e.g. enter folder name"
+        [value]="newFolderName()"
+        (input)="onInput($event)"
+        (keydown.enter)="submit()"
+      />
+      @if (folderNameError()) {
+        <span class="form-error">{{ folderNameError() }}</span>
+      }
+    </div>
+  </div>
+
+  <div footer>
+    <app-ui-button variant="secondary" size="md" (click)="onClose()">Cancel</app-ui-button>
+    <app-ui-button variant="primary" size="md" [loading]="isSubmitting()" (click)="submit()">
+      Create Folder
+    </app-ui-button>
+  </div>
+</app-modal>

@@ -55,6 +55,15 @@
   padding-right: 42px;
 }
 
+.form-control::-ms-reveal,
+.form-control::-ms-clear,
+input::-ms-reveal,
+input::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 .toggle-pwd-btn {
   position: absolute;
   right: 12px;

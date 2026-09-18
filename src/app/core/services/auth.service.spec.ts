@@ -50,7 +50,7 @@ describe('AuthService', () => {
     expect(service.currentUser()).toBeNull();
   });
 
-  it('should authenticate user and store session on valid login', () => {
+  it('should authenticate user and store session on valid login without requiring role input', () => {
     const mockUsers = [
       {
         id: 1,
@@ -62,33 +62,18 @@ describe('AuthService', () => {
       },
     ];
 
-    service
-      .login({ email: 'admin@demo.com', role: 'admin', password: 'Password123' })
-      .subscribe((user) => {
-        expect(user.email).toBe('admin@demo.com');
-        expect(service.isAuthenticated()).toBe(true);
-        expect(service.currentRole()).toBe('admin');
-      });
+    service.login({ identifier: 'admin@demo.com', password: 'Password123' }).subscribe((user) => {
+      expect(user.email).toBe('admin@demo.com');
+      expect(service.isAuthenticated()).toBe(true);
+      expect(service.currentRole()).toBe('admin');
+    });
 
     const req = httpMock.expectOne(`${environment.apiUrl}/users`);
     expect(req.request.method).toBe('GET');
     req.flush(mockUsers);
   });
 
-  it('should reject login when no role is selected', () => {
-    let error: Error | undefined;
-
-    service.login({ email: 'admin@demo.com', password: 'Password123' }).subscribe({
-      next: () => expect.unreachable('login should not succeed without a role'),
-      error: (err: Error) => (error = err),
-    });
-
-    expect(error?.message).toBe('Please select a role to continue.');
-    expect(service.isAuthenticated()).toBe(false);
-    httpMock.expectNone(`${environment.apiUrl}/users`);
-  });
-
-  it('should reject login when the role does not match the account', () => {
+  it('should reject login when user is not found or password is wrong', () => {
     const mockUsers = [
       {
         id: 1,
@@ -101,17 +86,44 @@ describe('AuthService', () => {
     ];
     let error: Error | undefined;
 
-    service
-      .login({ email: 'admin@demo.com', role: 'employee', password: 'Password123' })
-      .subscribe({
-        next: () => expect.unreachable('login should not succeed with a mismatched role'),
-        error: (err: Error) => (error = err),
-      });
+    service.login({ identifier: 'admin@demo.com', password: 'WrongPassword' }).subscribe({
+      next: () => expect.unreachable('login should not succeed with wrong password'),
+      error: (err: Error) => (error = err),
+    });
 
     httpMock.expectOne(`${environment.apiUrl}/users`).flush(mockUsers);
 
-    expect(error?.message).toBe('No account found matching the provided credentials.');
+    expect(error?.message).toBe('Invalid username/email or password.');
     expect(service.isAuthenticated()).toBe(false);
+  });
+
+  it('should register a new user with the selected role', () => {
+    const newUserPayload = {
+      name: 'Jane Manager',
+      email: 'jane@example.com',
+      role: 'manager' as const,
+      password: 'Password123!',
+      department: 'Sales',
+    };
+
+    service.signUp(newUserPayload).subscribe((createdUser) => {
+      expect(createdUser.role).toBe('manager');
+      expect(createdUser.name).toBe('Jane Manager');
+    });
+
+    const checkReq = httpMock.expectOne(`${environment.apiUrl}/users?email=jane@example.com`);
+    expect(checkReq.request.method).toBe('GET');
+    checkReq.flush([]);
+
+    const postReq = httpMock.expectOne(`${environment.apiUrl}/users`);
+    expect(postReq.request.method).toBe('POST');
+    expect(postReq.request.body.role).toBe('manager');
+    postReq.flush({
+      id: 2,
+      ...newUserPayload,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+    });
   });
 
   it('should clear session on logout', () => {

@@ -38,7 +38,8 @@ export class PhoneInputComponent implements ControlValueAccessor {
     );
   });
 
-  selectedFlag = computed(() => COUNTRIES.find((c) => c.dial === this.dial())?.flag ?? '');
+  selectedCountry = computed(() => COUNTRIES.find((c) => c.dial === this.dial()));
+  selectedFlag = computed(() => this.selectedCountry()?.flag ?? '');
 
   showError(): boolean {
     const c = this.ngControl?.control;

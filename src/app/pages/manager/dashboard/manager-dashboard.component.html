@@ -1,7 +1,7 @@
-<div class="dashboard-page">
+<div class="manager-dashboard-page">
   <app-page-header
-    title="Manager Portal Dashboard"
-    subtitle="Operational metrics, team directory overview and asset management"
+    title="Manager Operations Command"
+    subtitle="Workforce allocation, department analytics & team operational hub"
     badgeText="Manager Workspace"
   >
     <div actions>
@@ -23,7 +23,7 @@
         </svg>
         Gallery
       </app-ui-button>
-      <app-ui-button variant="primary" size="md" routerLink="/drive">
+      <app-ui-button variant="secondary" size="md" routerLink="/drive">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -41,119 +41,553 @@
         </svg>
         Drive Files
       </app-ui-button>
+      <app-ui-button variant="primary" size="md" routerLink="/admin/users">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <line x1="19" y1="8" x2="19" y2="14"></line>
+          <line x1="22" y1="11" x2="16" y2="11"></line>
+        </svg>
+        User Directory
+      </app-ui-button>
     </div>
   </app-page-header>
 
   @if (isLoading()) {
-    <app-loader message="Loading manager analytics..."></app-loader>
+    <app-loader message="Loading manager operations data..."></app-loader>
   } @else {
-    <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-icon purple">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
+    <!-- Manager Team Operations Hero Banner -->
+    <div class="manager-hero-card">
+      <div class="hero-left">
+        <div class="hero-tag">
+          <span class="pulse-indicator"></span>
+          <span>Live Operations Hub</span>
         </div>
-        <div class="metric-body">
-          <span class="metric-label">Managed Team Members</span>
-          <div class="metric-val">{{ totalUsers() }}</div>
-          <span class="metric-trend positive">{{ activeUsers() }} active</span>
+        <h2 class="hero-title">Team Operations & Resource Center</h2>
+        <p class="hero-desc">
+          Monitor team readiness, department allocations, and access all operational resources from
+          one unified management console.
+        </p>
+        <div class="hero-cta-row">
+          <a routerLink="/admin/users" class="hero-action-btn primary">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Open Full User Table</span>
+          </a>
+          <a routerLink="/drive" class="hero-action-btn secondary">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+              ></path>
+            </svg>
+            <span>Team Drive Explorer</span>
+          </a>
         </div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-icon indigo">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-            ></path>
-          </svg>
+      <div class="hero-kpi-grid">
+        <div class="hero-kpi-pill">
+          <div class="kpi-icon-wrap teal">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <div class="kpi-details">
+            <span class="kpi-num">{{ totalUsers() }}</span>
+            <span class="kpi-text">Total Team</span>
+          </div>
         </div>
-        <div class="metric-body">
-          <span class="metric-label">Drive Assets</span>
-          <div class="metric-val">{{ totalDriveNodes() }}</div>
-          <span class="metric-trend">{{ formattedDriveSize() }} storage</span>
-        </div>
-      </div>
 
-      <div class="metric-card">
-        <div class="metric-icon success">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
-          </svg>
+        <div class="hero-kpi-pill">
+          <div class="kpi-icon-wrap emerald">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <div class="kpi-details">
+            <span class="kpi-num">{{ activeUsers() }}</span>
+            <span class="kpi-text">Active Now</span>
+          </div>
         </div>
-        <div class="metric-body">
-          <span class="metric-label">Gallery Images</span>
-          <div class="metric-val">{{ totalImages() }}</div>
-          <span class="metric-trend">Available for zoom view</span>
+
+        <div class="hero-kpi-pill">
+          <div class="kpi-icon-wrap blue">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </div>
+          <div class="kpi-details">
+            <span class="kpi-num">{{ departmentSummaries().length }}</span>
+            <span class="kpi-text">Departments</span>
+          </div>
+        </div>
+
+        <div class="hero-kpi-pill">
+          <div class="kpi-icon-wrap purple">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
+          </div>
+          <div class="kpi-details">
+            <span class="kpi-num">{{ formattedDriveSize() }}</span>
+            <span class="kpi-text">Cloud Storage</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Team Directory Overview -->
-    <div class="card">
-      <div class="card-header flex-between">
-        <div>
-          <h3 class="card-title">Team Directory</h3>
-          <span class="card-subtitle">Organization staff directory (Read-only view)</span>
+    <!-- Manager Metrics Row -->
+    <div class="manager-metrics-grid">
+      <div class="m-metric-card">
+        <div class="m-metric-header">
+          <div class="m-metric-icon teal">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <span class="m-metric-badge">{{ activePercentage() }}% active</span>
         </div>
-        <div class="search-wrap">
-          <app-search-input
-            placeholder="Filter by name, email, department..."
-            (searchChange)="onSearch($event)"
-          ></app-search-input>
+        <div class="m-metric-val">{{ totalUsers() }}</div>
+        <div class="m-metric-title">Team Headcount</div>
+        <div class="m-metric-sub">{{ activeUsers() }} active • {{ inactiveUsers() }} inactive</div>
+      </div>
+
+      <div class="m-metric-card">
+        <div class="m-metric-header">
+          <div class="m-metric-icon emerald">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </div>
+          <span class="m-metric-badge success">Operational</span>
+        </div>
+        <div class="m-metric-val">{{ activePercentage() }}%</div>
+        <div class="m-metric-title">Workforce Availability</div>
+        <div class="m-progress-bar-wrap">
+          <div class="m-progress-bar emerald" [style.width.%]="activePercentage()"></div>
+        </div>
+      </div>
+
+      <div class="m-metric-card">
+        <div class="m-metric-header">
+          <div class="m-metric-icon indigo">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+              ></path>
+            </svg>
+          </div>
+          <span class="m-metric-badge">{{ formattedDriveSize() }}</span>
+        </div>
+        <div class="m-metric-val">{{ totalDriveNodes() }}</div>
+        <div class="m-metric-title">Team Drive Assets</div>
+        <div class="m-metric-sub">Shared workplace files & folders</div>
+      </div>
+
+      <div class="m-metric-card">
+        <div class="m-metric-header">
+          <div class="m-metric-icon purple">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </div>
+          <span class="m-metric-badge purple">Zoom View</span>
+        </div>
+        <div class="m-metric-val">{{ totalImages() }}</div>
+        <div class="m-metric-title">Gallery Media Assets</div>
+        <div class="m-metric-sub">Visual library uploads</div>
+      </div>
+    </div>
+
+    <!-- Middle Section: Department Distribution & Quick Actions -->
+    <div class="manager-center-grid">
+      <!-- Department Workforce Allocation Card -->
+      <div class="manager-card">
+        <div class="m-card-head flex-between">
+          <div>
+            <h3 class="m-card-title">Department Workforce Allocation</h3>
+            <span class="m-card-subtitle">Headcount and active distribution per department</span>
+          </div>
+          <span class="head-chip">{{ departmentSummaries().length }} units</span>
+        </div>
+
+        <div class="m-card-body">
+          <div class="dept-alloc-list">
+            @for (dept of departmentSummaries(); track dept.name) {
+              <div class="dept-alloc-item">
+                <div class="dept-alloc-top flex-between">
+                  <div class="dept-info-title">
+                    <span class="dept-bullet"></span>
+                    <strong class="dept-label-name">{{ dept.name }}</strong>
+                  </div>
+                  <div class="dept-info-stats">
+                    <span class="dept-active-count">{{ dept.active }} active</span>
+                    <span class="dept-total-count">/ {{ dept.total }} total</span>
+                  </div>
+                </div>
+                <div class="dept-alloc-bar-track">
+                  <div class="dept-alloc-bar-fill" [style.width.%]="dept.percentage"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Command Center -->
+      <div class="manager-card">
+        <div class="m-card-head">
+          <h3 class="m-card-title">Workspace Command Shortcuts</h3>
+          <span class="m-card-subtitle">Fast navigation to essential manager features</span>
+        </div>
+
+        <div class="m-card-body">
+          <div class="command-grid">
+            <a class="command-box" routerLink="/admin/users">
+              <div class="command-icon-wrap indigo">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <line x1="19" y1="8" x2="19" y2="14"></line>
+                  <line x1="22" y1="11" x2="16" y2="11"></line>
+                </svg>
+              </div>
+              <div class="command-meta">
+                <div class="command-title">User Management</div>
+                <div class="command-desc">View, filter & manage all team members</div>
+              </div>
+              <svg
+                class="cmd-arrow"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+
+            <a class="command-box" routerLink="/drive">
+              <div class="command-icon-wrap teal">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                  ></path>
+                </svg>
+              </div>
+              <div class="command-meta">
+                <div class="command-title">Workplace Drive</div>
+                <div class="command-desc">Explore shared documents & folders</div>
+              </div>
+              <svg
+                class="cmd-arrow"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+
+            <a class="command-box" routerLink="/gallery">
+              <div class="command-icon-wrap purple">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <div class="command-meta">
+                <div class="command-title">Image Gallery</div>
+                <div class="command-desc">Upload photos & inspect with magnifier</div>
+              </div>
+              <svg
+                class="cmd-arrow"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+
+            <a class="command-box" routerLink="/profile">
+              <div class="command-icon-wrap emerald">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <div class="command-meta">
+                <div class="command-title">Security & Profile</div>
+                <div class="command-desc">Manage account password & settings</div>
+              </div>
+              <svg
+                class="cmd-arrow"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manager Team Directory Roster Table -->
+    <div class="manager-card roster-card">
+      <div class="roster-card-header">
+        <div class="roster-header-left">
+          <div class="roster-title-row">
+            <h3 class="m-card-title">Team Directory Roster</h3>
+            <span class="roster-count-badge">{{ filteredRosterUsers().length }} members</span>
+          </div>
+          <span class="m-card-subtitle"
+            >Filter by department below or open the full user directory</span
+          >
+        </div>
+
+        <div class="roster-header-right">
+          <!-- Department Filter Pills -->
+          <div class="dept-filter-bar">
+            @for (dept of departmentsList(); track dept) {
+              <button
+                type="button"
+                class="filter-pill"
+                [class.active]="selectedDept() === dept"
+                (click)="setDepartmentFilter(dept)"
+              >
+                {{ dept }}
+              </button>
+            }
+          </div>
+
+          <app-ui-button variant="primary" size="sm" routerLink="/admin/users">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            View All in User Table
+          </app-ui-button>
         </div>
       </div>
 
       <div class="table-container">
-        <table class="custom-table">
+        <table class="manager-table">
           <thead>
             <tr>
-              <th>Member</th>
-              <th>Role</th>
+              <th>Team Member</th>
               <th>Department</th>
-              <th>Contact Phone</th>
+              <th>Role</th>
+              <th>Phone</th>
               <th>Status</th>
+              <th class="text-right">Action</th>
             </tr>
           </thead>
           <tbody>
-            @for (user of filteredUsers(); track user.id) {
-              <tr>
+            @for (user of filteredRosterUsers(); track user.id) {
+              <tr class="roster-row">
                 <td>
                   <div class="user-cell">
                     <div class="user-avatar-initials">{{ getInitials(user.name) }}</div>
@@ -164,10 +598,14 @@
                   </div>
                 </td>
                 <td>
+                  <span class="dept-badge">{{ user.department || 'General' }}</span>
+                </td>
+                <td>
                   <app-badge [variant]="getRoleBadge(user.role)">{{ user.role }}</app-badge>
                 </td>
-                <td>{{ user.department || 'General' }}</td>
-                <td>{{ user.phone || '-' }}</td>
+                <td>
+                  <span class="phone-text">{{ user.phone || '—' }}</span>
+                </td>
                 <td>
                   <app-badge
                     [variant]="user.status === 'active' ? 'success' : 'danger'"
@@ -176,14 +614,35 @@
                     {{ user.status }}
                   </app-badge>
                 </td>
+                <td class="text-right">
+                  <button
+                    type="button"
+                    class="quick-view-btn"
+                    (click)="openUserModal(user)"
+                    title="View Profile Details"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>Details</span>
+                  </button>
+                </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="5">
-                  <app-empty-state
-                    title="No team members found"
-                    description="Try adjusting your search criteria."
-                  ></app-empty-state>
+                <td colspan="6" class="empty-roster-cell">
+                  <div class="empty-msg">No members found in {{ selectedDept() }}.</div>
                 </td>
               </tr>
             }
@@ -192,4 +651,12 @@
       </div>
     </div>
   }
+
+  <!-- User Details View Modal -->
+  <app-user-view-modal
+    [isOpen]="isViewModalOpen()"
+    [user]="selectedUser()"
+    (edit)="onEditUser($event)"
+    (close)="closeUserModal()"
+  ></app-user-view-modal>
 </div>

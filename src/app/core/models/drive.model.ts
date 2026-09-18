@@ -4,10 +4,11 @@ export interface DriveNode {
   id: string;
   name: string;
   type: DriveNodeType;
-  parentId: string; 
-  size?: number; 
-  mimeType?: string; 
-  dataUrl?: string; 
+  parentId: string;
+  size?: number;
+  mimeType?: string;
+  dataUrl?: string;
+  url?: string;
   uploadedBy?: string;
   createdAt: string;
   updatedAt?: string;

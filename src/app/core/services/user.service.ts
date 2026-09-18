@@ -36,6 +36,13 @@ export class UserService {
     appendParam('status', params.status);
     appendParam('department', params.department);
 
+    if (params.startDate) {
+      httpParams = httpParams.set('createdAt_gte', params.startDate);
+    }
+    if (params.endDate) {
+      httpParams = httpParams.set('createdAt_lte', params.endDate);
+    }
+
     if (params.sort) {
       httpParams = httpParams.set('_sort', params.sort);
       httpParams = httpParams.set('_order', params.order || 'asc');

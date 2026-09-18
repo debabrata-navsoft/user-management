@@ -7,9 +7,11 @@ export interface FilterOption {
 export interface FilterGroup {
   id: string;
   title: string;
+  type?: 'checkbox' | 'date';
   searchable?: boolean;
   isExpanded?: boolean;
   searchQuery?: string;
+  singleSelect?: boolean;
   options: FilterOption[];
 }
 

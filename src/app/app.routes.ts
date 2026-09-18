@@ -1,19 +1,22 @@
 import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { guestGuard } from './core/guards/guest.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { AuthService } from './core/services/auth.service';
 
 export const routes: Routes = [
-  // Public Auth Routes
+  // Public Auth Routes (accessible only to guests / unauthenticated users)
   {
     path: 'login',
     loadComponent: () => import('./pages/auth/login/login.component').then((m) => m.LoginComponent),
+    canActivate: [guestGuard],
   },
   {
     path: 'signup',
     loadComponent: () =>
       import('./pages/auth/signup/signup.component').then((m) => m.SignupComponent),
+    canActivate: [guestGuard],
   },
   {
     path: 'forgot-password',
@@ -21,6 +24,7 @@ export const routes: Routes = [
       import('./pages/auth/forgot-password/forgot-password.component').then(
         (m) => m.ForgotPasswordComponent,
       ),
+    canActivate: [guestGuard],
   },
   {
     path: 'reset-password',
@@ -28,6 +32,7 @@ export const routes: Routes = [
       import('./pages/auth/reset-password/reset-password.component').then(
         (m) => m.ResetPasswordComponent,
       ),
+    canActivate: [guestGuard],
   },
 
   // Protected App Shell Routes
@@ -62,7 +67,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/admin/users/user-list.component').then((m) => m.UserListComponent),
         canActivate: [roleGuard],
-        data: { roles: ['admin'] },
+        data: { roles: ['admin', 'manager'] },
       },
 
       // Manager Routes
@@ -73,7 +78,11 @@ export const routes: Routes = [
             (m) => m.ManagerDashboardComponent,
           ),
         canActivate: [roleGuard],
-        data: { roles: ['manager', 'admin'] },
+        data: { roles: ['manager'] },
+      },
+      {
+        path: 'manager/users',
+        redirectTo: 'admin/users',
       },
 
       // User / Employee Dashboard Routes
@@ -84,7 +93,7 @@ export const routes: Routes = [
             (m) => m.UserDashboardComponent,
           ),
         canActivate: [roleGuard],
-        data: { roles: ['employee', 'manager', 'admin'] },
+        data: { roles: ['employee'] },
       },
 
       // Shared Operational Features

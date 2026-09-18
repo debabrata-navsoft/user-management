@@ -21,16 +21,23 @@
 .data-table-toolbar {
   flex-shrink: 0;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 10px 16px;
   box-shadow: var(--shadow-xs);
   z-index: 30;
+}
+
+.toolbar-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
 }
 
 .toolbar-left {
@@ -56,19 +63,15 @@
   font-weight: 700;
 }
 
-/* Inline Active Filter Chips */
+/* Active Filter Chips Row */
 .toolbar-chips-inline {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-}
-
-.chips-divider {
-  width: 1px;
-  height: 22px;
-  background: var(--border);
-  margin: 0 4px;
+  width: 100%;
+  padding-top: 8px;
+  border-top: 1px solid var(--surface-muted);
 }
 
 .chips-label {
@@ -382,60 +385,69 @@
   font: inherit;
   text-transform: inherit;
   letter-spacing: inherit;
-  color: inherit;
+  color: var(--text-muted);
   text-align: inherit;
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
-  transition: color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .sort-btn:hover {
   color: var(--text);
+  background: rgba(0, 0, 0, 0.02);
 }
 
-/* Reserved, not hidden: the space is held so headers keep their alignment
-   whichever column is sorted. */
+.sort-btn.is-sorted {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Lucide sort icon styles: hidden at rest for all columns */
 .sort-icon {
-  visibility: hidden;
-  opacity: 0;
   flex-shrink: 0;
-  transition: opacity 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
-/* The arrow is a hover affordance only — no column carries one at rest, the
-   sorted column included. On an unsorted header it is faint and grey and
-   previews the direction a click applies (ascending); on the sorted header it
-   is solid indigo and reports the current direction, so a click visibly moves
-   it between the two states. */
-.sortable-th:hover .sort-icon {
-  visibility: visible;
-  opacity: 0.4;
-  color: var(--text-muted);
+/* Neutral/unsorted icon color */
+.sort-icon.is-neutral {
+  color: #64748b;
 }
 
-/* The accent is carried by the arrow alone. The label keeps the same colour as
-   every other header, so the row reads as one consistent band. */
-.sortable-th.is-sorted:hover .sort-icon {
+/* Active sorted column icon color (black) */
+.sort-icon.is-active {
+  color: #0f172a;
+}
+
+/* When cursor hovers over any column header (including ID), reveal the arrow */
+.sort-btn:hover .sort-icon {
   opacity: 1;
-  color: var(--primary);
+  visibility: visible;
+}
+
+.sort-btn:hover .sort-icon.is-active {
+  color: #000000;
+  transform: scale(1.1);
 }
 
 .actions-th .sort-btn {
   justify-content: flex-end;
 }
 
-/* A centred column has to centre its header too, or the label sits left of the
-   pills below it: .sortable-th zeroes the th padding and the button lays its
-   label out with flex, so the th's own text-align never reaches the text. */
+/* Centred column header alignment */
 .custom-table th.text-center .sort-btn {
   justify-content: center;
   padding-left: 8px;
   padding-right: 8px;
 }
 
-/* Mirror of .sort-icon on the leading edge, so the label itself lands on the
-   column's centre line rather than the label-plus-arrow pair doing so. */
 .custom-table th.text-center .sort-btn::before {
   content: '';
   width: 14px;

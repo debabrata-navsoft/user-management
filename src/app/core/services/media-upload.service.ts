@@ -12,6 +12,7 @@ import { SnackbarService } from './snackbar.service';
 export interface MediaUploadOutcome {
   uploaded: string[];
   tooLarge: string[];
+  duplicates: string[];
   failed: string[];
 }
 
@@ -104,13 +105,20 @@ export class MediaUploadService {
   }
 
   report(outcome: MediaUploadOutcome, destination = 'current folder'): void {
-    const { uploaded, tooLarge, failed } = outcome;
+    const { uploaded, tooLarge, duplicates, failed } = outcome;
 
     if (uploaded.length > 0) {
       this.snackbar.success(
         uploaded.length === 1
           ? `Uploaded "${uploaded[0]}" to the ${destination}.`
           : `Uploaded ${uploaded.length} files to the ${destination}.`,
+      );
+    }
+    if (duplicates && duplicates.length > 0) {
+      this.snackbar.error(
+        `${duplicates.length} duplicate file(s) skipped (already exist in ${destination}): ` +
+          duplicates.join(', '),
+        'Duplicate File',
       );
     }
     if (tooLarge.length > 0) {
@@ -129,7 +137,7 @@ export class MediaUploadService {
     items: MediaUploadItem[],
     post: (item: MediaUploadItem) => Observable<unknown>,
   ): Promise<MediaUploadOutcome> {
-    const outcome: MediaUploadOutcome = { uploaded: [], tooLarge: [], failed: [] };
+    const outcome: MediaUploadOutcome = { uploaded: [], tooLarge: [], duplicates: [], failed: [] };
 
     // One loader for the whole batch. The interceptor raises and drops the
     // global loader per request, so across a paced batch the request count hits

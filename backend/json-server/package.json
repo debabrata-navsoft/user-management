@@ -1,0 +1,21 @@
+{
+  "name": "user-management-mock-backend",
+  "version": "1.0.0",
+  "description": "JSON Server mock backend for User Management System",
+  "main": "db.json",
+  "scripts": {
+    "start": "json-server --watch db.json --host 0.0.0.0 --port $PORT",
+    "dev": "json-server --watch db.json --port 3000",
+    "serve": "json-server db.json --port 3000"
+  },
+  "keywords": [
+    "json-server",
+    "mock-api",
+    "backend"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "json-server": "^0.17.4"
+  }
+}

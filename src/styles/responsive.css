@@ -115,8 +115,52 @@
     padding: 8px 12px !important;
   }
 
+  .data-table-toolbar .toolbar-top-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .data-table-toolbar .toolbar-right {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-left: 0 !important;
+  }
+
+  .data-table-toolbar .search-container {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+  }
+
+  .data-table-toolbar .btn-filter-trigger {
+    flex-shrink: 0 !important;
+    height: 38px !important;
+    padding: 6px 12px !important;
+  }
+
   .data-table-toolbar .table-total-count {
     font-size: 13.5px !important;
+  }
+
+  .toolbar-chips-inline {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    padding-top: 6px !important;
+    border-top: 1px solid var(--surface-muted) !important;
+  }
+
+  .toolbar-chips-inline .chips-list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
   }
 
   /* ---- Pagination ----
@@ -200,7 +244,7 @@
      card. The parent has a definite height, so 100% resolves cleanly. */
   .user-management-page {
     height: 100% !important;
-    margin-bottom: 0 !important;
+    margin-bottom: -16px !important;
     gap: 8px !important;
   }
 
@@ -344,7 +388,7 @@
   /* ---- Drive ---- */
   .drive-page {
     height: 100% !important;
-    margin-bottom: 0 !important;
+    margin-bottom: -16px !important;
     gap: 8px !important;
   }
 
@@ -396,6 +440,50 @@
   .files-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
     gap: 12px !important;
+  }
+
+  /* Drive Table in Mobile List View */
+  .drive-list-card {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .drive-table {
+    table-layout: auto !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
+
+  .drive-table th,
+  .drive-table td {
+    width: auto !important;
+    white-space: nowrap !important;
+    padding: 10px 14px !important;
+  }
+
+  .drive-table .th-name,
+  .drive-table .td-name {
+    min-width: 180px !important;
+  }
+
+  .drive-table .th-owner,
+  .drive-table .td-owner {
+    min-width: 130px !important;
+  }
+
+  .drive-table .th-date,
+  .drive-table .td-date {
+    min-width: 110px !important;
+  }
+
+  .drive-table .th-size,
+  .drive-table .td-size {
+    min-width: 80px !important;
+  }
+
+  .drive-table .actions-th,
+  .drive-table .actions-cell {
+    min-width: 70px !important;
   }
 
   /* ---- Gallery ---- */
@@ -574,6 +662,24 @@
   .drive-page {
     height: 100% !important;
     margin-bottom: 0 !important;
+  }
+
+  .drive-list-card {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .drive-table {
+    table-layout: auto !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
+
+  .drive-table th,
+  .drive-table td {
+    width: auto !important;
+    white-space: nowrap !important;
+    padding: 12px 16px !important;
   }
 
   .folders-grid {
