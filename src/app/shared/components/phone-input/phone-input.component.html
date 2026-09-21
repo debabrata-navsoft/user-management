@@ -62,6 +62,7 @@
       [value]="number()"
       [placeholder]="placeholder()"
       [disabled]="disabled()"
+      [attr.maxlength]="maxDigits()"
       (input)="onNumberChange($event)"
       (blur)="markTouched()"
       autocomplete="off"

@@ -1,5 +1,5 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { isValidPhoneNumber, validatePhoneNumberLength } from 'libphonenumber-js';
+import { isValidPhoneNumber, validatePhoneNumberLength } from 'libphonenumber-js/mobile';
 import { phoneRulesForDial, splitPhone } from './countries';
 
 export const PASSWORD_MIN_LENGTH = 6;

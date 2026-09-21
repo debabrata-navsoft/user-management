@@ -2,9 +2,8 @@ import {
   CountryCode,
   getCountries,
   getCountryCallingCode,
-  getExampleNumber,
-} from 'libphonenumber-js';
-import examples from 'libphonenumber-js/examples.mobile.json';
+  Metadata,
+} from 'libphonenumber-js/mobile';
 
 export interface Country {
   code: string;
@@ -14,7 +13,7 @@ export interface Country {
   flagSvg: string;
 }
 
-const PREFERRED = ['IN', 'AE', 'SA', 'US', 'GB'];
+const PREFERRED = ['IN', 'US', 'GB'];
 
 export const DEFAULT_COUNTRY = 'IN';
 
@@ -63,14 +62,31 @@ export function joinPhone(dial: string, number: string): string {
   return digits ? `${dial} ${digits}` : '';
 }
 
+interface MobileNumberingPlan {
+  possibleLengths(): number[];
+  type(name: 'MOBILE'): { possibleLengths(): number[] } | undefined;
+}
+
+function mobileLengths(dial: string): number[] {
+  const metadata = new Metadata();
+
+  const lengths = COUNTRIES.filter((c) => c.dial === dial).flatMap((c) => {
+    metadata.selectNumberingPlan(c.code as CountryCode);
+    const plan = metadata.numberingPlan as unknown as MobileNumberingPlan | undefined;
+    return plan?.type('MOBILE')?.possibleLengths() ?? plan?.possibleLengths() ?? [];
+  });
+
+  return [...new Set(lengths)].sort((a, b) => a - b);
+}
+
+export function maxMobileDigits(dial: string): number | undefined {
+  return mobileLengths(dial).at(-1);
+}
+
 export function phoneRulesForDial(dial: string): { country: string; digits?: number } {
   const country = COUNTRIES.find((c) => c.dial === dial);
   if (!country) return { country: '' };
 
-  try {
-    const example = getExampleNumber(country.code as CountryCode, examples);
-    return { country: country.name, digits: example?.nationalNumber.length };
-  } catch {
-    return { country: country.name };
-  }
+  const lengths = mobileLengths(dial);
+  return { country: country.name, digits: lengths.length === 1 ? lengths[0] : undefined };
 }

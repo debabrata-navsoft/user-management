@@ -3,7 +3,13 @@ import { ControlValueAccessor, NgControl } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { COUNTRIES, DEFAULT_DIAL, joinPhone, splitPhone } from '../../../core/utils/countries';
+import {
+  COUNTRIES,
+  DEFAULT_DIAL,
+  joinPhone,
+  maxMobileDigits,
+  splitPhone,
+} from '../../../core/utils/countries';
 
 @Component({
   selector: 'app-phone-input',
@@ -40,6 +46,7 @@ export class PhoneInputComponent implements ControlValueAccessor {
 
   selectedCountry = computed(() => COUNTRIES.find((c) => c.dial === this.dial()));
   selectedFlag = computed(() => this.selectedCountry()?.flag ?? '');
+  maxDigits = computed(() => maxMobileDigits(this.dial()));
 
   showError(): boolean {
     const c = this.ngControl?.control;
@@ -69,15 +76,17 @@ export class PhoneInputComponent implements ControlValueAccessor {
 
   onDialChange(dial: string): void {
     this.dial.set(dial);
+    this.number.set(this.number().slice(0, this.maxDigits()));
     this.emit();
   }
 
   onNumberChange(event: Event): void {
     const el = event.target as HTMLInputElement;
-    const cleaned = el.value.replace(/\D/g, '');
+    const cleaned = el.value.replace(/\D/g, '').slice(0, this.maxDigits());
 
     if (el.value !== cleaned) {
-      const caret = (el.selectionStart ?? cleaned.length) - (el.value.length - cleaned.length);
+      const pos = el.selectionStart ?? el.value.length;
+      const caret = Math.min(el.value.slice(0, pos).replace(/\D/g, '').length, cleaned.length);
       el.value = cleaned;
       el.setSelectionRange(caret, caret);
     }

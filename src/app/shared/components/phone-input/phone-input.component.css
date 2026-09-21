@@ -4,7 +4,7 @@
 
 .phone-row {
   display: grid;
-  grid-template-columns: 104px minmax(0, 1fr);
+  grid-template-columns: 114px minmax(0, 1fr);
   gap: 8px;
   align-items: start;
   --mat-form-field-outlined-outline-color: var(--border-strong);
@@ -55,6 +55,7 @@
 
 .trigger-dial {
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .phone-row ::ng-deep .mat-focused .mdc-notched-outline {
