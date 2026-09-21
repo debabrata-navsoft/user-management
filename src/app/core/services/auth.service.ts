@@ -194,25 +194,29 @@ export class AuthService {
     return !!current && roles.includes(current);
   }
 
-  /** Admins and managers review every user's uploads; anyone else sees only their own. */
-  seesAllUploads(): boolean {
-    return this.hasRole('admin', 'manager');
-  }
-
   /**
-   * Narrows a Gallery/Drive query to the signed in user's own rows, and leaves it untouched
-   * for admins and managers. `uploadedBy` holds the email on newer rows and the display name
-   * on older ones, so both are sent — json-server reads a repeated param as OR.
+   * Narrows a Gallery/Drive query to one person's uploads. `uploadedBy` holds the email on
+   * newer rows and the display name on older ones, so both are sent — json-server reads a
+   * repeated param as OR.
    */
-  ownedScope(base: Record<string, string | number> = {}): HttpParams {
+  ownerScope(
+    owner: Pick<User, 'email' | 'name'> | null,
+    base: Record<string, string | number> = {},
+  ): HttpParams {
     let params = new HttpParams({ fromObject: base });
-    if (this.seesAllUploads()) return params;
-
-    const me = this.currentUser();
-    for (const identity of [me?.email, me?.name]) {
+    for (const identity of [owner?.email, owner?.name]) {
       if (identity) params = params.append('uploadedBy', identity);
     }
     return params;
+  }
+
+  /**
+   * Every role sees only its own uploads, admins and managers included — one person's files
+   * have no business in everybody else's gallery. Another user's are reached from the user
+   * list instead, through {@link ownerScope}.
+   */
+  ownedScope(base: Record<string, string | number> = {}): HttpParams {
+    return this.ownerScope(this.currentUser(), base);
   }
 
   /**

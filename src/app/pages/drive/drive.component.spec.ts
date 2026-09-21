@@ -3,12 +3,14 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import {
   AlertCircle,
   CheckCircle2,
   CircleMinus,
+  ArrowLeft,
   EllipsisVertical,
+  Eye,
   File as FileIcon,
   FileArchive,
   FileCode,
@@ -411,3 +413,122 @@ async function waitForPost(httpMock: HttpTestingController, url: string) {
   }
   throw new Error(`No request to ${url}`);
 }
+
+describe('DriveComponent user browsing', () => {
+  let fixture: ComponentFixture<DriveComponent>;
+  let httpMock: HttpTestingController;
+  let navigations: Record<string, unknown>[];
+
+  const admin = {
+    id: 1,
+    name: 'System Admin',
+    email: 'admin@demo.com',
+    role: 'admin',
+    status: 'active',
+  };
+  const emma = {
+    id: 7,
+    name: 'Emma Employee',
+    email: 'emma@demo.com',
+    role: 'employee',
+    status: 'active',
+  };
+
+  const flushAll = (match: (url: string) => boolean, body: unknown) => {
+    for (const req of httpMock.match((r) => match(r.url))) req.flush(body as never);
+  };
+
+  const lastQuery = () => navigations.at(-1)?.['queryParams'];
+
+  beforeEach(async () => {
+    localStorage.setItem(
+      'user_manage_session',
+      JSON.stringify({ token: 'x', user: admin, expiresAt: Date.now() + 3_600_000 }),
+    );
+
+    await TestBed.configureTestingModule({
+      imports: [DriveComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideNoopAnimations(),
+        importProvidersFrom(
+          LucideAngularModule.pick({
+            Search,
+            X,
+            Info,
+            CheckCircle2,
+            AlertCircle,
+            TriangleAlert,
+            CircleMinus,
+            Eye,
+            File: FileIcon,
+            FileArchive,
+            FileCode,
+            FileImage,
+            FilePlay,
+            FileSpreadsheet,
+            FileText,
+            FolderPlus,
+            Music,
+            Presentation,
+            Upload,
+            EllipsisVertical,
+            Trash2,
+            ArrowLeft,
+          }),
+        ),
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(DriveComponent);
+    httpMock = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+
+    flushAll((url) => url.endsWith('/users/1'), admin);
+    flushAll((url) => url.endsWith('/users'), [admin, emma]);
+    fixture.detectChanges();
+
+    navigations = [];
+    const router = TestBed.inject(Router);
+    router.navigate = ((_commands: unknown[], extras: Record<string, unknown>) => {
+      navigations.push(extras);
+      return Promise.resolve(true);
+    }) as never;
+  });
+
+  afterEach(() => localStorage.clear());
+
+  it('shows the user list first, and loads no drive until one is picked', () => {
+    expect(fixture.componentInstance.showUserList()).toBe(true);
+    expect(fixture.nativeElement.querySelector('app-user-picker')).toBeTruthy();
+    httpMock.expectNone((r) => r.url.endsWith('/nodes'));
+  });
+
+  it('puts the viewed user in the URL, so browser Back returns to the list', () => {
+    fixture.componentInstance.viewUser(emma as never);
+    expect(lastQuery()).toEqual({ userId: 7, folderId: null });
+
+    fixture.componentInstance.backToUsers();
+    expect(lastQuery()).toEqual({ userId: null, folderId: null });
+  });
+
+  it('keeps that user in the URL when opening one of their folders', () => {
+    fixture.componentInstance.viewUser(emma as never);
+    flushAll((url) => url.endsWith('/nodes'), []);
+
+    fixture.componentInstance.navigateToFolder('folder-1');
+
+    // Dropping userId here would bounce the page back to the user list mid-browse.
+    expect(lastQuery()).toEqual({ folderId: 'folder-1', userId: '7' });
+  });
+
+  it('asks for that user`s nodes, by email and display name', () => {
+    fixture.componentInstance.viewUser(emma as never);
+
+    const req = httpMock.match((r) => r.url.endsWith('/nodes'))[0];
+    expect(req.request.params.getAll('uploadedBy')).toEqual(['emma@demo.com', 'Emma Employee']);
+    expect(fixture.componentInstance.canUpload()).toBe(false);
+  });
+});

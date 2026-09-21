@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ImageItem, ImageUploadPreview } from '../models/image.model';
+import { User } from '../models/user.model';
 import { batchedWrite } from '../utils/write-pacing';
 import { AuthService } from './auth.service';
 
@@ -17,6 +18,13 @@ export class ImageService {
   getImages(): Observable<ImageItem[]> {
     return this.http.get<ImageItem[]>(this.baseUrl, {
       params: this.auth.ownedScope({ _sort: 'createdAt', _order: 'desc' }),
+    });
+  }
+
+  /** One user's gallery, for an admin or manager reviewing them from the user list. */
+  getImagesFor(owner: Pick<User, 'email' | 'name'>): Observable<ImageItem[]> {
+    return this.http.get<ImageItem[]>(this.baseUrl, {
+      params: this.auth.ownerScope(owner, { _sort: 'createdAt', _order: 'desc' }),
     });
   }
 

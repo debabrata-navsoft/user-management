@@ -3,10 +3,14 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BreadcrumbItem, DriveNode, DriveStats } from '../models/drive.model';
+import { User } from '../models/user.model';
 import { PacedWriteOutcome, batchedWrite, runPacedWrites } from '../utils/write-pacing';
 import { AuthService } from './auth.service';
 
 export const DRIVE_ROOT = 'root';
+
+/** Enough of a user to match `uploadedBy`, which holds either identity. */
+export type DriveOwner = Pick<User, 'email' | 'name'>;
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +20,13 @@ export class DriveService {
   private auth = inject(AuthService);
   private baseUrl = `${environment.apiUrl}/nodes`;
 
-  getNodes(parentId: string = DRIVE_ROOT): Observable<DriveNode[]> {
-    return this.http.get<DriveNode[]>(this.baseUrl, { params: this.auth.ownedScope({ parentId }) });
+  /** Without an `owner` this is your own drive; with one, the drive of the user being reviewed. */
+  getNodes(parentId: string = DRIVE_ROOT, owner?: DriveOwner): Observable<DriveNode[]> {
+    return this.http.get<DriveNode[]>(this.baseUrl, { params: this.scopeFor(owner, { parentId }) });
+  }
+
+  private scopeFor(owner: DriveOwner | undefined, base: Record<string, string> = {}) {
+    return owner ? this.auth.ownerScope(owner, base) : this.auth.ownedScope(base);
   }
 
   /**
@@ -29,9 +38,14 @@ export class DriveService {
     return this.http.get<DriveNode[]>(this.baseUrl);
   }
 
-  /** Every node the signed in user may see at any depth — all of them for admin/manager. */
-  getVisibleNodes(): Observable<DriveNode[]> {
-    return this.http.get<DriveNode[]>(this.baseUrl, { params: this.auth.ownedScope() });
+  /** Every node one user owns, at any depth — your own unless an owner is named. */
+  getVisibleNodes(owner?: DriveOwner): Observable<DriveNode[]> {
+    return this.http.get<DriveNode[]>(this.baseUrl, { params: this.scopeFor(owner) });
+  }
+
+  /** One user's files, for an admin or manager reviewing them from the user list. */
+  getFilesFor(owner: DriveOwner): Observable<DriveNode[]> {
+    return this.getVisibleNodes(owner).pipe(map((nodes) => nodes.filter((n) => n.type === 'file')));
   }
 
   getNodeById(id: string): Observable<DriveNode> {
@@ -135,8 +149,8 @@ export class DriveService {
     );
   }
 
-  getStats(): Observable<DriveStats> {
-    return this.getVisibleNodes().pipe(
+  getStats(owner?: DriveOwner): Observable<DriveStats> {
+    return this.getVisibleNodes(owner).pipe(
       map((nodes) => {
         let totalFolders = 0;
         let totalFiles = 0;

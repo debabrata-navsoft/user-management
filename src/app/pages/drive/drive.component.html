@@ -3,170 +3,189 @@
   <div class="drive-header-sticky">
     <app-page-header
       title="Drive File & Folder Manager"
-      subtitle="Google Drive-inspired workplace asset management with folders, nested navigation and file previews"
-      [badgeText]="stats().totalFolders + ' Folders, ' + stats().totalFiles + ' Files'"
+      [subtitle]="headerSubtitle()"
+      [badgeText]="headerBadge()"
     >
       <div actions>
-        <!-- Upload File Button -->
-        <app-ui-button variant="secondary" size="md" (click)="openUploadModal()">
-          <lucide-icon name="upload" [size]="16"></lucide-icon>
-          Upload Files
-        </app-ui-button>
+        @if (viewedUser()) {
+          <app-ui-button variant="secondary" size="md" (click)="backToUsers()">
+            <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+            All Users
+          </app-ui-button>
+        }
 
-        <!-- New Folder Button -->
-        <app-ui-button variant="primary" size="md" (click)="openCreateFolderModal()">
-          <lucide-icon name="folder-plus" [size]="16" [strokeWidth]="2.5"></lucide-icon>
-          New Folder
-        </app-ui-button>
+        @if (canUpload()) {
+          <!-- Upload File Button -->
+          <app-ui-button variant="secondary" size="md" (click)="openUploadModal()">
+            <lucide-icon name="upload" [size]="16"></lucide-icon>
+            Upload Files
+          </app-ui-button>
+
+          <!-- New Folder Button -->
+          <app-ui-button variant="primary" size="md" (click)="openCreateFolderModal()">
+            <lucide-icon name="folder-plus" [size]="16" [strokeWidth]="2.5"></lucide-icon>
+            New Folder
+          </app-ui-button>
+        }
       </div>
     </app-page-header>
 
     <!-- Navigation Toolbar: Breadcrumbs & View Modes -->
-    <div class="card drive-toolbar-card">
-      <div class="toolbar-left">
-        <!-- Breadcrumbs Path -->
-        <nav class="drive-breadcrumbs">
-          @for (crumb of breadcrumbs(); track crumb.id; let last = $last) {
-            <div class="crumb-wrapper" [class.is-current]="last">
-              @if (!last) {
-                <button type="button" class="crumb-btn" (click)="navigateToFolder(crumb.id)">
-                  @if (crumb.id === 'root') {
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                  }
-                  <span>{{ crumb.name }}</span>
-                </button>
-                <span class="crumb-sep">/</span>
-              } @else {
-                <span class="crumb-active">
-                  @if (crumb.id === 'root') {
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                  }
-                  <span>{{ crumb.name }}</span>
-                </span>
-              }
-            </div>
-          }
-        </nav>
-      </div>
-
-      <div class="toolbar-right">
-        <div class="drive-search">
-          <app-search-input
-            placeholder="Search by name or owner..."
-            [value]="searchQuery()"
-            (searchChange)="onSearch($event)"
-          ></app-search-input>
+    @if (!showUserList()) {
+      <div class="card drive-toolbar-card">
+        <div class="toolbar-left">
+          <!-- Breadcrumbs Path -->
+          <nav class="drive-breadcrumbs">
+            @for (crumb of breadcrumbs(); track crumb.id; let last = $last) {
+              <div class="crumb-wrapper" [class.is-current]="last">
+                @if (!last) {
+                  <button type="button" class="crumb-btn" (click)="navigateToFolder(crumb.id)">
+                    @if (crumb.id === 'root') {
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                      </svg>
+                    }
+                    <span>{{ crumb.name }}</span>
+                  </button>
+                  <span class="crumb-sep">/</span>
+                } @else {
+                  <span class="crumb-active">
+                    @if (crumb.id === 'root') {
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                      </svg>
+                    }
+                    <span>{{ crumb.name }}</span>
+                  </span>
+                }
+              </div>
+            }
+          </nav>
         </div>
 
-        <!-- View Switcher -->
-        <div class="view-toggle-group">
-          <button
-            type="button"
-            class="toggle-btn"
-            [class.active]="viewMode() === 'grid'"
-            (click)="setViewMode('grid')"
-            title="Grid View"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+        <div class="toolbar-right">
+          <div class="drive-search">
+            <app-search-input
+              placeholder="Search by name or owner..."
+              [value]="searchQuery()"
+              (searchChange)="onSearch($event)"
+            ></app-search-input>
+          </div>
+
+          <!-- View Switcher -->
+          <div class="view-toggle-group">
+            <button
+              type="button"
+              class="toggle-btn"
+              [class.active]="viewMode() === 'grid'"
+              (click)="setViewMode('grid')"
+              title="Grid View"
             >
-              <rect x="3" y="3" width="7" height="7"></rect>
-              <rect x="14" y="3" width="7" height="7"></rect>
-              <rect x="14" y="14" width="7" height="7"></rect>
-              <rect x="3" y="14" width="7" height="7"></rect>
-            </svg>
-          </button>
-          <button
-            type="button"
-            class="toggle-btn"
-            [class.active]="viewMode() === 'list'"
-            (click)="setViewMode('list')"
-            title="List View"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="toggle-btn"
+              [class.active]="viewMode() === 'list'"
+              (click)="setViewMode('list')"
+              title="List View"
             >
-              <line x1="8" y1="6" x2="21" y2="6"></line>
-              <line x1="8" y1="12" x2="21" y2="12"></line>
-              <line x1="8" y1="18" x2="21" y2="18"></line>
-              <line x1="3" y1="6" x2="3.01" y2="6"></line>
-              <line x1="3" y1="12" x2="3.01" y2="12"></line>
-              <line x1="3" y1="18" x2="3.01" y2="18"></line>
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    }
   </div>
 
-  <!-- Scrollable Data Area (Only items scroll, header and toolbar stay fixed) -->
-  <app-drive-content
-    [isLoading]="isLoading()"
-    [isDeleting]="isActionSubmitting()"
-    [currentFolders]="currentFolders()"
-    [currentFiles]="currentFiles()"
-    [viewMode]="viewMode()"
-    [activeMenuNode]="activeMenuNode()"
-    [menuDropUp]="menuDropUp()"
-    [searchQuery]="searchQuery()"
-    [selectedIds]="selectedIds()"
-    [allSelected]="allVisibleSelected()"
-    (createFolder)="openCreateFolderModal()"
-    (clearSearch)="onSearch('')"
-    (navigateToFolder)="navigateToFolder($event)"
-    (toggleMenu)="toggleMenu($event.node, $event.event)"
-    (closeMenu)="closeMenu()"
-    (preview)="openPreview($event)"
-    (download)="downloadFile($event)"
-    (rename)="openRenameModal($event)"
-    (delete)="confirmDelete($event)"
-    (toggleSelection)="toggleSelection($event)"
-    (toggleSelectAll)="toggleSelectAll()"
-    (clearSelection)="clearSelection()"
-    (deleteSelected)="confirmDeleteSelected()"
-  ></app-drive-content>
+  <!-- The user list comes first for an admin or manager: one person's drive at a time. -->
+  @if (showUserList()) {
+    <app-user-picker
+      [users]="users()"
+      [isLoading]="isLoading()"
+      (select)="viewUser($event)"
+    ></app-user-picker>
+  } @else {
+    <app-drive-content
+      [isLoading]="isLoading()"
+      [isDeleting]="isActionSubmitting()"
+      [currentFolders]="currentFolders()"
+      [currentFiles]="currentFiles()"
+      [viewMode]="viewMode()"
+      [activeMenuNode]="activeMenuNode()"
+      [menuDropUp]="menuDropUp()"
+      [searchQuery]="searchQuery()"
+      [selectedIds]="selectedIds()"
+      [allSelected]="allVisibleSelected()"
+      (createFolder)="openCreateFolderModal()"
+      (clearSearch)="onSearch('')"
+      (navigateToFolder)="navigateToFolder($event)"
+      (toggleMenu)="toggleMenu($event.node, $event.event)"
+      (closeMenu)="closeMenu()"
+      (preview)="openPreview($event)"
+      (download)="downloadFile($event)"
+      (rename)="openRenameModal($event)"
+      (delete)="confirmDelete($event)"
+      (toggleSelection)="toggleSelection($event)"
+      (toggleSelectAll)="toggleSelectAll()"
+      (clearSelection)="clearSelection()"
+      (deleteSelected)="confirmDeleteSelected()"
+    ></app-drive-content>
+  }
 
   <!-- Upload Modal -->
   <app-upload-modal

@@ -4,12 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { BreadcrumbItem, DriveNode, DriveStats } from '../../core/models/drive.model';
+import { User } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
 import { DRIVE_ROOT, DriveService } from '../../core/services/drive.service';
 import { ImageModalService } from '../../core/services/image-modal.service';
 import { MediaUploadService } from '../../core/services/media-upload.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
 import { UploaderService } from '../../core/services/uploader.service';
+import { UserService } from '../../core/services/user.service';
 import { openDataUrlInNewTab } from '../../core/utils/data-url';
 import { isImageType, isVideoType } from '../../core/utils/file-types';
 import { isValidFolderName } from '../../core/utils/folder-validator';
@@ -25,6 +27,7 @@ import { RenameModalComponent } from './rename-modal/rename-modal.component';
 import { SearchInputComponent } from '../../shared/components/search-input/search-input.component';
 import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.component';
 import { UploadModalComponent } from '../../shared/components/upload-modal/upload-modal.component';
+import { UserPickerComponent } from '../../shared/components/user-picker/user-picker.component';
 
 const CONTEXT_MENU_HEIGHT_PX = 200;
 
@@ -42,6 +45,7 @@ const CONTEXT_MENU_HEIGHT_PX = 200;
     RenameModalComponent,
     FilePreviewModalComponent,
     UploadModalComponent,
+    UserPickerComponent,
     LucideAngularModule,
   ],
   templateUrl: './drive.component.html',
@@ -54,11 +58,37 @@ export class DriveComponent implements OnInit {
   private snackbar = inject(SnackbarService);
   private imageModalService = inject(ImageModalService);
   private uploaders = inject(UploaderService);
+  private userService = inject(UserService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
   isLoading = signal<boolean>(true);
   isActionSubmitting = signal<boolean>(false);
+
+  users = signal<User[]>([]);
+  /** Whose drive is on screen. Null while the user list is showing. */
+  viewedUser = signal<User | null>(null);
+
+  /** Admins and managers start on the user list; everyone else only ever has their own. */
+  canBrowseUsers = computed(() => this.authService.hasRole('admin', 'manager'));
+  showUserList = computed(() => this.canBrowseUsers() && !this.viewedUser());
+  // Uploads are stored against whoever is signed in, so they only land in your own drive.
+  canUpload = computed(
+    () => !this.canBrowseUsers() || this.authService.isCurrentUser(this.viewedUser()?.id),
+  );
+
+  headerSubtitle = computed(() => {
+    const owner = this.viewedUser();
+    if (this.showUserList()) return 'Open a user to see the folders and files they uploaded';
+    if (owner) return `Folders and files uploaded by ${owner.name}`;
+    return 'Google Drive-inspired workplace asset management with folders, nested navigation and file previews';
+  });
+
+  headerBadge = computed(() =>
+    this.showUserList()
+      ? `${this.users().length} Users`
+      : `${this.stats().totalFolders} Folders, ${this.stats().totalFiles} Files`,
+  );
 
   currentFolderId = signal<string>(DRIVE_ROOT);
   nodes = signal<DriveNode[]>([]);
@@ -156,15 +186,84 @@ export class DriveComponent implements OnInit {
       this.viewMode.set(savedMode);
     }
 
+    // Both the folder and, for an admin, the user being viewed live in the URL, so browser
+    // Back walks back through them instead of leaving the page.
     this.route.queryParamMap.subscribe((params) => {
       const folderId = params.get('folderId') || DRIVE_ROOT;
       const view = params.get('view') as 'grid' | 'list';
       if (view && (view === 'grid' || view === 'list')) {
         this.viewMode.set(view);
       }
-      this.loadFolder(folderId);
+
+      if (!this.canBrowseUsers()) {
+        this.loadFolder(folderId);
+        return;
+      }
+      this.applyUserParam(params.get('userId'), folderId);
     });
 
+    if (this.canBrowseUsers()) this.loadUsers();
+    else this.loadStats();
+  }
+
+  private applyUserParam(userId: string | null, folderId: string): void {
+    if (!userId) {
+      this.setViewedUser(null);
+      return;
+    }
+
+    if (String(this.viewedUser()?.id ?? '') === userId) {
+      // Same user, so this is folder navigation — `viewUser` already loaded the root.
+      if (folderId !== this.currentFolderId()) this.loadFolder(folderId);
+      return;
+    }
+
+    this.userService.resolveUser(userId, this.users()).subscribe({
+      next: (user) => this.setViewedUser(user, folderId),
+      error: () => this.setViewedUser(null),
+    });
+  }
+
+  loadUsers(): void {
+    this.isLoading.set(true);
+    this.userService.getAllUsers().subscribe({
+      next: (users) => {
+        this.users.set(users);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false),
+    });
+  }
+
+  viewUser(user: User): void {
+    this.setViewedUser(user);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { userId: user.id, folderId: null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  backToUsers(): void {
+    this.setViewedUser(null);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { userId: null, folderId: null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  /** `null` is the user list: same reset, minus the load. */
+  private setViewedUser(user: User | null, folderId: string = DRIVE_ROOT): void {
+    this.viewedUser.set(user);
+    this.searchQuery.set('');
+    this.clearSelection();
+
+    if (!user) {
+      this.nodes.set([]);
+      return;
+    }
+    this.loadFolder(folderId);
     this.loadStats();
   }
 
@@ -175,7 +274,7 @@ export class DriveComponent implements OnInit {
     this.clearSelection();
 
     forkJoin({
-      nodes: this.driveService.getNodes(folderId),
+      nodes: this.driveService.getNodes(folderId, this.viewedUser() ?? undefined),
       crumbs: this.driveService.getBreadcrumbs(folderId),
     }).subscribe({
       next: (res) => {
@@ -190,7 +289,7 @@ export class DriveComponent implements OnInit {
   }
 
   loadStats(): void {
-    this.driveService.getStats().subscribe({
+    this.driveService.getStats(this.viewedUser() ?? undefined).subscribe({
       next: (s) => this.stats.set(s),
     });
   }
@@ -204,6 +303,11 @@ export class DriveComponent implements OnInit {
     }
     if (this.viewMode() === 'list') {
       queryParams['view'] = 'list';
+    }
+    // This call replaces the query, so whose drive is open has to be carried over.
+    const owner = this.viewedUser();
+    if (owner) {
+      queryParams['userId'] = String(owner.id);
     }
     this.router.navigate([], {
       relativeTo: this.route,

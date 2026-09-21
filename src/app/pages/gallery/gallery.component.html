@@ -1,14 +1,22 @@
 <div class="gallery-page">
   <app-page-header
     title="Image Gallery & Product Magnifier"
-    subtitle="Upload multiple images, organize media assets, and inspect with product-style zoom magnifier"
-    [badgeText]="images().length + ' Images Stored'"
+    [subtitle]="headerSubtitle()"
+    [badgeText]="headerBadge()"
   >
     <div actions>
-      <app-ui-button variant="primary" size="md" (click)="openUploadModal()">
-        <lucide-icon name="plus" [size]="14"></lucide-icon>
-        Upload Images
-      </app-ui-button>
+      @if (viewedUser()) {
+        <app-ui-button variant="secondary" size="md" (click)="backToUsers()">
+          <lucide-icon name="arrow-left" [size]="14"></lucide-icon>
+          All Users
+        </app-ui-button>
+      }
+      @if (canUpload()) {
+        <app-ui-button variant="primary" size="md" (click)="openUploadModal()">
+          <lucide-icon name="plus" [size]="14"></lucide-icon>
+          Upload Images
+        </app-ui-button>
+      }
     </div>
   </app-page-header>
 
@@ -24,8 +32,14 @@
     (uploaded)="onImagesUploaded($event)"
   ></app-upload-modal>
 
-  <!-- Active Magnifier Inspector Section -->
-  @if (activeImage(); as active) {
+  <!-- The user list comes first for an admin or manager: one person's gallery at a time. -->
+  @if (showUserList()) {
+    <app-user-picker
+      [users]="users()"
+      [isLoading]="isLoading()"
+      (select)="viewUser($event)"
+    ></app-user-picker>
+  } @else if (activeImage(); as active) {
     <div class="card inspector-card">
       <div class="card-header flex-between">
         <div class="studio-heading">

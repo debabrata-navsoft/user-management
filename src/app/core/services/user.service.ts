@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PagedResult, PaginationParams } from '../models/pagination.model';
 import { User } from '../models/user.model';
@@ -80,6 +80,12 @@ export class UserService {
 
   getUserById(id: string | number): Observable<User> {
     return this.http.get<User>(`${this.baseUrl}/${id}`);
+  }
+
+  /** For a `?userId=` deep link that can land before the directory has loaded. */
+  resolveUser(id: string, loaded: User[]): Observable<User> {
+    const known = loaded.find((u) => String(u.id) === id);
+    return known ? of(known) : this.getUserById(id);
   }
 
   createUser(user: Partial<User>): Observable<User> {

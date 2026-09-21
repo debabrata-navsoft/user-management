@@ -100,14 +100,26 @@ describe('AuthService', () => {
       // Older rows stored the display name, newer ones the email — json-server ORs them.
       expect(params.getAll('uploadedBy')).toEqual(['emma@demo.com', 'Emma Employee']);
       expect(params.get('_sort')).toBe('createdAt');
-      expect(service.seesAllUploads()).toBe(false);
     });
 
-    it('leaves the query untouched for admin and manager', () => {
+    it('scopes an admin to their own rows as well', () => {
       signIn('admin', 'System Admin', 'admin@demo.com');
 
-      expect(service.seesAllUploads()).toBe(true);
-      expect(service.ownedScope({ parentId: 'root' }).has('uploadedBy')).toBe(false);
+      // Admins review someone else's uploads from the user list, not from their own gallery.
+      expect(service.ownedScope({ parentId: 'root' }).getAll('uploadedBy')).toEqual([
+        'admin@demo.com',
+        'System Admin',
+      ]);
+    });
+
+    it('scopes a query to any named owner, for that user-list review', () => {
+      const params = service.ownerScope({ email: 'emma@demo.com', name: 'Emma Employee' });
+
+      expect(params.getAll('uploadedBy')).toEqual(['emma@demo.com', 'Emma Employee']);
+    });
+
+    it('does not filter at all without an owner, which would hide every row', () => {
+      expect(service.ownerScope(null, { parentId: 'root' }).has('uploadedBy')).toBe(false);
     });
   });
 

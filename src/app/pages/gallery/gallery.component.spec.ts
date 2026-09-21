@@ -1,14 +1,16 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import {
   AlertCircle,
   ArrowLeft,
+  CircleMinus,
   Download,
+  Eye,
   Grid,
   LucideAngularModule,
   Maximize2,
@@ -19,7 +21,9 @@ import {
   Upload,
   X,
 } from 'lucide-angular';
+import { environment } from '../../../environments/environment';
 import { ImageItem } from '../../core/models/image.model';
+import { User } from '../../core/models/user.model';
 import { ImageModalService } from '../../core/services/image-modal.service';
 import { ImageService } from '../../core/services/image.service';
 import { GalleryComponent } from './gallery.component';
@@ -272,5 +276,128 @@ describe('GalleryComponent selection', () => {
 
     expect(component.selectedCount()).toBe(mockImages.length);
     expect(selectAllCheckbox().checked).toBe(true);
+  });
+});
+
+describe('GalleryComponent user browsing', () => {
+  let fixture: ComponentFixture<GalleryComponent>;
+  let component: GalleryComponent;
+  let httpMock: HttpTestingController;
+
+  const admin: User = {
+    id: 1,
+    name: 'System Admin',
+    email: 'admin@demo.com',
+    role: 'admin',
+    status: 'active',
+  };
+  const emma: User = {
+    id: 7,
+    name: 'Emma Employee',
+    email: 'emma@demo.com',
+    role: 'employee',
+    status: 'active',
+  };
+
+  const flushAll = (url: string, body: User | User[]) => {
+    for (const req of httpMock.match((r) => r.url === url)) req.flush(body);
+  };
+
+  beforeEach(async () => {
+    localStorage.setItem(
+      'user_manage_session',
+      JSON.stringify({ token: 'x', user: admin, expiresAt: Date.now() + 3_600_000 }),
+    );
+
+    await TestBed.configureTestingModule({
+      imports: [GalleryComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideNoopAnimations(),
+        importProvidersFrom(
+          LucideAngularModule.pick({
+            AlertCircle,
+            ArrowLeft,
+            CircleMinus,
+            Download,
+            Eye,
+            Grid,
+            Maximize2,
+            Plus,
+            Search,
+            Trash2,
+            TriangleAlert,
+            Upload,
+            X,
+          }),
+        ),
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(GalleryComponent);
+    component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+
+    // AuthService re-reads the stored session on boot, then the page loads the directory.
+    flushAll(`${environment.apiUrl}/users/1`, admin);
+    flushAll(`${environment.apiUrl}/users`, [admin, emma]);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => localStorage.clear());
+
+  it('shows the user list first, not an empty gallery', () => {
+    expect(component.showUserList()).toBe(true);
+    expect(fixture.nativeElement.querySelector('app-user-picker')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('app-gallery-collection')).toBeNull();
+    // Nothing is fetched from /images until a user is chosen.
+    httpMock.expectNone((r) => r.url.endsWith('/images'));
+  });
+
+  it('opens one user`s images, asked for by email and display name', () => {
+    component.viewUser(emma);
+    fixture.detectChanges();
+
+    const req = httpMock.match((r) => r.url.endsWith('/images'))[0];
+    expect(req.request.params.getAll('uploadedBy')).toEqual(['emma@demo.com', 'Emma Employee']);
+    req.flush([mockImage(1, 'emma.png')]);
+    fixture.detectChanges();
+
+    expect(component.showUserList()).toBe(false);
+    expect(fixture.nativeElement.querySelector('app-gallery-collection')).toBeTruthy();
+    // Uploads carry the signed-in identity, so they cannot go into someone else's gallery.
+    expect(component.canUpload()).toBe(false);
+  });
+
+  it('puts the viewed user in the URL, so browser Back returns to the list', () => {
+    const navigations: Record<string, unknown>[] = [];
+    const router = TestBed.inject(Router);
+    router.navigate = ((_commands: unknown[], extras: Record<string, unknown>) => {
+      navigations.push(extras);
+      return Promise.resolve(true);
+    }) as never;
+
+    component.viewUser(emma);
+    expect(navigations.at(-1)?.['queryParams']).toEqual({ userId: 7 });
+
+    component.backToUsers();
+    expect(navigations.at(-1)?.['queryParams']).toEqual({});
+  });
+
+  it('goes back to the list, and lets you upload into your own gallery', () => {
+    component.viewUser(emma);
+    httpMock.match((r) => r.url.endsWith('/images'))[0].flush([]);
+
+    component.backToUsers();
+    fixture.detectChanges();
+    expect(component.showUserList()).toBe(true);
+    expect(component.images()).toEqual([]);
+
+    component.viewUser(admin);
+    httpMock.match((r) => r.url.endsWith('/images'))[0].flush([]);
+    expect(component.canUpload()).toBe(true);
   });
 });

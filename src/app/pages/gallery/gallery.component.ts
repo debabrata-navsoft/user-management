@@ -1,13 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ImageItem } from '../../core/models/image.model';
+import { User } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ImageModalService } from '../../core/services/image-modal.service';
 import { ImageService } from '../../core/services/image.service';
 import { MediaUploadOutcome } from '../../core/services/media-upload.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
 import { UploaderService } from '../../core/services/uploader.service';
+import { UserService } from '../../core/services/user.service';
 import { formatBytes, formatDate } from '../../core/utils/formatters';
 import { onSelectionShortcut } from '../../core/utils/keyboard';
 import { PacedWriteOutcome, runPacedWrites } from '../../core/utils/write-pacing';
@@ -16,6 +19,7 @@ import { ImageMagnifierComponent } from '../../shared/components/image-magnifier
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.component';
 import { UploadModalComponent } from '../../shared/components/upload-modal/upload-modal.component';
+import { UserPickerComponent } from '../../shared/components/user-picker/user-picker.component';
 import { GalleryCollectionComponent } from './gallery-collection/gallery-collection.component';
 
 @Component({
@@ -26,6 +30,7 @@ import { GalleryCollectionComponent } from './gallery-collection/gallery-collect
     PageHeaderComponent,
     UiButtonComponent,
     UploadModalComponent,
+    UserPickerComponent,
     ImageMagnifierComponent,
     ConfirmDialogComponent,
     GalleryCollectionComponent,
@@ -36,7 +41,10 @@ import { GalleryCollectionComponent } from './gallery-collection/gallery-collect
 })
 export class GalleryComponent implements OnInit {
   private imageService = inject(ImageService);
+  private userService = inject(UserService);
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private snackbar = inject(SnackbarService);
   uploaders = inject(UploaderService);
   modalService = inject(ImageModalService);
@@ -44,6 +52,29 @@ export class GalleryComponent implements OnInit {
   isLoading = signal<boolean>(true);
   isDeleting = signal<boolean>(false);
   showUploadModal = signal<boolean>(false);
+
+  users = signal<User[]>([]);
+  /** Whose gallery is on screen. Null while the user list is showing. */
+  viewedUser = signal<User | null>(null);
+
+  /** Admins and managers start on the user list; everyone else only ever has their own. */
+  canBrowseUsers = computed(() => this.authService.hasRole('admin', 'manager'));
+  showUserList = computed(() => this.canBrowseUsers() && !this.viewedUser());
+  // Uploads are stored against whoever is signed in, so they can only go to your own gallery.
+  canUpload = computed(
+    () => !this.canBrowseUsers() || this.authService.isCurrentUser(this.viewedUser()?.id),
+  );
+
+  headerSubtitle = computed(() => {
+    const owner = this.viewedUser();
+    if (this.showUserList()) return 'Open a user to see the images they uploaded';
+    if (owner) return `Images uploaded by ${owner.name}`;
+    return 'Upload multiple images, organize media assets, and inspect with product-style zoom magnifier';
+  });
+
+  headerBadge = computed(() =>
+    this.showUserList() ? `${this.users().length} Users` : `${this.images().length} Images Stored`,
+  );
 
   images = signal<ImageItem[]>([]);
   searchQuery = signal<string>('');
@@ -122,12 +153,68 @@ export class GalleryComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.fetchImages();
+    if (!this.canBrowseUsers()) {
+      this.fetchImages();
+      return;
+    }
+
+    this.loadUsers();
+    // Who is being viewed lives in the URL, so browser Back returns to the user list
+    // instead of leaving the page altogether.
+    this.route.queryParamMap.subscribe((params) => this.applyUserParam(params.get('userId')));
+  }
+
+  private applyUserParam(userId: string | null): void {
+    if (!userId) {
+      this.setViewedUser(null);
+      return;
+    }
+    if (String(this.viewedUser()?.id ?? '') === userId) return;
+
+    this.userService.resolveUser(userId, this.users()).subscribe({
+      next: (user) => this.setViewedUser(user),
+      error: () => this.setViewedUser(null),
+    });
+  }
+
+  loadUsers(): void {
+    this.isLoading.set(true);
+    this.userService.getAllUsers().subscribe({
+      next: (users) => {
+        this.users.set(users);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false),
+    });
+  }
+
+  viewUser(user: User): void {
+    this.setViewedUser(user);
+    this.router.navigate([], { relativeTo: this.route, queryParams: { userId: user.id } });
+  }
+
+  backToUsers(): void {
+    this.setViewedUser(null);
+    this.router.navigate([], { relativeTo: this.route, queryParams: {} });
+  }
+
+  /** `null` is the user list: same reset, minus the fetch. */
+  private setViewedUser(user: User | null): void {
+    this.viewedUser.set(user);
+    this.activeImage.set(null);
+    this.clearSelection();
+    this.searchQuery.set('');
+
+    if (user) this.fetchImages();
+    else this.images.set([]);
   }
 
   fetchImages(): void {
     this.isLoading.set(true);
-    this.imageService.getImages().subscribe({
+    const owner = this.viewedUser();
+    const request = owner ? this.imageService.getImagesFor(owner) : this.imageService.getImages();
+
+    request.subscribe({
       next: (data) => {
         this.images.set(data);
 

@@ -36,6 +36,56 @@
           <span class="detail-val">{{ formatDate(u.createdAt) }}</span>
         </div>
       </div>
+
+      <!-- Their uploads: the Gallery and Drive pages only ever show your own. -->
+      <div class="uploads-section">
+        <div class="uploads-head">
+          <h4 class="uploads-title">Uploads</h4>
+          <span class="uploads-meta">
+            {{ images().length }} image{{ images().length === 1 ? '' : 's' }} ·
+            {{ files().length }} file{{ files().length === 1 ? '' : 's' }}
+          </span>
+        </div>
+
+        @if (isLoadingUploads() && !hasUploads()) {
+          <p class="uploads-empty">Loading uploads…</p>
+        } @else if (!hasUploads()) {
+          <p class="uploads-empty">{{ u.name }} has not uploaded anything yet.</p>
+        } @else {
+          @if (images().length > 0) {
+            <div class="upload-thumbs">
+              @for (img of images(); track img.id) {
+                <button
+                  type="button"
+                  class="upload-thumb"
+                  (click)="openImage($index)"
+                  [title]="img.name"
+                >
+                  <img [src]="img.url" [alt]="img.name" />
+                </button>
+              }
+            </div>
+          }
+
+          @if (files().length > 0) {
+            <ul class="upload-files">
+              @for (file of files(); track file.id) {
+                <li>
+                  <button type="button" class="upload-file" (click)="openFile(file)">
+                    <app-file-type-icon
+                      [fileName]="file.name"
+                      [mimeType]="file.mimeType || ''"
+                      [size]="18"
+                    ></app-file-type-icon>
+                    <span class="upload-file-name">{{ file.name }}</span>
+                    <span class="upload-file-size">{{ formatBytes(file.size) }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        }
+      </div>
     </div>
   }
 

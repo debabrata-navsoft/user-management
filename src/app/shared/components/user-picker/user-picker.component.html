@@ -1,0 +1,49 @@
+<div class="card user-picker-card">
+  <div class="card-header flex-between">
+    <div>
+      <h3 class="card-title">{{ title() }}</h3>
+      <span class="card-subtitle">{{ subtitle() }}</span>
+    </div>
+    <div class="picker-search">
+      <app-search-input
+        placeholder="Search by name, email or department..."
+        [value]="search()"
+        (searchChange)="search.set($event)"
+      ></app-search-input>
+    </div>
+  </div>
+
+  <div class="card-body">
+    @if (isLoading()) {
+      <app-loader message="Loading users..."></app-loader>
+    } @else if (filteredUsers().length === 0) {
+      <app-empty-state
+        title="No users found"
+        description="No one matches that search. Clear it to see the whole directory."
+      ></app-empty-state>
+    } @else {
+      <div class="user-grid">
+        @for (user of filteredUsers(); track user.id) {
+          <button type="button" class="user-card" (click)="select.emit(user)">
+            <div class="user-avatar">{{ getInitials(user.name) }}</div>
+
+            <div class="user-meta">
+              <span class="user-name">{{ user.name }}</span>
+              <span class="user-email">{{ user.email }}</span>
+              <div class="user-chips">
+                <app-badge [variant]="roleBadgeVariant(user.role)">{{ user.role }}</app-badge>
+                <span class="user-dept">{{ user.department || 'General' }}</span>
+              </div>
+            </div>
+
+            <!-- A span, not a button: the whole card is already the button. -->
+            <span class="user-view-chip">
+              <lucide-icon name="eye" [size]="14"></lucide-icon>
+              View
+            </span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>
