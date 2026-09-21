@@ -1,5 +1,5 @@
 <!-- Scrollable Data Area (Only items scroll, header and toolbar stay fixed) -->
-<div class="drive-scrollable-content">
+<div class="drive-scrollable-content" [class.selection-active]="selectedCount() > 0">
   @if (isLoading()) {
     <app-loader message="Loading drive contents..."></app-loader>
   } @else {
@@ -27,6 +27,37 @@
         }
       </div>
     } @else {
+      <!-- Selection bar: one row for both views. Ctrl+A on the page fills it. -->
+      <div class="drive-selection-bar">
+        <label class="select-all-row">
+          <input
+            type="checkbox"
+            class="select-box"
+            [checked]="allSelected()"
+            (change)="toggleSelectAll.emit()"
+          />
+          <span>Select all {{ itemCount() }} item{{ itemCount() === 1 ? '' : 's' }}</span>
+        </label>
+
+        @if (selectedCount() > 0) {
+          <div class="selection-actions">
+            <span class="selection-count">{{ selectedCount() }} selected</span>
+            <app-ui-button variant="ghost" size="sm" (click)="clearSelection.emit()">
+              Clear
+            </app-ui-button>
+            <app-ui-button
+              variant="danger"
+              size="sm"
+              [loading]="isDeleting()"
+              (click)="deleteSelected.emit()"
+            >
+              <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+              {{ selectedCount() === 1 ? 'Delete' : 'Delete Selected' }}
+            </app-ui-button>
+          </div>
+        }
+      </div>
+
       <!-- GRID VIEW -->
       @if (viewMode() === 'grid') {
         <!-- FOLDERS SECTION -->
@@ -38,9 +69,20 @@
                 <div
                   class="folder-card"
                   [class.menu-open]="activeMenuNode()?.id === folder.id"
+                  [class.is-checked]="isSelected(folder.id)"
                   (click)="onFolderClick(folder)"
                   (dblclick)="onFolderDblClick(folder)"
                 >
+                  <label class="select-check" (click)="$event.stopPropagation()">
+                    <input
+                      type="checkbox"
+                      class="select-box"
+                      [checked]="isSelected(folder.id)"
+                      (change)="toggleSelection.emit(folder.id)"
+                      [attr.aria-label]="'Select ' + folder.name"
+                    />
+                  </label>
+
                   <div class="folder-main">
                     <div class="folder-icon">
                       <app-file-type-icon [folder]="true" [size]="22"></app-file-type-icon>
@@ -94,9 +136,20 @@
                 <div
                   class="file-card"
                   [class.menu-open]="activeMenuNode()?.id === file.id"
+                  [class.is-checked]="isSelected(file.id)"
                   (click)="onFileClick(file)"
                   (dblclick)="onFileDblClick(file)"
                 >
+                  <label class="select-check" (click)="$event.stopPropagation()">
+                    <input
+                      type="checkbox"
+                      class="select-box"
+                      [checked]="isSelected(file.id)"
+                      (change)="toggleSelection.emit(file.id)"
+                      [attr.aria-label]="'Select ' + file.name"
+                    />
+                  </label>
+
                   <div class="file-preview-area">
                     @if (isImageFile(file) && file.dataUrl) {
                       <img [src]="file.dataUrl" [alt]="file.name" class="file-img-thumb" />
@@ -176,6 +229,15 @@
           <table class="drive-table">
             <thead>
               <tr>
+                <th class="th-select">
+                  <input
+                    type="checkbox"
+                    class="select-box"
+                    [checked]="allSelected()"
+                    (change)="toggleSelectAll.emit()"
+                    aria-label="Select all items"
+                  />
+                </th>
                 <th class="th-name">Name</th>
                 <th class="th-owner">Owner</th>
                 <th class="th-date">Date modified</th>
@@ -189,9 +251,19 @@
                 <tr
                   class="drive-row folder-row"
                   [class.menu-open]="activeMenuNode()?.id === folder.id"
+                  [class.is-checked]="isSelected(folder.id)"
                   (click)="onFolderClick(folder)"
                   (dblclick)="onFolderDblClick(folder)"
                 >
+                  <td class="td-select" (click)="$event.stopPropagation()">
+                    <input
+                      type="checkbox"
+                      class="select-box"
+                      [checked]="isSelected(folder.id)"
+                      (change)="toggleSelection.emit(folder.id)"
+                      [attr.aria-label]="'Select ' + folder.name"
+                    />
+                  </td>
                   <td class="td-name">
                     <div class="item-name-cell">
                       <div class="folder-table-icon">
@@ -266,9 +338,19 @@
                 <tr
                   class="drive-row file-row"
                   [class.menu-open]="activeMenuNode()?.id === file.id"
+                  [class.is-checked]="isSelected(file.id)"
                   (click)="onFileClick(file)"
                   (dblclick)="onFileDblClick(file)"
                 >
+                  <td class="td-select" (click)="$event.stopPropagation()">
+                    <input
+                      type="checkbox"
+                      class="select-box"
+                      [checked]="isSelected(file.id)"
+                      (change)="toggleSelection.emit(file.id)"
+                      [attr.aria-label]="'Select ' + file.name"
+                    />
+                  </td>
                   <td class="td-name">
                     <div class="item-name-cell">
                       <div class="file-table-icon" [class.is-img]="isImageFile(file)">

@@ -144,12 +144,15 @@
   <!-- Scrollable Data Area (Only items scroll, header and toolbar stay fixed) -->
   <app-drive-content
     [isLoading]="isLoading()"
+    [isDeleting]="isActionSubmitting()"
     [currentFolders]="currentFolders()"
     [currentFiles]="currentFiles()"
     [viewMode]="viewMode()"
     [activeMenuNode]="activeMenuNode()"
     [menuDropUp]="menuDropUp()"
     [searchQuery]="searchQuery()"
+    [selectedIds]="selectedIds()"
+    [allSelected]="allVisibleSelected()"
     (createFolder)="openCreateFolderModal()"
     (clearSearch)="onSearch('')"
     (navigateToFolder)="navigateToFolder($event)"
@@ -159,6 +162,10 @@
     (download)="downloadFile($event)"
     (rename)="openRenameModal($event)"
     (delete)="confirmDelete($event)"
+    (toggleSelection)="toggleSelection($event)"
+    (toggleSelectAll)="toggleSelectAll()"
+    (clearSelection)="clearSelection()"
+    (deleteSelected)="confirmDeleteSelected()"
   ></app-drive-content>
 
   <!-- Upload Modal -->
@@ -203,13 +210,9 @@
   <!-- Delete Confirmation Dialog -->
   <app-confirm-dialog
     [isOpen]="isDeleteOpen()"
-    title="Delete Item"
-    [message]="
-      'Are you sure you want to delete ' +
-      (nodeToDelete()?.name || '') +
-      (nodeToDelete()?.type === 'folder' ? ' and all its subfolders/files?' : '?')
-    "
-    confirmText="Delete"
+    [title]="deleteDialog().title"
+    [message]="deleteDialog().message"
+    [confirmText]="deleteDialog().confirmText"
     [danger]="true"
     [loading]="isActionSubmitting()"
     (confirmed)="submitDelete()"

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { DriveNode } from '../../../core/models/drive.model';
 import { UploaderService } from '../../../core/services/uploader.service';
@@ -9,6 +9,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 import { FileTypeIconComponent } from '../../../shared/components/file-type-icon/file-type-icon.component';
 import { IconButtonComponent } from '../../../shared/components/icon-button/icon-button.component';
 import { LoaderComponent } from '../../../shared/components/loader/loader.component';
+import { UiButtonComponent } from '../../../shared/components/ui-button/ui-button.component';
 import { DriveItemMenuComponent } from '../drive-item-menu/drive-item-menu.component';
 
 @Component({
@@ -20,6 +21,7 @@ import { DriveItemMenuComponent } from '../drive-item-menu/drive-item-menu.compo
     FileTypeIconComponent,
     IconButtonComponent,
     LoaderComponent,
+    UiButtonComponent,
     DriveItemMenuComponent,
     LucideAngularModule,
   ],
@@ -30,11 +32,14 @@ export class DriveContentComponent {
   uploaders = inject(UploaderService);
 
   isLoading = input<boolean>(false);
+  isDeleting = input<boolean>(false);
   currentFolders = input<DriveNode[]>([]);
   currentFiles = input<DriveNode[]>([]);
   viewMode = input<'grid' | 'list'>('grid');
   activeMenuNode = input<DriveNode | null>(null);
   menuDropUp = input<boolean>(false);
+  selectedIds = input<Set<string>>(new Set());
+  allSelected = input<boolean>(false);
   /** Drives the empty state: nothing to show because of a search reads very differently
    *  from a folder that really is empty. */
   searchQuery = input<string>('');
@@ -48,10 +53,22 @@ export class DriveContentComponent {
   download = output<DriveNode>();
   rename = output<DriveNode>();
   delete = output<DriveNode>();
+  toggleSelection = output<string>();
+  toggleSelectAll = output<void>();
+  clearSelection = output<void>();
+  deleteSelected = output<void>();
 
   formatBytes = formatBytes;
   formatDate = formatDate;
   getInitials = getInitials;
+
+  itemCount = computed(() => this.currentFolders().length + this.currentFiles().length);
+
+  selectedCount = computed(() => this.selectedIds().size);
+
+  isSelected(id: string): boolean {
+    return this.selectedIds().has(id);
+  }
 
   isImageFile(node: DriveNode): boolean {
     return isImageType(node.name, node.mimeType);

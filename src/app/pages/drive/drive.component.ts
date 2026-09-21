@@ -14,6 +14,7 @@ import { openDataUrlInNewTab } from '../../core/utils/data-url';
 import { isImageType, isVideoType } from '../../core/utils/file-types';
 import { isValidFolderName } from '../../core/utils/folder-validator';
 import { formatBytes, formatDate, getInitials } from '../../core/utils/formatters';
+import { PacedWriteOutcome } from '../../core/utils/write-pacing';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CreateFolderModalComponent } from './create-folder-modal/create-folder-modal.component';
 import { DriveContentComponent } from './drive-content/drive-content.component';
@@ -25,6 +26,13 @@ import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.c
 import { UploadModalComponent } from '../../shared/components/upload-modal/upload-modal.component';
 
 const CONTEXT_MENU_HEIGHT_PX = 200;
+
+/** Ctrl+A belongs to the text box while the caret is in one. */
+function isTypingTarget(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  if (!el?.tagName) return false;
+  return ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable;
+}
 
 @Component({
   selector: 'app-drive',
@@ -75,7 +83,9 @@ export class DriveComponent implements OnInit {
   previewNode = signal<DriveNode | null>(null);
 
   isDeleteOpen = signal<boolean>(false);
-  nodeToDelete = signal<DriveNode | null>(null);
+  pendingDeletes = signal<DriveNode[]>([]);
+
+  selectedIds = signal<Set<string>>(new Set());
 
   activeMenuNode = signal<DriveNode | null>(null);
   menuDropUp = signal<boolean>(false);
@@ -104,6 +114,31 @@ export class DriveComponent implements OnInit {
 
   currentFiles = computed(() => {
     return this.filteredNodes().filter((n) => n.type === 'file');
+  });
+
+  selectedNodes = computed(() => this.filteredNodes().filter((n) => this.selectedIds().has(n.id)));
+
+  selectedCount = computed(() => this.selectedNodes().length);
+
+  allVisibleSelected = computed(() => {
+    const visible = this.filteredNodes();
+    return visible.length > 0 && visible.every((n) => this.selectedIds().has(n.id));
+  });
+
+  deleteDialog = computed(() => {
+    const pending = this.pendingDeletes();
+    const [first] = pending;
+    const single = pending.length === 1;
+    const folders = pending.some((n) => n.type === 'folder');
+
+    return {
+      title: single ? 'Delete Item' : 'Delete Selected Items',
+      confirmText: single ? 'Delete' : 'Delete All',
+      message: single
+        ? `Are you sure you want to delete ${first.name}${folders ? ' and all its subfolders/files?' : '?'}`
+        : `Are you sure you want to delete these ${pending.length} items?` +
+          (folders ? ' Their subfolders and files go too.' : ''),
+    };
   });
 
   private siblingsOfType(type: DriveNode['type']): DriveNode[] {
@@ -142,6 +177,8 @@ export class DriveComponent implements OnInit {
   loadFolder(folderId: string): void {
     this.isLoading.set(true);
     this.currentFolderId.set(folderId);
+    // Selection is per folder: carrying ids across a move would delete out of sight.
+    this.clearSelection();
 
     forkJoin({
       nodes: this.driveService.getNodes(folderId),
@@ -185,6 +222,32 @@ export class DriveComponent implements OnInit {
     if (this.activeMenuNode()) {
       this.closeMenu();
     }
+  }
+
+  /** Ctrl/Cmd+A selects this folder, Escape drops the selection — as in Google Drive. */
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    if (this.isAnyModalOpen() || isTypingTarget(event.target)) return;
+
+    const key = event.key.toLowerCase();
+    if (key === 'a' && (event.ctrlKey || event.metaKey)) {
+      // Otherwise the browser selects the whole page instead.
+      event.preventDefault();
+      this.selectAll();
+    } else if (key === 'escape' && this.selectedCount() > 0) {
+      this.clearSelection();
+    }
+  }
+
+  private isAnyModalOpen(): boolean {
+    return (
+      this.isUploadModalOpen() ||
+      this.isCreateFolderOpen() ||
+      this.isRenameOpen() ||
+      this.isPreviewOpen() ||
+      this.isDeleteOpen() ||
+      this.imageModalService.isOpen()
+    );
   }
 
   onFolderClick(folder: DriveNode): void {
@@ -393,32 +456,92 @@ export class DriveComponent implements OnInit {
 
   // Delete
   confirmDelete(node: DriveNode): void {
-    this.nodeToDelete.set(node);
-    this.isDeleteOpen.set(true);
+    this.openDeleteModal([node]);
+  }
+
+  confirmDeleteSelected(): void {
+    this.openDeleteModal(this.selectedNodes());
   }
 
   closeDeleteModal(): void {
     this.isDeleteOpen.set(false);
-    this.nodeToDelete.set(null);
+    this.pendingDeletes.set([]);
   }
 
   submitDelete(): void {
-    const node = this.nodeToDelete();
-    if (!node) return;
+    const targets = this.pendingDeletes();
+    if (targets.length === 0) return;
 
     this.isActionSubmitting.set(true);
-    this.driveService.deleteNode(node.id).subscribe({
-      next: () => {
-        this.isActionSubmitting.set(false);
-        this.closeDeleteModal();
-        this.snackbar.success(`Deleted "${node.name}"`);
-        this.loadFolder(this.currentFolderId());
-        this.loadStats();
-      },
+    this.driveService.deleteNodes(targets.map((n) => n.id)).subscribe({
+      next: (outcome) => this.finishDelete(targets, outcome),
       error: () => {
         this.isActionSubmitting.set(false);
         this.snackbar.error('Failed to delete item.');
       },
+    });
+  }
+
+  private openDeleteModal(targets: DriveNode[]): void {
+    if (targets.length === 0) return;
+    this.pendingDeletes.set(targets);
+    this.isDeleteOpen.set(true);
+  }
+
+  /** `outcome` counts every node deleted, descendants included; the user counts what they picked. */
+  private finishDelete(targets: DriveNode[], outcome: PacedWriteOutcome<string>): void {
+    this.isActionSubmitting.set(false);
+    this.closeDeleteModal();
+
+    const deleted = new Set(outcome.done);
+    const removed = targets.filter((node) => deleted.has(node.id)).length;
+    const total = targets.length;
+
+    if (removed === total) {
+      this.snackbar.success(
+        total === 1 ? `Deleted "${targets[0].name}"` : `Deleted ${total} items.`,
+      );
+    } else if (removed === 0) {
+      this.snackbar.error('Failed to delete item.');
+    } else {
+      this.snackbar.warning(
+        `Deleted ${removed} of ${total} items. ` +
+          (outcome.aborted
+            ? 'The API stopped responding — check that `npm run api` is running, then delete the rest.'
+            : 'Please retry the rest.'),
+      );
+    }
+
+    // `loadFolder` drops the selection, so nothing deleted stays checked.
+    if (removed === 0) return;
+    this.loadFolder(this.currentFolderId());
+    this.loadStats();
+  }
+
+  toggleSelection(id: string): void {
+    this.editSelection((ids) => {
+      if (!ids.delete(id)) ids.add(id);
+    });
+  }
+
+  toggleSelectAll(): void {
+    if (this.allVisibleSelected()) this.clearSelection();
+    else this.selectAll();
+  }
+
+  selectAll(): void {
+    this.editSelection((ids) => this.filteredNodes().forEach((n) => ids.add(n.id)));
+  }
+
+  clearSelection(): void {
+    this.selectedIds.set(new Set());
+  }
+
+  private editSelection(mutate: (ids: Set<string>) => void): void {
+    this.selectedIds.update((curr) => {
+      const next = new Set(curr);
+      mutate(next);
+      return next;
     });
   }
 }

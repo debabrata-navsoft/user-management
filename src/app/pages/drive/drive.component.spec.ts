@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpRequest, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -23,6 +23,7 @@ import {
   Presentation,
   Upload,
   Search,
+  Trash2,
   TriangleAlert,
   X,
 } from 'lucide-angular';
@@ -78,6 +79,7 @@ describe('DriveComponent multi-file upload', () => {
             Presentation,
             Upload,
             EllipsisVertical,
+            Trash2,
           }),
         ),
       ],
@@ -264,6 +266,112 @@ describe('DriveComponent multi-file upload', () => {
     expect(component.currentFiles().map((f) => f.name)).toEqual(['notes.pdf']);
   });
 
+  describe('select all and bulk delete', () => {
+    const createdAt = new Date().toISOString();
+    const folder = {
+      id: 'folder-1',
+      name: 'Reports',
+      type: 'folder' as const,
+      parentId: 'root',
+      createdAt,
+    };
+    const file = {
+      id: 'file-1',
+      name: 'notes.pdf',
+      type: 'file' as const,
+      parentId: 'root',
+      createdAt,
+    };
+    const nested = {
+      id: 'file-2',
+      name: 'nested.pdf',
+      type: 'file' as const,
+      parentId: 'folder-1',
+      createdAt,
+    };
+
+    const press = (key: string, init: KeyboardEventInit = {}) =>
+      document.dispatchEvent(new KeyboardEvent('keydown', { key, ...init }));
+
+    beforeEach(() => {
+      fixture.componentInstance.nodes.set([folder, file]);
+    });
+
+    it('selects every item in the folder on Ctrl+A, and drops it again on Escape', () => {
+      const component = fixture.componentInstance;
+
+      press('a', { ctrlKey: true });
+      expect(component.selectedCount()).toBe(2);
+      expect(component.allVisibleSelected()).toBe(true);
+
+      press('Escape');
+      expect(component.selectedCount()).toBe(0);
+    });
+
+    it('takes Cmd+A too, and leaves Ctrl+A alone inside a text box', () => {
+      const component = fixture.componentInstance;
+
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true }));
+      expect(component.selectedCount()).toBe(0);
+      input.remove();
+
+      press('a', { metaKey: true });
+      expect(component.selectedCount()).toBe(2);
+    });
+
+    it('only selects what the search box left on screen', () => {
+      const component = fixture.componentInstance;
+      component.searchQuery.set('notes');
+
+      press('a', { ctrlKey: true });
+
+      expect([...component.selectedIds()]).toEqual(['file-1']);
+    });
+
+    it('deletes the whole selection in one paced batch, descendants included', async () => {
+      const component = fixture.componentInstance;
+      component.selectAll();
+      component.confirmDeleteSelected();
+      component.submitDelete();
+
+      // The tree is fetched once, not once per selected node.
+      const tree = await waitFor(httpMock, (r) => r.method === 'GET' && r.url.endsWith('/nodes'));
+      tree.flush([folder, file, nested]);
+
+      const deleted: string[] = [];
+      for (let i = 0; i < 3; i++) {
+        const req = await waitFor(httpMock, (r) => r.method === 'DELETE');
+        deleted.push(req.request.url.split('/nodes/')[1]);
+        req.flush(null);
+      }
+
+      // The batch finishes a microtask after the last flush.
+      await new Promise((r) => setTimeout(r, 20));
+
+      // The folder's child goes with it, and no id is deleted twice.
+      expect(deleted.sort()).toEqual(['file-1', 'file-2', 'folder-1']);
+      expect(httpMock.match((r) => r.method === 'DELETE')).toEqual([]);
+      expect(component.selectedCount()).toBe(0);
+      expect(component.isDeleteOpen()).toBe(false);
+    });
+
+    it('asks about the selection, not about one item', () => {
+      const component = fixture.componentInstance;
+      component.selectAll();
+      component.confirmDeleteSelected();
+
+      expect(component.deleteDialog().title).toBe('Delete Selected Items');
+      expect(component.deleteDialog().message).toContain('these 2 items');
+
+      component.closeDeleteModal();
+      component.confirmDelete(file);
+      expect(component.deleteDialog().title).toBe('Delete Item');
+      expect(component.deleteDialog().message).toContain('notes.pdf');
+    });
+  });
+
   it('still reports a sibling name the search box is hiding, so duplicates stay blocked', () => {
     const component = fixture.componentInstance;
     const createdAt = new Date().toISOString();
@@ -281,6 +389,19 @@ describe('DriveComponent multi-file upload', () => {
     expect(component.existingFileNames()).toEqual(['notes.pdf']);
   });
 });
+
+/** Paced writes are 150 ms apart, so the next one does not exist yet when the spec looks. */
+async function waitFor(
+  httpMock: HttpTestingController,
+  match: (r: HttpRequest<unknown>) => boolean,
+) {
+  for (let i = 0; i < 200; i++) {
+    const matches = httpMock.match(match);
+    if (matches.length > 0) return matches[0];
+    await new Promise((r) => setTimeout(r, 5));
+  }
+  throw new Error('No matching request');
+}
 
 async function waitForPost(httpMock: HttpTestingController, url: string) {
   for (let i = 0; i < 100; i++) {

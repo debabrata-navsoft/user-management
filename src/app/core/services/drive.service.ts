@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BreadcrumbItem, DriveNode, DriveStats } from '../models/drive.model';
-import { batchedWrite, runPacedWrites } from '../utils/write-pacing';
+import { PacedWriteOutcome, batchedWrite, runPacedWrites } from '../utils/write-pacing';
 import { AuthService } from './auth.service';
 
 export const DRIVE_ROOT = 'root';
@@ -21,7 +21,7 @@ export class DriveService {
   }
 
   /**
-   * Deliberately unscoped: breadcrumbs and `deleteNode` walk the tree, and skipping a
+   * Deliberately unscoped: breadcrumbs and `deleteNodes` walk the tree, and skipping a
    * node owned by someone else would break a path or orphan a descendant. Anything that
    * *displays* a list wants {@link getVisibleNodes} instead.
    */
@@ -90,17 +90,19 @@ export class DriveService {
     });
   }
 
-  deleteNode(id: string): Observable<void> {
+  /**
+   * One paced batch for the whole selection: the tree is fetched once and every id is
+   * expanded to its descendants, so selecting a folder and a file inside it cannot
+   * delete that file twice.
+   */
+  deleteNodes(ids: string[]): Observable<PacedWriteOutcome<string>> {
     return this.getAllNodes().pipe(
-      switchMap(async (allNodes) => {
-        const ids = [...this.getDescendantIds(id, allNodes), id];
-        const { done } = await runPacedWrites(ids, (nodeId) =>
+      switchMap((allNodes) => {
+        const targets = new Set(ids.flatMap((id) => [...this.getDescendantIds(id, allNodes), id]));
+
+        return runPacedWrites([...targets], (nodeId) =>
           this.http.delete<void>(`${this.baseUrl}/${nodeId}`, { context: batchedWrite() }),
         );
-
-        if (done.length < ids.length) {
-          throw new Error(`Deleted ${done.length} of ${ids.length} items. Please try again.`);
-        }
       }),
     );
   }

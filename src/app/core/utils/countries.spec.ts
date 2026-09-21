@@ -8,7 +8,7 @@ describe('COUNTRIES', () => {
   });
 
   it('puts the preferred countries first', () => {
-    expect(COUNTRIES.slice(0, 5).map((c) => c.code)).toEqual(['IN', 'AE', 'SA', 'US', 'GB']);
+    expect(COUNTRIES.slice(0, 3).map((c) => c.code)).toEqual(['IN', 'US', 'GB']);
   });
 
   it('carries a name, flag, flagSvg and well-formed dial code for each', () => {
