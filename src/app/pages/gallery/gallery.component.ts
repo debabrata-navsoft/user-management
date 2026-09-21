@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ImageItem } from '../../core/models/image.model';
 import { AuthService } from '../../core/services/auth.service';
@@ -9,6 +9,7 @@ import { MediaUploadOutcome } from '../../core/services/media-upload.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
 import { UploaderService } from '../../core/services/uploader.service';
 import { formatBytes, formatDate } from '../../core/utils/formatters';
+import { onSelectionShortcut } from '../../core/utils/keyboard';
 import { PacedWriteOutcome, runPacedWrites } from '../../core/utils/write-pacing';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ImageMagnifierComponent } from '../../shared/components/image-magnifier/image-magnifier.component';
@@ -239,6 +240,18 @@ export class GalleryComponent implements OnInit {
     this.fetchImages();
   }
 
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    // The studio replaces the grid, selection bar and all, so there is nothing to select.
+    if (this.activeImage() || this.showUploadModal() || this.isDeleteModalOpen()) return;
+    if (this.modalService.isOpen()) return;
+
+    onSelectionShortcut(event, {
+      selectAll: () => this.selectAll(),
+      clear: () => this.clearSelection(),
+    });
+  }
+
   isSelected(id: string | number): boolean {
     return this.selectedIds().has(id);
   }
@@ -249,14 +262,16 @@ export class GalleryComponent implements OnInit {
     });
   }
 
+  selectAll(): void {
+    this.editSelection((ids) => this.filteredImages().forEach((img) => ids.add(img.id)));
+  }
+
+  /** Unchecking only drops what is on screen, so a selection the search hides is not lost. */
   toggleSelectAll(): void {
-    const selectAll = !this.allFilteredSelected();
-    this.editSelection((ids) => {
-      for (const img of this.filteredImages()) {
-        if (selectAll) ids.add(img.id);
-        else ids.delete(img.id);
-      }
-    });
+    const add = !this.allFilteredSelected();
+    this.editSelection((ids) =>
+      this.filteredImages().forEach((img) => (add ? ids.add(img.id) : ids.delete(img.id))),
+    );
   }
 
   clearSelection(): void {

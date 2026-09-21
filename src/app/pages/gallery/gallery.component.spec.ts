@@ -151,6 +151,58 @@ describe('GalleryComponent selection', () => {
     });
   });
 
+  describe('select all', () => {
+    const press = (key: string, init: KeyboardEventInit = {}) =>
+      document.dispatchEvent(new KeyboardEvent('keydown', { key, ...init }));
+
+    afterEach(() => TestBed.inject(ImageModalService).close());
+
+    it('selects the collection on Ctrl+A, and drops it again on Escape', () => {
+      press('a', { ctrlKey: true });
+      expect(component.selectedCount()).toBe(mockImages.length);
+      expect(component.allFilteredSelected()).toBe(true);
+
+      press('Escape');
+      expect(component.selectedCount()).toBe(0);
+    });
+
+    it('takes Cmd+A too, and leaves Ctrl+A alone inside a text box', () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true }));
+      expect(component.selectedCount()).toBe(0);
+      input.remove();
+
+      press('a', { metaKey: true });
+      expect(component.selectedCount()).toBe(mockImages.length);
+    });
+
+    it('only selects what the search box left on screen', () => {
+      component.searchQuery.set('three');
+
+      press('a', { ctrlKey: true });
+
+      expect(component.selectedImages().map((i) => i.name)).toEqual(['three.png']);
+    });
+
+    it('stays out of the way while the studio is open', () => {
+      component.setActiveImage(mockImages[0]);
+
+      press('a', { ctrlKey: true });
+
+      expect(component.selectedCount()).toBe(0);
+    });
+
+    it('ticks every card, and the select-all box, when the shortcut fires', () => {
+      press('a', { ctrlKey: true });
+      fixture.detectChanges();
+
+      expect(cardCheckboxes().length).toBe(mockImages.length);
+      expect(cardCheckboxes().every((box) => box.checked)).toBe(true);
+      expect(selectAllCheckbox().checked).toBe(true);
+    });
+  });
+
   it('searches the uploader as well as the image name', () => {
     component.images.set([
       { ...mockImage(1, 'sunset.png'), uploadedBy: 'Smith Josh' },

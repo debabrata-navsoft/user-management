@@ -500,10 +500,12 @@
   white-space: nowrap;
 }
 
-/* An item's own box stays out of the way until you reach for it. The select-all row and
-   the table header box are exempt — they are how a selection starts. */
+/* Every box inside the list stays out of the way until you reach for it — hover, or once
+   a selection is running. The "Select all" row above is the one that always shows, because
+   it is how a selection starts. */
 .folder-card .select-check,
 .file-card .select-check,
+.th-select .select-box,
 .td-select .select-box {
   opacity: 0;
   pointer-events: none;
@@ -518,6 +520,7 @@
 .drive-row:hover .td-select .select-box,
 .drive-row.is-checked .td-select .select-box,
 .selection-active .select-check,
+.selection-active .th-select .select-box,
 .selection-active .td-select .select-box {
   opacity: 1;
   pointer-events: auto;

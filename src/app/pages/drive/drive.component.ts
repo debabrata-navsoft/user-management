@@ -13,6 +13,7 @@ import { UploaderService } from '../../core/services/uploader.service';
 import { openDataUrlInNewTab } from '../../core/utils/data-url';
 import { isImageType, isVideoType } from '../../core/utils/file-types';
 import { isValidFolderName } from '../../core/utils/folder-validator';
+import { onSelectionShortcut } from '../../core/utils/keyboard';
 import { formatBytes, formatDate, getInitials } from '../../core/utils/formatters';
 import { PacedWriteOutcome } from '../../core/utils/write-pacing';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -26,13 +27,6 @@ import { UiButtonComponent } from '../../shared/components/ui-button/ui-button.c
 import { UploadModalComponent } from '../../shared/components/upload-modal/upload-modal.component';
 
 const CONTEXT_MENU_HEIGHT_PX = 200;
-
-/** Ctrl+A belongs to the text box while the caret is in one. */
-function isTypingTarget(target: EventTarget | null): boolean {
-  const el = target as HTMLElement | null;
-  if (!el?.tagName) return false;
-  return ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable;
-}
 
 @Component({
   selector: 'app-drive',
@@ -224,19 +218,14 @@ export class DriveComponent implements OnInit {
     }
   }
 
-  /** Ctrl/Cmd+A selects this folder, Escape drops the selection — as in Google Drive. */
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
-    if (this.isAnyModalOpen() || isTypingTarget(event.target)) return;
+    if (this.isAnyModalOpen()) return;
 
-    const key = event.key.toLowerCase();
-    if (key === 'a' && (event.ctrlKey || event.metaKey)) {
-      // Otherwise the browser selects the whole page instead.
-      event.preventDefault();
-      this.selectAll();
-    } else if (key === 'escape' && this.selectedCount() > 0) {
-      this.clearSelection();
-    }
+    onSelectionShortcut(event, {
+      selectAll: () => this.selectAll(),
+      clear: () => this.clearSelection(),
+    });
   }
 
   private isAnyModalOpen(): boolean {
