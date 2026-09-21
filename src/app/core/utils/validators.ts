@@ -2,7 +2,6 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { isValidPhoneNumber, validatePhoneNumberLength } from 'libphonenumber-js';
 import { phoneRulesForDial, splitPhone } from './countries';
 
-/** Exported so the rule and the message it produces cannot drift apart. */
 export const PASSWORD_MIN_LENGTH = 6;
 export const PASSWORD_MAX_LENGTH = 15;
 
@@ -22,12 +21,6 @@ export class AppValidators {
     };
   }
 
-  /**
-   * `Validators.required` accepts a value of only spaces, so a password of blanks reads as
-   * present and fails the strength rule instead — the field looks empty while the message
-   * talks about characters the user cannot see. Blank counts as missing here, and the error
-   * key stays `required` so every message stays as it was.
-   */
   static required(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value;
