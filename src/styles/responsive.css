@@ -1,25 +1,5 @@
 /* =========================================================================
    RESPONSIVE — phone & tablet override layer
-
-   One global sheet for every role. It used to be split into admin.css,
-   manager.css and employee.css, but all three were loaded for everyone, and
-   the pages they targeted share components (page header, data table, toolbar,
-   pagination, modals). The split therefore bought nothing and cost three
-   copies of the same dashboard and table rules, which had already started to
-   drift apart. Rules here are grouped by breakpoint, then by the piece of UI
-   they touch — not by who is signed in.
-
-   Desktop is handled by each component's own stylesheet; this file only adds
-   the two narrower tiers.
-
-   Breakpoints:  phone <= 640px   |   tablet 641px - 1024px
-
-   Declarations are `!important` on purpose. Angular appends component styles
-   to <head> after this global sheet, and a component rule like
-   `.metrics-grid[_ngcontent-x]` outranks a plain `.metrics-grid` here, so an
-   override layer has to say so explicitly.
-   ========================================================================= */
-
 /* ============================== PHONE =================================== */
 @media (max-width: 640px) {
   /* ---- Shell ---- */
@@ -36,11 +16,6 @@
     gap: 8px !important;
   }
 
-  /* Title and badge share one row. The badge is what looked broken before: it
-     was being allowed to wrap, so "22 Folders, 43 Files" broke across two
-     lines. Pinning it to one line and stopping it from shrinking means the
-     title absorbs the pressure instead — it wraps, which reads fine, and
-     min-width:0 is what permits that rather than forcing the row wider. */
   .page-header-container .title-row {
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -705,16 +680,20 @@
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px !important;
   }
+
+  .picker-search {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .picker-search app-search-input {
+    display: block !important;
+    width: 100% !important;
+  }
 }
 
 /* ============================== TABLET ================================== */
 @media (min-width: 641px) and (max-width: 1024px) {
-  /* ---- Shell ----
-     The sidebar becomes a drawer for the whole tablet band, not just below
-     768px as layout.component.css does on its own. A tablet is ~1024px wide;
-     handing 260px of that to permanent navigation left the user table clipped
-     mid-column. The hamburger and overlay are already in the DOM at every
-     width — only CSS was keeping them hidden. */
   .hide-mobile {
     display: none !important;
   }
