@@ -6,9 +6,9 @@
   >
     <div actions>
       @if (viewedUser()) {
-        <app-ui-button variant="secondary" size="md" (click)="backToUsers()">
+        <app-ui-button class="back-btn" variant="secondary" size="md" (click)="backToUsers()">
           <lucide-icon name="arrow-left" [size]="14"></lucide-icon>
-          All Users
+          <span class="btn-label">All Users</span>
         </app-ui-button>
       }
       @if (!showUserList()) {

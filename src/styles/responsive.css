@@ -56,6 +56,37 @@
     width: 100% !important;
   }
 
+  /* Drive and Gallery carry three header actions while browsing a user. They only share
+     one row if the back button drops its label and the other two give up some padding. */
+  .drive-page .header-actions,
+  .gallery-page .header-actions {
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+  }
+
+  .header-actions app-ui-button {
+    min-width: 0 !important;
+  }
+
+  .header-actions .back-btn {
+    flex: 0 0 auto !important;
+  }
+
+  .header-actions .back-btn .btn-label {
+    display: none !important;
+  }
+
+  .header-actions .back-btn .btn {
+    width: auto !important;
+    padding: 8px 11px !important;
+  }
+
+  .drive-page .header-actions .btn,
+  .gallery-page .header-actions .btn {
+    padding: 8px 10px !important;
+    font-size: 12.5px !important;
+  }
+
   /* ---- Data-table toolbar ----
      The count gets its own line, but search and Filters share one row. Each
      stacked control costs ~48px of height, and on a phone that height is the
