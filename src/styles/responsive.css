@@ -612,6 +612,10 @@
     gap: 12px !important;
   }
 
+  .gallery-img-wrap {
+    height: 118px !important;
+  }
+
   .preview-grid {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
   }
