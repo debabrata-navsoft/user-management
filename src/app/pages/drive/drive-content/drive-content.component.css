@@ -473,6 +473,7 @@
   color: #475569;
   cursor: pointer;
   user-select: none;
+  padding: 6px 0;
 }
 
 .select-box {
