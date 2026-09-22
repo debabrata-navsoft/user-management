@@ -60,10 +60,9 @@ export class GalleryComponent implements OnInit {
   /** Admins and managers start on the user list; everyone else only ever has their own. */
   canBrowseUsers = computed(() => this.authService.hasRole('admin', 'manager'));
   showUserList = computed(() => this.canBrowseUsers() && !this.viewedUser());
-  // Uploads are stored against whoever is signed in, so they can only go to your own gallery.
-  canUpload = computed(
-    () => !this.canBrowseUsers() || this.authService.isCurrentUser(this.viewedUser()?.id),
-  );
+  // An admin or manager reviews what others uploaded; an upload of theirs would be stored
+  // against their own account, never the user on screen.
+  canUpload = computed(() => !this.canBrowseUsers());
 
   headerSubtitle = computed(() => {
     const owner = this.viewedUser();

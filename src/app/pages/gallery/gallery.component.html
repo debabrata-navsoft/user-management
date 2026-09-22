@@ -11,8 +11,14 @@
           All Users
         </app-ui-button>
       }
-      @if (canUpload()) {
-        <app-ui-button variant="primary" size="md" (click)="openUploadModal()">
+      @if (!showUserList()) {
+        <app-ui-button
+          variant="primary"
+          size="md"
+          [disabled]="!canUpload()"
+          [title]="canUpload() ? 'Upload images' : 'Only the owner of a gallery can upload to it'"
+          (click)="openUploadModal()"
+        >
           <lucide-icon name="plus" [size]="14"></lucide-icon>
           Upload Images
         </app-ui-button>
@@ -142,6 +148,7 @@
       [images]="filteredImages()"
       [isLoading]="isLoading()"
       [isDeleting]="isDeleting()"
+      [canUpload]="canUpload()"
       [searchQuery]="searchQuery()"
       [activeImageId]="activeImage()?.id ?? null"
       [selectedIds]="selectedIds()"
@@ -158,7 +165,7 @@
     ></app-gallery-collection>
   }
 
-    <!-- Global Image Upload Modal Dialog -->
+  <!-- Global Image Upload Modal Dialog -->
   <app-upload-modal
     [isOpen]="showUploadModal()"
     [existingNames]="existingImageNames()"

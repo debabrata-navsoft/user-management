@@ -21,7 +21,7 @@
           <app-empty-state
             title="This folder is empty"
             description="Create a subfolder or upload files to organize content in this directory."
-            actionText="Create Folder"
+            [actionText]="canUpload() ? 'Create Folder' : ''"
             (action)="createFolder.emit()"
           ></app-empty-state>
         }

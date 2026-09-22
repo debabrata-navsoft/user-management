@@ -681,12 +681,20 @@
     gap: 10px !important;
   }
 
-  .picker-search {
+  .gallery-header-actions {
     width: 100% !important;
-    max-width: none !important;
+    margin-left: 0 !important;
   }
 
-  .picker-search app-search-input {
+  .picker-search,
+  .gallery-search {
+    width: 100% !important;
+    max-width: none !important;
+    flex: 1 1 100% !important;
+  }
+
+  .picker-search app-search-input,
+  .gallery-search app-search-input {
     display: block !important;
     width: 100% !important;
   }

@@ -40,7 +40,7 @@
       <app-empty-state
         title="No images in gallery"
         description="Upload your first photo to get started with the gallery and magnifier."
-        actionText="Upload Images"
+        [actionText]="canUpload() ? 'Upload Images' : ''"
         (action)="upload.emit()"
       ></app-empty-state>
     } @else {

@@ -28,6 +28,7 @@ export class GalleryCollectionComponent {
   images = input<ImageItem[]>([]);
   isLoading = input<boolean>(false);
   isDeleting = input<boolean>(false);
+  canUpload = input<boolean>(true);
   searchQuery = input<string>('');
   activeImageId = input<string | number | null>(null);
   selectedIds = input<Set<string | number>>(new Set());

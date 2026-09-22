@@ -387,7 +387,7 @@ describe('GalleryComponent user browsing', () => {
     expect(navigations.at(-1)?.['queryParams']).toEqual({});
   });
 
-  it('goes back to the list, and lets you upload into your own gallery', () => {
+  it('goes back to the list, and never offers upload to a reviewer', () => {
     component.viewUser(emma);
     httpMock.match((r) => r.url.endsWith('/images'))[0].flush([]);
 
@@ -396,8 +396,9 @@ describe('GalleryComponent user browsing', () => {
     expect(component.showUserList()).toBe(true);
     expect(component.images()).toEqual([]);
 
+    // Not even on their own row: an admin's upload would be stored against their account.
     component.viewUser(admin);
     httpMock.match((r) => r.url.endsWith('/images'))[0].flush([]);
-    expect(component.canUpload()).toBe(true);
+    expect(component.canUpload()).toBe(false);
   });
 });

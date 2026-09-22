@@ -14,15 +14,29 @@
           </app-ui-button>
         }
 
-        @if (canUpload()) {
+        @if (!showUserList()) {
+          @let uploadHint = canUpload() ? '' : 'Only the owner of a drive can add to it';
+
           <!-- Upload File Button -->
-          <app-ui-button variant="secondary" size="md" (click)="openUploadModal()">
+          <app-ui-button
+            variant="secondary"
+            size="md"
+            [disabled]="!canUpload()"
+            [title]="uploadHint || 'Upload files'"
+            (click)="openUploadModal()"
+          >
             <lucide-icon name="upload" [size]="16"></lucide-icon>
             Upload Files
           </app-ui-button>
 
           <!-- New Folder Button -->
-          <app-ui-button variant="primary" size="md" (click)="openCreateFolderModal()">
+          <app-ui-button
+            variant="primary"
+            size="md"
+            [disabled]="!canUpload()"
+            [title]="uploadHint || 'Create a folder'"
+            (click)="openCreateFolderModal()"
+          >
             <lucide-icon name="folder-plus" [size]="16" [strokeWidth]="2.5"></lucide-icon>
             New Folder
           </app-ui-button>
@@ -163,6 +177,7 @@
     <app-drive-content
       [isLoading]="isLoading()"
       [isDeleting]="isActionSubmitting()"
+      [canUpload]="canUpload()"
       [currentFolders]="currentFolders()"
       [currentFiles]="currentFiles()"
       [viewMode]="viewMode()"

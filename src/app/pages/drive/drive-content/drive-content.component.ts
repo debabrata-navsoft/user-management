@@ -33,6 +33,7 @@ export class DriveContentComponent {
 
   isLoading = input<boolean>(false);
   isDeleting = input<boolean>(false);
+  canUpload = input<boolean>(true);
   currentFolders = input<DriveNode[]>([]);
   currentFiles = input<DriveNode[]>([]);
   viewMode = input<'grid' | 'list'>('grid');
