@@ -2,7 +2,9 @@
   <div class="card-header flex-between">
     <div>
       <h3 class="card-title">{{ title() }}</h3>
-      <span class="card-subtitle">{{ subtitle() }}</span>
+      @if (subtitle()) {
+        <span class="card-subtitle">{{ subtitle() }}</span>
+      }
     </div>
     <div class="picker-search">
       <app-search-input

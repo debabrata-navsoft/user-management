@@ -28,7 +28,7 @@ export class UserPickerComponent {
   users = input<User[]>([]);
   isLoading = input<boolean>(false);
   title = input<string>('Browse by user');
-  subtitle = input<string>('Open a user to see what they uploaded');
+  subtitle = input<string>('');
 
   select = output<User>();
 

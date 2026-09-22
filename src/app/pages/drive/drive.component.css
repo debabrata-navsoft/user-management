@@ -7,6 +7,16 @@
   overflow: hidden;
 }
 
+/* The file browser is a fixed-height column so the toolbar stays put while files scroll.
+   The user list has no toolbar to pin, so it scrolls with the page, as the Gallery does. */
+.drive-page.browsing-users {
+  height: auto;
+  overflow: visible;
+  margin-bottom: 0;
+  /* The tight 10px belongs to the breadcrumb toolbar; with no toolbar, use the Gallery's. */
+  gap: 16px;
+}
+
 .drive-header-sticky {
   flex-shrink: 0;
   display: flex;
