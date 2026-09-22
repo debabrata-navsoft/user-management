@@ -43,16 +43,27 @@
           <div class="selection-actions">
             <span class="selection-count">{{ selectedCount() }} selected</span>
             <app-ui-button variant="ghost" size="sm" (click)="clearSelection.emit()">
-              Clear
+              <span>
+                Clear
+                @if (selectedCount() > 1) {
+                  <span class="btn-word">All</span>
+                }
+              </span>
             </app-ui-button>
             <app-ui-button
+              class="delete-selected"
               variant="danger"
               size="sm"
               [loading]="isDeleting()"
               (click)="deleteSelected.emit()"
             >
               <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-              {{ selectedCount() === 1 ? 'Delete' : 'Delete Selected' }}
+              <span>
+                Delete
+                @if (selectedCount() > 1) {
+                  <span class="btn-word">Selected</span>
+                }
+              </span>
             </app-ui-button>
           </div>
         }

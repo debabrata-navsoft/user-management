@@ -624,11 +624,6 @@
     grid-template-columns: 1fr !important;
   }
 
-  /* The zoom panel is parked to the right of the image on desktop
-     (left: 100% + 20px), which on a phone puts it completely off-screen — the
-     lens tracked your finger but the magnified view was never visible.
-     Overlay it on the image instead: drag to inspect, lift to see the photo
-     again. */
   .zoom-result-window {
     display: block !important;
     position: absolute !important;
@@ -719,10 +714,14 @@
   .gallery-header-actions {
     width: 100% !important;
     margin-left: 0 !important;
+    justify-content: flex-start !important;
   }
 
   /* Count, Clear and Delete stay on one row here; they only fit once the chip and the
      buttons give up some of their desktop padding. */
+  /* One row from border to border on both pages. The full labels do not fit a phone —
+     with them the delete button ran past the card edge — so the second word is dropped
+     and the row spans the card instead of overflowing it. */
   .selection-actions {
     width: 100% !important;
     flex-wrap: nowrap !important;
@@ -751,6 +750,15 @@
   .gallery-search app-search-input {
     display: block !important;
     width: 100% !important;
+  }
+}
+
+/* --- Narrow phones (iPhone SE and friends) --- */
+@media (max-width: 359px) {
+  /* "Delete Selected" and "Clear All" fit a 375px card; at 320px they run past its edge,
+     so each label drops its second word. */
+  .selection-actions .btn-word {
+    display: none !important;
   }
 }
 
