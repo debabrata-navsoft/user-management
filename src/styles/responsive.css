@@ -690,6 +690,25 @@
     margin-left: 0 !important;
   }
 
+  /* Count, Clear and Delete stay on one row here; they only fit once the chip and the
+     buttons give up some of their desktop padding. */
+  .selection-actions {
+    width: 100% !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
+  }
+
+  .selection-actions .selection-count {
+    padding: 3px 8px !important;
+    font-size: 11.5px !important;
+  }
+
+  .selection-actions .btn {
+    padding: 6px 9px !important;
+    font-size: 12px !important;
+  }
+
   .picker-search,
   .gallery-search {
     width: 100% !important;

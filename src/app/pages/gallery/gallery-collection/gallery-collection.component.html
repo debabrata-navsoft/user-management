@@ -9,19 +9,22 @@
     </div>
     <div class="gallery-header-actions">
       @if (selectedCount() > 0) {
-        <span class="selection-count">{{ selectedCount() }} selected</span>
-        <app-ui-button variant="ghost" size="sm" (click)="clearSelection.emit()"
-          >Clear Selection</app-ui-button
-        >
-        <app-ui-button
-          variant="danger"
-          size="sm"
-          [loading]="isDeleting()"
-          (click)="deleteSelected.emit()"
-        >
-          <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-          {{ selectedCount() === 1 ? 'Delete' : 'Delete Selected' }}
-        </app-ui-button>
+        <div class="selection-actions">
+          <span class="selection-count">{{ selectedCount() }} selected</span>
+          <app-ui-button variant="ghost" size="sm" (click)="clearSelection.emit()"
+            >Clear Selection</app-ui-button
+          >
+          <app-ui-button
+            class="delete-selected"
+            variant="danger"
+            size="sm"
+            [loading]="isDeleting()"
+            (click)="deleteSelected.emit()"
+          >
+            <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+            {{ selectedCount() === 1 ? 'Delete' : 'Delete Selected' }}
+          </app-ui-button>
+        </div>
       }
       <div class="gallery-search">
         <app-search-input

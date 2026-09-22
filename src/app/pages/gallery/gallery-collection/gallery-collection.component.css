@@ -136,6 +136,12 @@
   gap: 10px;
 }
 
+.selection-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .selection-count {
   font-size: 12.5px;
   font-weight: 600;
