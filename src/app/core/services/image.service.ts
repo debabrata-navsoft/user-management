@@ -21,6 +21,13 @@ export class ImageService {
     });
   }
 
+  /** Every user's images, for the admin and manager dashboard totals. */
+  getAllImages(): Observable<ImageItem[]> {
+    return this.http.get<ImageItem[]>(this.baseUrl, {
+      params: { _sort: 'createdAt', _order: 'desc' },
+    });
+  }
+
   /** One user's gallery, for an admin or manager reviewing them from the user list. */
   getImagesFor(owner: Pick<User, 'email' | 'name'>): Observable<ImageItem[]> {
     return this.http.get<ImageItem[]>(this.baseUrl, {

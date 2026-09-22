@@ -149,8 +149,17 @@ export class DriveService {
     );
   }
 
+  /** Every user's totals, for the admin and manager dashboards. */
+  getAllStats(): Observable<DriveStats> {
+    return this.toStats(this.getAllNodes());
+  }
+
   getStats(owner?: DriveOwner): Observable<DriveStats> {
-    return this.getVisibleNodes(owner).pipe(
+    return this.toStats(this.getVisibleNodes(owner));
+  }
+
+  private toStats(nodes: Observable<DriveNode[]>): Observable<DriveStats> {
+    return nodes.pipe(
       map((nodes) => {
         let totalFolders = 0;
         let totalFiles = 0;

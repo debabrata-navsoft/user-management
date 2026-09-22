@@ -74,8 +74,8 @@ export class AdminDashboardComponent implements OnInit {
 
     forkJoin({
       users: this.userService.getAllUsers(),
-      images: this.imageService.getImages(),
-      driveStats: this.driveService.getStats(),
+      images: this.imageService.getAllImages(),
+      driveStats: this.driveService.getAllStats(),
     }).subscribe({
       next: (res) => {
         this.users.set(res.users);
