@@ -719,6 +719,13 @@
 
   /* Count, Clear and Delete stay on one row here; they only fit once the chip and the
      buttons give up some of their desktop padding. */
+  /* `padding: 8px 0` gives the row height but no inset, so the checkbox sits flush against
+     the edge of the scroll area. On a phone it also wants a finger-sized tap target. */
+  .select-all-row {
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
+
   /* One row from border to border on both pages. The full labels do not fit a phone —
      with them the delete button ran past the card edge — so the second word is dropped
      and the row spans the card instead of overflowing it. */
