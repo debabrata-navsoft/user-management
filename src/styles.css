@@ -190,6 +190,84 @@ select.form-control {
   background-size: 16px 16px;
 }
 
+/* The open option list is OS-drawn and ignores normal CSS, which is why it showed as a
+   flat system list with a harsh blue highlight. Chromium 135+ supports opting the select
+   into a styleable popup with `appearance: base-select`; the element, its form binding and
+   keyboard handling stay native. Browsers without it keep the native list unchanged. */
+@supports (appearance: base-select) {
+  select.form-control,
+  select.form-control::picker(select) {
+    appearance: base-select;
+  }
+
+  select.form-control {
+    display: flex;
+    align-items: center;
+  }
+
+  /* The chevron is already painted as a background image above. */
+  select.form-control::picker-icon {
+    display: none;
+  }
+
+  select.form-control:open {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  }
+
+  /* Always open below the field; the default flips the list above it near the
+     bottom of the viewport. */
+  select.form-control::picker(select) {
+    position-area: block-end span-inline-end;
+    position-try-fallbacks: none;
+    margin-block: 6px;
+    padding: 6px;
+    max-height: 264px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+  }
+
+  select.form-control option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: var(--radius-xs);
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  /* The `display` above outranks the browser's own `[hidden] { display: none }`, which
+     would put the "Please Select" placeholder back into the open list. */
+  select.form-control option[hidden] {
+    display: none;
+  }
+
+  select.form-control option:hover,
+  select.form-control option:focus-visible {
+    background-color: var(--surface-muted);
+    outline: none;
+  }
+
+  select.form-control option:checked {
+    background-color: var(--primary-soft);
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  /* Tick on the trailing edge, in brand colour, instead of before the label. */
+  select.form-control option::checkmark {
+    order: 1;
+    margin-inline-start: auto;
+    color: var(--primary);
+  }
+}
+
 .form-control:focus {
   outline: none;
   border-color: var(--primary);
