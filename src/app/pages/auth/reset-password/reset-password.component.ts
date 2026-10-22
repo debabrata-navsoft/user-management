@@ -33,7 +33,6 @@ export class ResetPasswordComponent implements OnInit {
   userId = signal<string | number>('');
   targetEmail = signal<string>('');
 
-  /** Caps typing in the password boxes at the same bound the validator enforces. */
   passwordMaxLength = PASSWORD_MAX_LENGTH;
 
   form: FormGroup = this.fb.group(

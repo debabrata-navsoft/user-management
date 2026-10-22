@@ -33,7 +33,6 @@ export class SignupComponent {
   private snackbar = inject(SnackbarService);
   private router = inject(Router);
 
-  /** Caps typing in the password boxes at the same bound the validator enforces. */
   passwordMaxLength = PASSWORD_MAX_LENGTH;
 
   form: FormGroup = this.fb.group(

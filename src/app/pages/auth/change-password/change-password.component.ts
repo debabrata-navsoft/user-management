@@ -35,7 +35,6 @@ export class ChangePasswordComponent {
   showNewPassword = signal<boolean>(false);
   showConfirmPassword = signal<boolean>(false);
 
-  /** Caps typing in the password boxes at the same bound the validator enforces. */
   passwordMaxLength = PASSWORD_MAX_LENGTH;
 
   form: FormGroup = this.fb.group(
