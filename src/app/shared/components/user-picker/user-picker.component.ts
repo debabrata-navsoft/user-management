@@ -7,10 +7,6 @@ import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { LoaderComponent } from '../loader/loader.component';
 import { SearchInputComponent } from '../search-input/search-input.component';
 
-/**
- * The list an admin or manager lands on in the Gallery and Drive: pick a user, then see
- * what they uploaded. Both pages scope their own view to one owner at a time.
- */
 @Component({
   selector: 'app-user-picker',
   standalone: true,

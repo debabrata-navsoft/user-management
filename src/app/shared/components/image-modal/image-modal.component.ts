@@ -65,7 +65,6 @@ export class ImageModalComponent {
   private gesture = { x: 0, y: 0, offsetX: 0, offsetY: 0, spread: 0, scale: ZOOM_MIN };
 
   constructor() {
-    // Opening the lightbox, or moving to another item, always starts back at 100%.
     effect(() => {
       this.modalService.currentIndex();
       this.modalService.isOpen();
@@ -146,7 +145,6 @@ export class ImageModalComponent {
     if (event.button !== 0) return;
     this.pointers.set(event.pointerId, { clientX: event.clientX, clientY: event.clientY });
 
-    // A lone pointer on an un-zoomed image is a click, not a drag — leave it alone.
     if (this.pointers.size < 2 && !this.isZoomed()) return;
 
     event.preventDefault();
@@ -184,7 +182,6 @@ export class ImageModalComponent {
     this.startGesture();
   }
 
-  /** Snapshots the pointers and current transform, so every move is a delta from here. */
   private startGesture(): void {
     const [a, b] = [...this.pointers.values()];
     if (!a) return;
@@ -201,7 +198,6 @@ export class ImageModalComponent {
     };
   }
 
-  /** Zooms to `next`, holding the point under `anchor` still (default: the image centre). */
   private zoomTo(next: number, anchor?: Point): void {
     const from = this.scale();
     const to = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(next * 100) / 100));
@@ -211,8 +207,6 @@ export class ImageModalComponent {
     const rect = this.frameRef?.nativeElement.getBoundingClientRect();
     if (!anchor || !rect) return this.apply(to, x, y);
 
-    // The visible centre sits at the layout centre plus the current translate; holding the
-    // anchor still means pushing that centre away from it in proportion to the scale change.
     const ratio = to / from - 1;
     this.apply(
       to,
@@ -221,7 +215,6 @@ export class ImageModalComponent {
     );
   }
 
-  /** Commits a transform, clamping the pan so the image stays over its un-zoomed footprint. */
   private apply(scale: number, x: number, y: number): void {
     const rect = this.frameRef?.nativeElement.getBoundingClientRect();
     this.scale.set(scale);

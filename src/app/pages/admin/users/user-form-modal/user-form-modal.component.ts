@@ -69,7 +69,6 @@ export class UserFormModalComponent {
 
   showPassword = signal<boolean>(false);
 
-  /** Caps typing in the password boxes at the same bound the validator enforces. */
   passwordMaxLength = PASSWORD_MAX_LENGTH;
 
   form: FormGroup = this.fb.group({
@@ -120,9 +119,6 @@ export class UserFormModalComponent {
       this.showPassword.set(false);
       this.setEnabled('password', !editing);
       this.setEnabled('id', editing);
-
-      // Disabled controls are dropped from form.value, and updateUser PATCHes,
-      // so leaving them out means the server keeps the existing role/status.
       this.setEnabled('role', !this.isEditingSelf());
       this.setEnabled('status', !this.isEditingSelf());
     });

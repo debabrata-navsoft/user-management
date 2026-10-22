@@ -38,7 +38,6 @@ export class FilterDrawerComponent {
   expandedGroups = signal<Record<string, boolean>>({});
   groupSearchQueries = signal<Record<string, string>>({});
 
-  // Date Range state per date group (e.g. 'createdDate')
   datePresets = signal<Record<string, 'today' | '7days' | '30days' | 'all' | 'custom'>>({});
   fromDate = signal<Record<string, string>>({});
   toDate = signal<Record<string, string>>({});

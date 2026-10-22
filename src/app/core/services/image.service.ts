@@ -21,14 +21,12 @@ export class ImageService {
     });
   }
 
-  /** Every user's images, for the admin and manager dashboard totals. */
   getAllImages(): Observable<ImageItem[]> {
     return this.http.get<ImageItem[]>(this.baseUrl, {
       params: { _sort: 'createdAt', _order: 'desc' },
     });
   }
 
-  /** One user's gallery, for an admin or manager reviewing them from the user list. */
   getImagesFor(owner: Pick<User, 'email' | 'name'>): Observable<ImageItem[]> {
     return this.http.get<ImageItem[]>(this.baseUrl, {
       params: this.auth.ownerScope(owner, { _sort: 'createdAt', _order: 'desc' }),
@@ -47,7 +45,6 @@ export class ImageService {
     return this.http.post<ImageItem>(this.baseUrl, payload);
   }
 
-  /** Always issued through `runPacedWrites`, which owns the retry and the reporting. */
   deleteImage(id: string | number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`, { context: batchedWrite() });
   }

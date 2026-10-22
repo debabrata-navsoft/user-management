@@ -82,7 +82,6 @@ export class UserService {
     return this.http.get<User>(`${this.baseUrl}/${id}`);
   }
 
-  /** For a `?userId=` deep link that can land before the directory has loaded. */
   resolveUser(id: string, loaded: User[]): Observable<User> {
     const known = loaded.find((u) => String(u.id) === id);
     return known ? of(known) : this.getUserById(id);

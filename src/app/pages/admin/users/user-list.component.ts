@@ -93,7 +93,6 @@ export class UserListComponent implements OnInit {
     { key: 'actions', header: 'Actions', width: '130px', align: 'center' },
   ];
 
-  // Create and edit share one dialog, so one open flag plus a mode drives both.
   isFormModalOpen = signal<boolean>(false);
   formMode = signal<UserFormMode>('add');
   isViewModalOpen = signal<boolean>(false);
@@ -106,7 +105,6 @@ export class UserListComponent implements OnInit {
   getInitials = getInitials;
   getRoleBadge = roleBadgeVariant;
 
-  /** Option counts tallied in one pass over every user. */
   filterGroups = computed<FilterGroup[]>(() => {
     const counts = new Map<string, number>();
     for (const user of this.allUsers()) {
@@ -131,7 +129,6 @@ export class UserListComponent implements OnInit {
       }),
     );
 
-    // Append Created Date filter group
     groups.push({
       id: 'createdAt',
       title: 'Created Date',
@@ -191,7 +188,6 @@ export class UserListComponent implements OnInit {
     this.refresh();
   }
 
-  /** Reload the page of rows and the unpaged set the drawer counts against. */
   refresh(): void {
     this.fetchUsers();
     this.userService.getAllUsers().subscribe({ next: (data) => this.allUsers.set(data) });
@@ -242,7 +238,6 @@ export class UserListComponent implements OnInit {
       });
   }
 
-  /** Anything that changes the result set invalidates the current page. */
   private reload(resetPage = true): void {
     if (resetPage) this.page.set(1);
     this.fetchUsers();
@@ -295,7 +290,6 @@ export class UserListComponent implements OnInit {
     this.snackbar.warning('Please check the highlighted fields.');
   }
 
-  /** The dialog emits only once its form is valid, so this just persists. */
   submitUserForm(value: Partial<User>): void {
     const id = this.formMode() === 'edit' ? value.id : undefined;
     const verb = id === undefined ? 'create' : 'update';

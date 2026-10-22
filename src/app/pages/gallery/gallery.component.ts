@@ -54,14 +54,10 @@ export class GalleryComponent implements OnInit {
   showUploadModal = signal<boolean>(false);
 
   users = signal<User[]>([]);
-  /** Whose gallery is on screen. Null while the user list is showing. */
   viewedUser = signal<User | null>(null);
 
-  /** Admins and managers start on the user list; everyone else only ever has their own. */
   canBrowseUsers = computed(() => this.authService.hasRole('admin', 'manager'));
   showUserList = computed(() => this.canBrowseUsers() && !this.viewedUser());
-  // An admin or manager reviews what others uploaded; an upload of theirs would be stored
-  // against their own account, never the user on screen.
   canUpload = computed(() => !this.canBrowseUsers());
 
   headerSubtitle = computed(() => {
@@ -158,8 +154,6 @@ export class GalleryComponent implements OnInit {
     }
 
     this.loadUsers();
-    // Who is being viewed lives in the URL, so browser Back returns to the user list
-    // instead of leaving the page altogether.
     this.route.queryParamMap.subscribe((params) => this.applyUserParam(params.get('userId')));
   }
 
@@ -197,7 +191,6 @@ export class GalleryComponent implements OnInit {
     this.router.navigate([], { relativeTo: this.route, queryParams: {} });
   }
 
-  /** `null` is the user list: same reset, minus the fetch. */
   private setViewedUser(user: User | null): void {
     this.viewedUser.set(user);
     this.activeImage.set(null);
@@ -310,7 +303,6 @@ export class GalleryComponent implements OnInit {
         total === 1 ? `Image "${removed[0].name}" deleted.` : `Deleted ${total} images.`,
       );
     } else if (outcome.aborted) {
-      // The connection dropped, so the rest were never attempted.
       this.snackbar.warning(
         `Deleted ${removed.length} of ${total} images before the API stopped responding. ` +
           'Check that `npm run api` is still running, then delete the rest.',
@@ -328,7 +320,6 @@ export class GalleryComponent implements OnInit {
 
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
-    // The studio replaces the grid, selection bar and all, so there is nothing to select.
     if (this.activeImage() || this.showUploadModal() || this.isDeleteModalOpen()) return;
     if (this.modalService.isOpen()) return;
 
@@ -352,7 +343,6 @@ export class GalleryComponent implements OnInit {
     this.editSelection((ids) => this.filteredImages().forEach((img) => ids.add(img.id)));
   }
 
-  /** Unchecking only drops what is on screen, so a selection the search hides is not lost. */
   toggleSelectAll(): void {
     const add = !this.allFilteredSelected();
     this.editSelection((ids) =>

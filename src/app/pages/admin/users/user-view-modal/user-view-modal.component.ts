@@ -48,8 +48,6 @@ export class UserViewModalComponent {
   roleBadgeVariant = roleBadgeVariant;
 
   constructor() {
-    // The gallery and the drive are scoped to whoever is signed in, so this is the one
-    // place another user's uploads can be seen — fetched only while the dialog is open.
     effect(() => {
       const owner = this.isOpen() ? this.user() : null;
       this.images.set([]);
@@ -76,7 +74,6 @@ export class UserViewModalComponent {
     );
   }
 
-  /** Media opens in the lightbox, anything else in a browser tab — as the Drive page does. */
   openFile(file: DriveNode): void {
     if (!file.dataUrl) return;
 

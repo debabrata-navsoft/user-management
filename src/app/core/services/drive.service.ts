@@ -9,7 +9,6 @@ import { AuthService } from './auth.service';
 
 export const DRIVE_ROOT = 'root';
 
-/** Enough of a user to match `uploadedBy`, which holds either identity. */
 export type DriveOwner = Pick<User, 'email' | 'name'>;
 
 @Injectable({
@@ -20,7 +19,6 @@ export class DriveService {
   private auth = inject(AuthService);
   private baseUrl = `${environment.apiUrl}/nodes`;
 
-  /** Without an `owner` this is your own drive; with one, the drive of the user being reviewed. */
   getNodes(parentId: string = DRIVE_ROOT, owner?: DriveOwner): Observable<DriveNode[]> {
     return this.http.get<DriveNode[]>(this.baseUrl, { params: this.scopeFor(owner, { parentId }) });
   }
@@ -29,21 +27,14 @@ export class DriveService {
     return owner ? this.auth.ownerScope(owner, base) : this.auth.ownedScope(base);
   }
 
-  /**
-   * Deliberately unscoped: breadcrumbs and `deleteNodes` walk the tree, and skipping a
-   * node owned by someone else would break a path or orphan a descendant. Anything that
-   * *displays* a list wants {@link getVisibleNodes} instead.
-   */
   getAllNodes(): Observable<DriveNode[]> {
     return this.http.get<DriveNode[]>(this.baseUrl);
   }
 
-  /** Every node one user owns, at any depth — your own unless an owner is named. */
   getVisibleNodes(owner?: DriveOwner): Observable<DriveNode[]> {
     return this.http.get<DriveNode[]>(this.baseUrl, { params: this.scopeFor(owner) });
   }
 
-  /** One user's files, for an admin or manager reviewing them from the user list. */
   getFilesFor(owner: DriveOwner): Observable<DriveNode[]> {
     return this.getVisibleNodes(owner).pipe(map((nodes) => nodes.filter((n) => n.type === 'file')));
   }
@@ -104,11 +95,6 @@ export class DriveService {
     });
   }
 
-  /**
-   * One paced batch for the whole selection: the tree is fetched once and every id is
-   * expanded to its descendants, so selecting a folder and a file inside it cannot
-   * delete that file twice.
-   */
   deleteNodes(ids: string[]): Observable<PacedWriteOutcome<string>> {
     return this.getAllNodes().pipe(
       switchMap((allNodes) => {
@@ -149,7 +135,6 @@ export class DriveService {
     );
   }
 
-  /** Every user's totals, for the admin and manager dashboards. */
   getAllStats(): Observable<DriveStats> {
     return this.toStats(this.getAllNodes());
   }

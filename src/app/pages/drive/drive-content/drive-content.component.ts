@@ -41,8 +41,6 @@ export class DriveContentComponent {
   menuDropUp = input<boolean>(false);
   selectedIds = input<Set<string>>(new Set());
   allSelected = input<boolean>(false);
-  /** Drives the empty state: nothing to show because of a search reads very differently
-   *  from a folder that really is empty. */
   searchQuery = input<string>('');
 
   createFolder = output<void>();

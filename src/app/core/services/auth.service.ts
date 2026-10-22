@@ -194,11 +194,6 @@ export class AuthService {
     return !!current && roles.includes(current);
   }
 
-  /**
-   * Narrows a Gallery/Drive query to one person's uploads. `uploadedBy` holds the email on
-   * newer rows and the display name on older ones, so both are sent — json-server reads a
-   * repeated param as OR.
-   */
   ownerScope(
     owner: Pick<User, 'email' | 'name'> | null,
     base: Record<string, string | number> = {},
@@ -210,20 +205,10 @@ export class AuthService {
     return params;
   }
 
-  /**
-   * Every role sees only its own uploads, admins and managers included — one person's files
-   * have no business in everybody else's gallery. Another user's are reached from the user
-   * list instead, through {@link ownerScope}.
-   */
   ownedScope(base: Record<string, string | number> = {}): HttpParams {
     return this.ownerScope(this.currentUser(), base);
   }
 
-  /**
-   * Where a role belongs when no specific page was asked for. Without a role there is no
-   * dashboard to pick, so the answer is the login page — guessing one would hand a signed
-   * out visitor another role's URL, which `roleGuard` then has to bounce.
-   */
   homeUrl(role: Role | null = this.currentRole()): string {
     if (role === 'admin') return '/admin/dashboard';
     if (role === 'manager') return '/manager/dashboard';

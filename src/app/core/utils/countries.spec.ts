@@ -2,8 +2,6 @@ import { COUNTRIES, DEFAULT_DIAL, joinPhone, splitPhone } from './countries';
 
 describe('COUNTRIES', () => {
   it('lists every dialable country, not a hand-picked subset', () => {
-    // libphonenumber-js knows ~245 territories; assert the order of magnitude
-    // rather than an exact count, which shifts as the dataset is updated.
     expect(COUNTRIES.length).toBeGreaterThan(200);
   });
 

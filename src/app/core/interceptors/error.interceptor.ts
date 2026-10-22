@@ -14,13 +14,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       let errorMessage = 'An unexpected error occurred.';
 
       if (error.error instanceof ErrorEvent) {
-        // Client-side or network error
         errorMessage = `Client error: ${error.error.message}`;
       } else if (error.status === 0) {
         errorMessage =
           'Unable to connect to mock API server. Please ensure `npm run api` is running on port 3000.';
-        // A paced batch retries the drop itself and sums up the result once, so a toast
-        // here would fire per attempt for a run that may well recover.
         if (!req.context.get(BATCHED_WRITE)) {
           snackbar.error(errorMessage, 'Network Connection Error');
         }

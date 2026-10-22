@@ -54,7 +54,6 @@ export class DataTableComponent {
 
   @ContentChild('cellTemplate') customCellTemplate?: TemplateRef<any>;
 
-  // Filter drawer config
   filterGroups = input<FilterGroup[]>([]);
   activeFilters = input<ActiveFilterState>({});
   entityLabel = input<string>('users');

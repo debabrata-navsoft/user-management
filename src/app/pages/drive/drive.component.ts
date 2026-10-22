@@ -66,14 +66,10 @@ export class DriveComponent implements OnInit {
   isActionSubmitting = signal<boolean>(false);
 
   users = signal<User[]>([]);
-  /** Whose drive is on screen. Null while the user list is showing. */
   viewedUser = signal<User | null>(null);
 
-  /** Admins and managers start on the user list; everyone else only ever has their own. */
   canBrowseUsers = computed(() => this.authService.hasRole('admin', 'manager'));
   showUserList = computed(() => this.canBrowseUsers() && !this.viewedUser());
-  // An admin or manager reviews what others uploaded; an upload of theirs would be stored
-  // against their own account, never the user on screen.
   canUpload = computed(() => !this.canBrowseUsers());
 
   headerSubtitle = computed(() => {
@@ -121,8 +117,6 @@ export class DriveComponent implements OnInit {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.nodes();
 
-    // Matches the Owner column: `uploadedBy` holds an email on newer rows, so search the
-    // display name the column actually shows as well as the raw stored value.
     return this.nodes().filter(
       (n) =>
         n.name.toLowerCase().includes(q) ||
@@ -168,8 +162,6 @@ export class DriveComponent implements OnInit {
     return this.nodes().filter((n) => n.type === type);
   }
 
-  // Duplicate checks run against every sibling, never `filteredNodes()` — a name hidden
-  // by the search box is still taken, and matching on the visible list let it through.
   existingFolderNames = computed(() => this.siblingsOfType('folder').map((f) => f.name));
 
   existingFileNames = computed(() => this.siblingsOfType('file').map((f) => f.name));
@@ -185,8 +177,6 @@ export class DriveComponent implements OnInit {
       this.viewMode.set(savedMode);
     }
 
-    // Both the folder and, for an admin, the user being viewed live in the URL, so browser
-    // Back walks back through them instead of leaving the page.
     this.route.queryParamMap.subscribe((params) => {
       const folderId = params.get('folderId') || DRIVE_ROOT;
       const view = params.get('view') as 'grid' | 'list';
@@ -212,7 +202,6 @@ export class DriveComponent implements OnInit {
     }
 
     if (String(this.viewedUser()?.id ?? '') === userId) {
-      // Same user, so this is folder navigation — `viewUser` already loaded the root.
       if (folderId !== this.currentFolderId()) this.loadFolder(folderId);
       return;
     }
@@ -252,7 +241,6 @@ export class DriveComponent implements OnInit {
     });
   }
 
-  /** `null` is the user list: same reset, minus the load. */
   private setViewedUser(user: User | null, folderId: string = DRIVE_ROOT): void {
     this.viewedUser.set(user);
     this.searchQuery.set('');
@@ -269,7 +257,6 @@ export class DriveComponent implements OnInit {
   loadFolder(folderId: string): void {
     this.isLoading.set(true);
     this.currentFolderId.set(folderId);
-    // Selection is per folder: carrying ids across a move would delete out of sight.
     this.clearSelection();
 
     forkJoin({
@@ -294,8 +281,6 @@ export class DriveComponent implements OnInit {
   }
 
   navigateToFolder(folderId: string): void {
-    // The query survives the move and filters the folder you land in — the search box
-    // shows it, so clearing it here would leave the text on screen filtering nothing.
     const queryParams: Record<string, string> = {};
     if (folderId && folderId !== DRIVE_ROOT) {
       queryParams['folderId'] = folderId;
@@ -303,7 +288,6 @@ export class DriveComponent implements OnInit {
     if (this.viewMode() === 'list') {
       queryParams['view'] = 'list';
     }
-    // This call replaces the query, so whose drive is open has to be carried over.
     const owner = this.viewedUser();
     if (owner) {
       queryParams['userId'] = String(owner.id);
@@ -342,9 +326,7 @@ export class DriveComponent implements OnInit {
     );
   }
 
-  onFolderClick(folder: DriveNode): void {
-    // Single click selects / focuses item; double click opens folder
-  }
+  onFolderClick(folder: DriveNode): void {}
 
   setViewMode(mode: 'grid' | 'list'): void {
     this.viewMode.set(mode);
@@ -478,7 +460,6 @@ export class DriveComponent implements OnInit {
       return;
     }
 
-    // Direct web URL (e.g. Google Docs, Google Sheets, external link)
     if (node.url) {
       window.open(node.url, '_blank');
       return;
@@ -495,8 +476,6 @@ export class DriveComponent implements OnInit {
       return;
     }
 
-    // Documents (Word, Excel, PDF, Text, Markdown, etc.) with stored file data:
-    // Decodes and opens the real file data in a new tab.
     if (node.dataUrl && openDataUrlInNewTab(node.dataUrl)) {
       return;
     }

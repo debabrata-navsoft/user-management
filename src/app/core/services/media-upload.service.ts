@@ -14,7 +14,6 @@ export interface MediaUploadOutcome {
   tooLarge: string[];
   duplicates: string[];
   failed: string[];
-  /** The API stopped responding mid-batch, so the remaining files were never attempted. */
   connectionLost?: boolean;
 }
 
@@ -84,7 +83,6 @@ export class MediaUploadService {
     );
   }
 
-  /** Counterpart of {@link uploadToDrive}: this writes `images` only. */
   uploadToGallery(items: MediaUploadItem[], opts: MediaUploadOptions): Promise<MediaUploadOutcome> {
     return this.runUploads(items, (item) =>
       this.http.post<ImageItem>(this.imagesUrl, this.imageFor(item, opts.uploadedBy), {
@@ -150,7 +148,6 @@ export class MediaUploadService {
       const { done, failed, pending, aborted } = await runPacedWrites(items, post);
       return {
         uploaded: done.map((item) => item.name),
-        // `pending` never got attempted, but from the caller's side it is the same miss.
         failed: [...failed, ...pending].map((item) => item.name),
         tooLarge: [],
         duplicates: [],

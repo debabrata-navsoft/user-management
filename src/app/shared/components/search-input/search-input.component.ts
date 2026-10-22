@@ -17,7 +17,6 @@ export class SearchInputComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   placeholder = input<string>('Search...');
-  /** The query the parent holds. Bind it to keep the box and the results in step. */
   value = input<string>('');
   debounce = input<number>(300);
 
@@ -26,8 +25,6 @@ export class SearchInputComponent implements OnInit {
   control = new FormControl<string>('');
 
   constructor() {
-    // Without this the box is write-only: a parent that resets or presets its query cannot
-    // move the text, so the field keeps showing a term that no longer filters anything.
     effect(() => {
       const next = this.value();
       if (next !== (this.control.value ?? '')) {
