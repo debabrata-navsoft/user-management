@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, RedirectCommand, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { SnackbarService } from '../services/snackbar.service';
 
@@ -12,10 +12,14 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // Landing on a dashboard while signed out is what Back does after logout —
-  // send that to a plain /login without a returnUrl or a scolding toast.
-  if (authService.isLandingUrl(state.url)) {
-    return router.createUrlTree(['/login']);
+  // Back/Forward after logout re-enters pages from history ('popstate'). That
+  // is not a deep link the user asked for, so it gets a plain /login with no
+  // returnUrl or toast — and replaces the entry, so pressing Back again keeps
+  // walking back instead of bouncing off /login. A dashboard never needs a
+  // returnUrl either: login picks one from the role.
+  const fromHistory = router.currentNavigation()?.trigger === 'popstate';
+  if (fromHistory || authService.isLandingUrl(state.url)) {
+    return new RedirectCommand(router.createUrlTree(['/login']), { replaceUrl: true });
   }
 
   snackbar.warning('Please log in to access this page.', 'Access Restricted');
