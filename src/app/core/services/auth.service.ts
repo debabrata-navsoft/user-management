@@ -26,8 +26,13 @@ export class AuthService {
   private sessionSignal = signal<AuthSession | null>(this.loadStoredSession());
 
   currentUser = computed(() => this.sessionSignal()?.user ?? null);
-  isAuthenticated = computed(() => !!this.sessionSignal() && !this.isSessionExpired());
   currentRole = computed<Role | null>(() => this.sessionSignal()?.user?.role ?? null);
+
+  // A plain method, not a computed: expiry depends on Date.now(), which no
+  // signal tracks, so a computed would cache `true` past `expiresAt`.
+  isAuthenticated(): boolean {
+    return !!this.sessionSignal() && !this.isSessionExpired();
+  }
 
   isCurrentUser(id: string | number | undefined): boolean {
     const me = this.currentUser();
@@ -49,13 +54,15 @@ export class AuthService {
       .get<User>(`${environment.apiUrl}/users/${currentId}`)
       .pipe(catchError((err: HttpErrorResponse) => (err.status === 404 ? of(null) : EMPTY)))
       .subscribe((latestUser) => {
+        const session = this.sessionSignal();
+        if (session?.user?.id !== currentId) return;
         if (!latestUser || latestUser.status === 'inactive') {
           this.clearSession();
           this.snackbar.warning('Your account is no longer active. Please sign in again.');
           this.router.navigate(['/login']);
           return;
         }
-        this.setSession(latestUser);
+        this.setSession(latestUser, session.expiresAt);
       });
   }
 
@@ -67,11 +74,7 @@ export class AuthService {
     return this.http.get<User[]>(`${environment.apiUrl}/users`).pipe(
       map((users) => {
         const user = users.find((u) => {
-          const matchId =
-            u.email?.toLowerCase() === input ||
-            u.username?.toLowerCase() === input ||
-            (input === 'admin' && u.role === 'admin') ||
-            (input === 'manager' && u.role === 'manager');
+          const matchId = u.email?.toLowerCase() === input || u.username?.toLowerCase() === input;
 
           if (!matchId) return false;
           if (credentials.role && u.role?.toLowerCase() !== credentials.role.trim().toLowerCase()) {
@@ -185,7 +188,7 @@ export class AuthService {
     this.clearSession();
     this.snackbar.info('You have been logged out.', 'Logout');
     if (redirect) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/login'], { replaceUrl: true });
     }
   }
 
@@ -216,6 +219,16 @@ export class AuthService {
     return '/login';
   }
 
+  /**
+   * A role's landing page (or the bare root) is never worth a `returnUrl`:
+   * login picks the dashboard from the role anyway, so carrying it only
+   * clutters the URL — and a stale one is what Back lands on after logout.
+   */
+  isLandingUrl(url: string | null | undefined): boolean {
+    const path = (url ?? '').split(/[?#]/)[0].replace(/\/+$/, '');
+    return !path || path.endsWith('/dashboard');
+  }
+
   redirectAfterLogin(role?: Role): void {
     this.router.navigate([this.homeUrl(role ?? this.currentRole())], { replaceUrl: true });
   }
@@ -224,9 +237,11 @@ export class AuthService {
     return this.sessionSignal()?.token ?? null;
   }
 
-  private setSession(user: User): void {
+  private setSession(
+    user: User,
+    expiresAt = Date.now() + (environment.sessionMinutes || 120) * 60 * 1000,
+  ): void {
     const { password, ...userWithoutPassword } = user;
-    const expiresAt = Date.now() + (environment.sessionMinutes || 120) * 60 * 1000;
     const token = btoa(
       JSON.stringify({
         id: user.id,

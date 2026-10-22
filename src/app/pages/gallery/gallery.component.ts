@@ -2,11 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { environment } from '../../../environments/environment';
 import { ImageItem } from '../../core/models/image.model';
 import { User } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ImageModalService } from '../../core/services/image-modal.service';
 import { ImageService } from '../../core/services/image.service';
+import { LoadingService } from '../../core/services/loading.service';
 import { MediaUploadOutcome } from '../../core/services/media-upload.service';
 import { SnackbarService } from '../../core/services/snackbar.service';
 import { UploaderService } from '../../core/services/uploader.service';
@@ -46,8 +48,11 @@ export class GalleryComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private snackbar = inject(SnackbarService);
+  private loading = inject(LoadingService);
   uploaders = inject(UploaderService);
   modalService = inject(ImageModalService);
+
+  readonly maxUploadMb = environment.maxUploadMb;
 
   isLoading = signal<boolean>(true);
   isDeleting = signal<boolean>(false);
@@ -282,8 +287,13 @@ export class GalleryComponent implements OnInit {
     if (targets.length === 0) return;
 
     this.isDeleting.set(true);
-    const outcome = await runPacedWrites(targets, (img) => this.imageService.deleteImage(img.id));
-    this.finishDelete(outcome, targets.length);
+    this.loading.show();
+    try {
+      const outcome = await runPacedWrites(targets, (img) => this.imageService.deleteImage(img.id));
+      this.finishDelete(outcome, targets.length);
+    } finally {
+      this.loading.hide();
+    }
   }
 
   private openDeleteModal(targets: ImageItem[]): void {

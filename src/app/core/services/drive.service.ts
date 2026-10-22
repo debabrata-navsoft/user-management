@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map, of, switchMap } from 'rxjs';
+import { Observable, defer, finalize, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BreadcrumbItem, DriveNode, DriveStats } from '../models/drive.model';
 import { User } from '../models/user.model';
 import { PacedWriteOutcome, batchedWrite, runPacedWrites } from '../utils/write-pacing';
 import { AuthService } from './auth.service';
+import { LoadingService } from './loading.service';
 
 export const DRIVE_ROOT = 'root';
 
@@ -17,6 +18,7 @@ export type DriveOwner = Pick<User, 'email' | 'name'>;
 export class DriveService {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
+  private loading = inject(LoadingService);
   private baseUrl = `${environment.apiUrl}/nodes`;
 
   getNodes(parentId: string = DRIVE_ROOT, owner?: DriveOwner): Observable<DriveNode[]> {
@@ -96,15 +98,23 @@ export class DriveService {
   }
 
   deleteNodes(ids: string[]): Observable<PacedWriteOutcome<string>> {
-    return this.getAllNodes().pipe(
-      switchMap((allNodes) => {
-        const targets = new Set(ids.flatMap((id) => [...this.getDescendantIds(id, allNodes), id]));
+    // Hold the request count open across the paced batch, or the overlay
+    // unmounts in every gap between deletes.
+    return defer(() => {
+      this.loading.show();
+      return this.getAllNodes().pipe(
+        switchMap((allNodes) => {
+          const targets = new Set(
+            ids.flatMap((id) => [...this.getDescendantIds(id, allNodes), id]),
+          );
 
-        return runPacedWrites([...targets], (nodeId) =>
-          this.http.delete<void>(`${this.baseUrl}/${nodeId}`, { context: batchedWrite() }),
-        );
-      }),
-    );
+          return runPacedWrites([...targets], (nodeId) =>
+            this.http.delete<void>(`${this.baseUrl}/${nodeId}`, { context: batchedWrite() }),
+          );
+        }),
+        finalize(() => this.loading.hide()),
+      );
+    });
   }
 
   getBreadcrumbs(currentFolderId: string): Observable<BreadcrumbItem[]> {

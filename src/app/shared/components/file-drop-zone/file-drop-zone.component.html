@@ -1,10 +1,15 @@
 <div
   class="dropzone-box"
-  [class.is-dragover]="isDragOver"
+  role="button"
+  tabindex="0"
+  aria-label="Upload files"
+  [class.is-dragover]="isDragOver()"
   (dragover)="onDragOver($event)"
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
   (click)="fileInput.click()"
+  (keydown.enter)="openPicker($event)"
+  (keydown.space)="openPicker($event)"
 >
   <input
     #fileInput

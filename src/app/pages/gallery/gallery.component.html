@@ -171,7 +171,7 @@
     [existingNames]="existingImageNames()"
     target="gallery"
     accept="image/png, image/jpeg, image/webp, image/gif, image/svg+xml"
-    [maxSizeMb]="2"
+    [maxSizeMb]="maxUploadMb"
     title="Upload Images"
     (close)="closeUploadModal()"
     (uploaded)="onImagesUploaded($event)"

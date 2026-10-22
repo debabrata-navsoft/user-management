@@ -85,7 +85,12 @@ export class UploadModalComponent {
     return isVideoType(item.name, item.type);
   }
 
+  // Bumped by clearPreviews(), so a selection still being read when the modal
+  // is cancelled cannot append its previews to the next session's queue.
+  private generation = 0;
+
   async onFilesSelected(files: File[]): Promise<void> {
+    const generation = this.generation;
     const previews: FileUploadPreviewItem[] = [];
     const currentQueueNames = new Set(
       this.selectedPreviews().map((p) => p.name.toLowerCase().trim()),
@@ -137,6 +142,7 @@ export class UploadModalComponent {
       previews.push(preview);
     }
 
+    if (generation !== this.generation) return;
     this.selectedPreviews.update((curr) => [...curr, ...previews]);
 
     if (rejected.length > 0) {
@@ -152,6 +158,7 @@ export class UploadModalComponent {
   }
 
   clearPreviews(): void {
+    this.generation++;
     this.selectedPreviews.set([]);
   }
 

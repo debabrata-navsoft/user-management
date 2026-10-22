@@ -68,7 +68,7 @@ export class RenameModalComponent {
     }
 
     const newName = raw.trim();
-    if (newName.toLowerCase() === currentNode.name.toLowerCase()) {
+    if (newName === currentNode.name) {
       this.onClose();
       return;
     }

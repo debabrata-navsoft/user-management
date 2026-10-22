@@ -113,6 +113,8 @@ export class FilterDrawerComponent {
       newMap[groupId] = true;
     }
     this.expandedGroups.set(newMap);
+    // Expanding rebuilds the search box empty; the query must match it.
+    this.groupSearchQueries.set({});
   }
 
   isGroupExpanded(groupId: string): boolean {

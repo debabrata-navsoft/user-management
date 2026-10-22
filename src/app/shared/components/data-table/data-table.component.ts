@@ -46,6 +46,7 @@ export class DataTableComponent {
   title = input<string>('');
   subtitle = input<string>('');
   searchPlaceholder = input<string>('Search records...');
+  search = input<string>('');
   isLoading = input<boolean>(false);
   total = input<number>(0);
   page = input<number>(1);
@@ -100,6 +101,12 @@ export class DataTableComponent {
 
   onClearAllFilters(): void {
     this.filterChange.emit({});
+  }
+
+  // The empty state can be caused by the search as much as by a filter.
+  onResetView(): void {
+    if (this.search()) this.searchChange.emit('');
+    this.onClearAllFilters();
   }
 
   activeFilterChips = computed<ActiveChip[]>(() => {

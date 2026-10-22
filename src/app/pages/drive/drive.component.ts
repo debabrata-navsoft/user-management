@@ -3,6 +3,7 @@ import { Component, HostListener, OnInit, computed, inject, signal } from '@angu
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
+import { environment } from '../../../environments/environment';
 import { BreadcrumbItem, DriveNode, DriveStats } from '../../core/models/drive.model';
 import { User } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
@@ -61,6 +62,8 @@ export class DriveComponent implements OnInit {
   private userService = inject(UserService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+
+  readonly maxUploadMb = environment.maxDriveUploadMb;
 
   isLoading = signal<boolean>(true);
   isActionSubmitting = signal<boolean>(false);
@@ -467,11 +470,14 @@ export class DriveComponent implements OnInit {
 
     // Images and Videos: in-app lightbox modal
     if (this.isPlayableFile(node) && node.dataUrl) {
-      const playable = this.currentFiles()
-        .filter((f) => this.isPlayableFile(f) && f.dataUrl)
-        .map((f) => ({ url: f.dataUrl!, title: f.name, mimeType: f.mimeType }));
+      const playableNodes = this.currentFiles().filter((f) => this.isPlayableFile(f) && f.dataUrl);
+      const playable = playableNodes.map((f) => ({
+        url: f.dataUrl!,
+        title: f.name,
+        mimeType: f.mimeType,
+      }));
 
-      const idx = playable.findIndex((f) => f.title === node.name);
+      const idx = playableNodes.findIndex((f) => f.id === node.id);
       this.imageModalService.open(playable, Math.max(0, idx));
       return;
     }
@@ -481,30 +487,6 @@ export class DriveComponent implements OnInit {
     }
     if (node.dataUrl) {
       this.snackbar.info(`Allow pop-ups to open "${node.name}" in a new tab.`);
-    }
-
-    const ext = (node.name || '').split('.').pop()?.toLowerCase() || '';
-    const mime = (node.mimeType || '').toLowerCase();
-
-    // Word / Docs Document fallback if no dataUrl
-    const isDoc =
-      ['doc', 'docx', 'gdoc', 'rtf', 'odt'].includes(ext) ||
-      mime.includes('word') ||
-      mime.includes('document');
-    if (isDoc) {
-      window.open('https://docs.google.com/document/u/0/', '_blank');
-      return;
-    }
-
-    // Excel / Spreadsheet fallback if no dataUrl
-    const isExcel =
-      ['xls', 'xlsx', 'csv', 'gsheet', 'ods'].includes(ext) ||
-      mime.includes('excel') ||
-      mime.includes('spreadsheet') ||
-      mime.includes('csv');
-    if (isExcel) {
-      window.open('https://docs.google.com/spreadsheets/u/0/', '_blank');
-      return;
     }
 
     this.previewNode.set(node);

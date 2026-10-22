@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { catchError, forkJoin, of } from 'rxjs';
 import { DriveNode } from '../../../../core/models/drive.model';
 import { ImageItem } from '../../../../core/models/image.model';
 import { User } from '../../../../core/models/user.model';
@@ -48,22 +49,24 @@ export class UserViewModalComponent {
   roleBadgeVariant = roleBadgeVariant;
 
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       const owner = this.isOpen() ? this.user() : null;
       this.images.set([]);
       this.files.set([]);
+      this.isLoadingUploads.set(!!owner);
       if (!owner) return;
 
-      this.isLoadingUploads.set(true);
-      this.imageService.getImagesFor(owner).subscribe({
-        next: (images) => this.images.set(images),
-        error: () => undefined,
+      // Cancelled on cleanup, so a slow response for the previous user can
+      // never land in this one's modal.
+      const sub = forkJoin({
+        images: this.imageService.getImagesFor(owner).pipe(catchError(() => of([]))),
+        files: this.driveService.getFilesFor(owner).pipe(catchError(() => of([]))),
+      }).subscribe(({ images, files }) => {
+        this.images.set(images);
+        this.files.set(files);
+        this.isLoadingUploads.set(false);
       });
-      this.driveService.getFilesFor(owner).subscribe({
-        next: (files) => this.files.set(files),
-        complete: () => this.isLoadingUploads.set(false),
-        error: () => this.isLoadingUploads.set(false),
-      });
+      onCleanup(() => sub.unsubscribe());
     });
   }
 

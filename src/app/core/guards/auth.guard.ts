@@ -12,6 +12,12 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
+  // Landing on a dashboard while signed out is what Back does after logout —
+  // send that to a plain /login without a returnUrl or a scolding toast.
+  if (authService.isLandingUrl(state.url)) {
+    return router.createUrlTree(['/login']);
+  }
+
   snackbar.warning('Please log in to access this page.', 'Access Restricted');
   return router.createUrlTree(['/login'], {
     queryParams: { returnUrl: state.url },

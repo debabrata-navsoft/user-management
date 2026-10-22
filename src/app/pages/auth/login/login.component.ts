@@ -68,7 +68,7 @@ export class LoginComponent {
           this.snackbar.success(`Welcome back, ${user.name}!`, 'Logged in');
 
           const returnUrl = this.route.snapshot.queryParams['returnUrl'] as string | undefined;
-          if (returnUrl && returnUrl !== '/' && !returnUrl.endsWith('/dashboard')) {
+          if (returnUrl && !this.authService.isLandingUrl(returnUrl)) {
             this.router.navigateByUrl(returnUrl, { replaceUrl: true });
           } else {
             this.authService.redirectAfterLogin(user.role);

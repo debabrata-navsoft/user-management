@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild, input, output } from '@angular/core';
+import { Component, ElementRef, ViewChild, input, output, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
@@ -19,29 +19,34 @@ export class FileDropZoneComponent {
 
   filesSelected = output<File[]>();
 
-  isDragOver = false;
+  isDragOver = signal(false);
 
   onDragOver(e: DragEvent): void {
     e.preventDefault();
     e.stopPropagation();
-    this.isDragOver = true;
+    this.isDragOver.set(true);
   }
 
   onDragLeave(e: DragEvent): void {
     e.preventDefault();
     e.stopPropagation();
-    this.isDragOver = false;
+    this.isDragOver.set(false);
   }
 
   onDrop(e: DragEvent): void {
     e.preventDefault();
     e.stopPropagation();
-    this.isDragOver = false;
+    this.isDragOver.set(false);
 
     if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
       const files = Array.from(e.dataTransfer.files);
       this.filesSelected.emit(files);
     }
+  }
+
+  openPicker(e: Event): void {
+    e.preventDefault();
+    this.fileInputRef.nativeElement.click();
   }
 
   onFileSelected(e: Event): void {

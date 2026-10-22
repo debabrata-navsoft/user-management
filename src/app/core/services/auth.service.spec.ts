@@ -84,6 +84,29 @@ describe('AuthService', () => {
     req.flush(mockUsers);
   });
 
+  it('stops reporting a session as authenticated once it expires, without a reload', () => {
+    vi.useFakeTimers();
+    try {
+      service.login({ identifier: 'admin@demo.com', password: 'Password123' }).subscribe();
+      httpMock.expectOne(`${environment.apiUrl}/users`).flush([
+        {
+          id: 1,
+          email: 'admin@demo.com',
+          password: 'Password123',
+          role: 'admin',
+          status: 'active',
+        },
+      ]);
+      expect(service.isAuthenticated()).toBe(true);
+
+      vi.advanceTimersByTime(environment.sessionMinutes * 60 * 1000 + 1000);
+
+      expect(service.isAuthenticated()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   describe('ownedScope', () => {
     /** Signs a role in through the normal login path, so the session is the real thing. */
     const signIn = (role: string, name: string, email: string) => {

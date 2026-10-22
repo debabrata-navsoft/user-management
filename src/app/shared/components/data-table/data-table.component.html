@@ -17,6 +17,7 @@
         <div class="search-container">
           <app-search-input
             [placeholder]="searchPlaceholder()"
+            [value]="search()"
             (searchChange)="searchChange.emit($event)"
           ></app-search-input>
         </div>
@@ -79,9 +80,9 @@
       <div class="table-empty-container">
         <app-empty-state
           title="No records found"
-          message="Try adjusting your search criteria or clearing active filters."
+          description="Try adjusting your search criteria or clearing active filters."
           actionText="Clear All Filters"
-          (action)="onClearAllFilters()"
+          (action)="onResetView()"
         ></app-empty-state>
       </div>
     } @else {

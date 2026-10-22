@@ -82,9 +82,10 @@ export class UserFormModalComponent {
     password: [
       '',
       [
-        Validators.required,
+        AppValidators.required(),
         Validators.minLength(PASSWORD_MIN_LENGTH),
         Validators.maxLength(PASSWORD_MAX_LENGTH),
+        AppValidators.passwordStrength(),
       ],
     ],
   });
@@ -126,10 +127,12 @@ export class UserFormModalComponent {
 
   private setEnabled(name: string, enabled: boolean): void {
     const control = this.form.controls[name];
+    // Without emitEvent: false, enabling `role` re-emits its value and the
+    // department link clears a department outside that role's list.
     if (enabled) {
-      control.enable();
+      control.enable({ emitEvent: false });
     } else {
-      control.disable();
+      control.disable({ emitEvent: false });
     }
   }
 

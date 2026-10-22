@@ -77,4 +77,31 @@ describe('UserFormModalComponent', () => {
     expect(component.form.controls['department'].disabled).toBe(false);
     expect(component.departmentOptions()).toContain('Engineering');
   });
+
+  it('keeps a stored department outside the role list when editing', async () => {
+    fixture.componentRef.setInput('mode', 'edit');
+    fixture.componentRef.setInput('user', {
+      id: 1,
+      name: 'Admin',
+      email: 'admin@gmail.com',
+      role: 'admin',
+      department: 'Engineering',
+      status: 'active',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(component.form.controls['department'].value).toBe('Engineering');
+  });
+
+  it('applies the shared strength rule to a new password', () => {
+    const password = component.form.controls['password'];
+
+    password.setValue('aaaaaa');
+    expect(password.hasError('passwordStrength')).toBe(true);
+
+    password.setValue('      ');
+    expect(password.valid).toBe(false);
+  });
 });

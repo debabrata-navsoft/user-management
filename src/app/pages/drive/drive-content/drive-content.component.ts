@@ -63,7 +63,9 @@ export class DriveContentComponent {
 
   itemCount = computed(() => this.currentFolders().length + this.currentFiles().length);
 
-  selectedCount = computed(() => this.selectedIds().size);
+  // From the parent, which counts only selected nodes the search still shows —
+  // the same set Delete acts on.
+  selectedCount = input<number>(0);
 
   isSelected(id: string): boolean {
     return this.selectedIds().has(id);

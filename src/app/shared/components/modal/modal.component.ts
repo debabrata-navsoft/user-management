@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, input, output } from '@angular/core';
+import { Component, HostListener, inject, input, output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
+import { ImageModalService } from '../../../core/services/image-modal.service';
 
 @Component({
   selector: 'app-modal',
@@ -10,6 +11,8 @@ import { LucideAngularModule } from 'lucide-angular';
   styleUrl: './modal.component.css',
 })
 export class ModalComponent {
+  private lightbox = inject(ImageModalService);
+
   isOpen = input<boolean>(false);
   title = input<string>('');
   size = input<'sm' | 'md' | 'lg' | 'xl'>('md');
@@ -20,6 +23,8 @@ export class ModalComponent {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    // A lightbox opened from inside this modal owns Escape while it is up.
+    if (this.lightbox.isOpen()) return;
     if (this.isOpen() && this.closable()) {
       this.close.emit();
     }

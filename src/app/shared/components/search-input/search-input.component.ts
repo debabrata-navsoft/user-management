@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, effect, inject, input, output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, filter } from 'rxjs';
 
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -24,12 +24,17 @@ export class SearchInputComponent implements OnInit {
 
   control = new FormControl<string>('');
 
+  // Not distinctUntilChanged: when the parent clears the box via `value`, that
+  // operator would still remember the old term and swallow it if retyped.
+  private lastEmitted = '';
+
   constructor() {
     effect(() => {
       const next = this.value();
       if (next !== (this.control.value ?? '')) {
         this.control.setValue(next, { emitEvent: false });
       }
+      this.lastEmitted = next;
     });
   }
 
@@ -37,11 +42,12 @@ export class SearchInputComponent implements OnInit {
     this.control.valueChanges
       .pipe(
         debounceTime(this.debounce()),
-        distinctUntilChanged(),
+        filter((val) => (val || '') !== this.lastEmitted),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((val) => {
-        this.searchChange.emit(val || '');
+        this.lastEmitted = val || '';
+        this.searchChange.emit(this.lastEmitted);
       });
   }
 
