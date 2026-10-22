@@ -98,8 +98,6 @@ export class DriveService {
   }
 
   deleteNodes(ids: string[]): Observable<PacedWriteOutcome<string>> {
-    // Hold the request count open across the paced batch, or the overlay
-    // unmounts in every gap between deletes.
     return defer(() => {
       this.loading.show();
       return this.getAllNodes().pipe(

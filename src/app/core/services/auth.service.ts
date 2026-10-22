@@ -28,8 +28,6 @@ export class AuthService {
   currentUser = computed(() => this.sessionSignal()?.user ?? null);
   currentRole = computed<Role | null>(() => this.sessionSignal()?.user?.role ?? null);
 
-  // A plain method, not a computed: expiry depends on Date.now(), which no
-  // signal tracks, so a computed would cache `true` past `expiresAt`.
   isAuthenticated(): boolean {
     return !!this.sessionSignal() && !this.isSessionExpired();
   }
@@ -219,11 +217,6 @@ export class AuthService {
     return '/login';
   }
 
-  /**
-   * A role's landing page (or the bare root) is never worth a `returnUrl`:
-   * login picks the dashboard from the role anyway, so carrying it only
-   * clutters the URL — and a stale one is what Back lands on after logout.
-   */
   isLandingUrl(url: string | null | undefined): boolean {
     const path = (url ?? '').split(/[?#]/)[0].replace(/\/+$/, '');
     return !path || path.endsWith('/dashboard');

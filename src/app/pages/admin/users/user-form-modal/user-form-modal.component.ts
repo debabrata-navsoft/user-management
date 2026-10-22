@@ -127,8 +127,6 @@ export class UserFormModalComponent {
 
   private setEnabled(name: string, enabled: boolean): void {
     const control = this.form.controls[name];
-    // Without emitEvent: false, enabling `role` re-emits its value and the
-    // department link clears a department outside that role's list.
     if (enabled) {
       control.enable({ emitEvent: false });
     } else {
